@@ -178,6 +178,8 @@
   .ph-table th{text-align:left;border-bottom:1px solid #999;padding:3px 6px;}
   .ph-table td{border-bottom:1px solid #ddd;padding:3px 6px;vertical-align:top;}
   .ph-foot{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.72rem;color:#666;margin-top:20px;border-top:1px solid #ccc;padding-top:8px;}
+    #barraRapida{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);}
+  #secPaciente,#bloqueSesion,#secHistorial,#results{scroll-margin-top:64px;}
 </style>
 </head>
 <body>
@@ -213,6 +215,13 @@
   </div>
 
   <div id="appContent" style="display:none;">
+      <div id="barraRapida">
+    <button type="button" class="banco-tab" data-ir="secPaciente">👤 Paciente</button>
+    <button type="button" class="banco-tab" data-ir="bloqueSesion">💪 Sesión</button>
+    <button type="button" class="banco-tab" data-ir="secHistorial">🗂️ Historial</button>
+    <button type="button" class="banco-tab" id="btnGuardarRapido">💾 Guardar</button>
+    <button type="button" class="banco-tab" id="btnNuevoPaciente" style="margin-left:auto;border-color:var(--red);color:var(--red);">🧹 Nuevo paciente</button>
+  </div>
 
   <details class="acc-item">
     <summary>🩺 Datos del profesional (para la historia clínica en PDF)</summary>
@@ -222,10 +231,11 @@
     </div>
   </details>
 
-  <section class="card acc-blue">
+  <section class="card acc-blue" id="secPaciente">
     <h2>👤 Paciente</h2>
     <label>Nombre o Nº de historia clínica</label>
-    <input type="text" id="idPaciente" placeholder="Ej: Pérez, Juan — HC 1234">
+    <input type="text" id="idPaciente" list="listaPacientes" autocomplete="off" placeholder="Ej: Pérez, Juan — HC 1234">
+    <datalist id="listaPacientes"></datalist>
     <div id="codigoPacienteDisplay" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:4px;"></div>
     <div id="dbStatus" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:2px;"></div>
     <div class="grid3" style="margin-top:8px;">
@@ -293,7 +303,7 @@
   </section>
 
   <section class="card acc-amber">
-    <h2>🚩 Antecedentes y cribado</h2>
+    <details id="detAntecedentes"><summary style="cursor:pointer;list-style:none;"><h2 style="margin:0;">🚩 Antecedentes y cribado (tocar para desplegar)</h2></summary>
     <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 10px;">Desplegá cada bloque para completarlo. Los que tengan algo marcado muestran cuántos ítems tienen.</p>
 
     <details class="acc-item">
@@ -376,12 +386,13 @@
         <div class="check-row"><input type="checkbox" value="licencia"><span>Licencia prolongada o beneficio ligado al reposo</span></div>
       </fieldset>
     </details>
+   </details>   
   </section>
 
   <button id="run">Generar orientación clínica</button>
   <div id="results"></div>
 
-  <section class="card acc-blue" style="margin-top:20px;">
+  <section class="card acc-blue" id="secHistorial" style="margin-top:20px;">
     <h2>🗂️ Historial de pacientes (uso diario)</h2>
     <button id="guardar" type="button" style="width:100%;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--ink);color:var(--paper);border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;">Guardar sesión de este paciente</button>
     <button id="exportarCsv" type="button" style="width:100%;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--teal);color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;">Descargar historial completo (CSV, se abre en Excel / Google Sheets)</button>
@@ -1170,6 +1181,7 @@ document.getElementById('guardar').addEventListener('click', async ()=>{
 function pintarHistorial(){
   const cont=document.getElementById('historial');
   if(!cont) return;
+    actualizarListaPacientes();
   if(!ultimoHistorial.length){cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>';return;}
   const filas = ultimoHistorial.map(p=>{
     const f=new Date(p.fecha);
@@ -1666,7 +1678,7 @@ function calc(){
   try{ evolucionGlobal = JSON.parse(localStorage.getItem(evolucionClaveActual)||'{}'); }catch(e){ evolucionGlobal={}; }
   cargarPlan();
 
-  html+=`<div class="res-block sesion-block"><h3>💪 Plan de 10 sesiones ${esMayor?'(adaptado a adulto mayor)':''}</h3>
+  html+=`<div class="res-block sesion-block" id="bloqueSesion"><h3>💪 Plan de 10 sesiones ${esMayor?'(adaptado a adulto mayor)':''}</h3>
     <div class="sesion-progress"><div class="sesion-progress-fill" id="sesionProgressFill" style="width:0%;"></div></div>
     <div id="sesionStepBody"></div>
     <div class="sesion-nav">
@@ -1694,9 +1706,86 @@ function calc(){
   renderSesionStep();
   renderResumenEvolucion();
   if(esNeuro) actualizarNivel(Object.keys(NIVELES)[0]);
-  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+    const destino = (rojas.length ? document.getElementById('results') : document.getElementById('bloqueSesion'));
+  destino.scrollIntoView({behavior:'smooth', block:'start'});
 }
 document.getElementById('run').addEventListener('click',calc);
+    // ===== Autocompletado de pacientes, limpiar y navegación rápida =====
+function registrosConocidos(){
+  return (ultimoHistorial||[]).concat(leerPacientesLS());
+}
+function actualizarListaPacientes(){
+  const dl=document.getElementById('listaPacientes'); if(!dl) return;
+  const vistos=new Set(); dl.innerHTML='';
+  registrosConocidos().forEach(r=>{
+    const n=(r.idPaciente||'').trim(), k=normalizarPaciente(n);
+    if(!n||n==='(sin nombre)'||vistos.has(k)) return;
+    vistos.add(k);
+    const o=document.createElement('option'); o.value=n; dl.appendChild(o);
+  });
+}
+actualizarListaPacientes();
+
+function cargarPacienteGuardado(nombre){
+  const k=normalizarPaciente(nombre);
+  const r=registrosConocidos().find(x=>normalizarPaciente(x.idPaciente||'')===k);
+  if(!r) return false;
+  document.getElementById('edad').value=r.edad||'';
+  document.getElementById('peso').value=r.peso||'';
+  document.getElementById('altura').value=r.altura||'';
+  document.getElementById('actividad').value=r.actividad||'sedentario';
+  document.getElementById('zona').value='';
+  document.getElementById('patologiaBuscador').value='';
+  filtrarPatologias();
+  if(DB[r.patologia]) document.getElementById('patologia').value=r.patologia;
+  [['comorb',r.comorb],['medic',r.medic]].forEach(([id,arr])=>{
+    document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(c=>{
+      if(c.id==='antecedenteNeuro') return;
+      c.checked=(arr||[]).includes(c.value);
+    });
+  });
+  ['chkDiabetes','chkAutoinmune'].forEach(id=>document.getElementById(id).dispatchEvent(new Event('change',{bubbles:true})));
+  actualizarContadoresAcordeon();
+  actualizarCodigoPacienteVisible();
+  return true;
+}
+document.getElementById('idPaciente').addEventListener('change', e=>{
+  const vacio=!['edad','peso','altura'].some(id=>document.getElementById(id).value);
+  if(vacio && cargarPacienteGuardado(e.target.value)){
+    document.getElementById('dbStatus').textContent='Datos cargados del último registro de '+e.target.value.trim()+' ✓';
+  }
+});
+
+function limpiarFormulario(){
+  ['idPaciente','edad','peso','altura','patologiaBuscador','autoinmuneCual'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('actividad').value='sedentario';
+  document.getElementById('zona').value='';
+  filtrarPatologias();
+  document.querySelectorAll('#comorb input, #medic input, #rojas input, #amarillas input, #azules input, #negras input').forEach(c=>{ c.checked=false; });
+  document.getElementById('diabetesTipo').value='';
+  document.getElementById('diabetesTipoWrap').style.display='none';
+  document.getElementById('autoinmuneCualWrap').style.display='none';
+  actualizarContadoresAcordeon();
+  document.getElementById('codigoPacienteDisplay').textContent='';
+  document.getElementById('dbStatus').textContent='';
+  document.getElementById('results').innerHTML='';
+  sesionesGlobal=[]; sesionIndexGlobal=0; evolucionGlobal={}; evolucionClaveActual='';
+  const det=document.getElementById('detAntecedentes'); if(det) det.open=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('idPaciente').focus({preventScroll:true});
+}
+
+document.querySelectorAll('#barraRapida [data-ir]').forEach(b=>b.addEventListener('click',()=>{
+  const el=document.getElementById(b.dataset.ir)||document.getElementById('results');
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+document.getElementById('btnGuardarRapido').addEventListener('click', e=>{
+  document.getElementById('guardar').click();
+  const b=e.currentTarget, txt=b.textContent;
+  b.textContent='✓ Guardado';
+  setTimeout(()=>b.textContent=txt,1500);
+});
+document.getElementById('btnNuevoPaciente').addEventListener('click', limpiarFormulario);
 </script>
 </body>
 </html>
