@@ -459,9 +459,8 @@
 <!-- SDK de Firebase (Auth + Firestore) — se usa para que cada usuario guarde sus pacientes en su propia cuenta -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>  
+  <script>
 // Catálogo de agentes físicos: dosis orientativa + condiciones que lo vuelven contraindicado (rojo)
 const AGENTES = {
   calor:{n:"Termoterapia superficial (calor)", d:"15-20 min · 40-45°C · previo a la movilidad",
@@ -704,8 +703,7 @@ const ZONAS = {
   "Neurológico central":["acv","lesion_medular","parkinson"],
   "Neurológico periférico":["neuropatico","neuropatia_diabetica","pie_caido","plexo_braquial"]
 };
-
-function poblarZonaSelect(selectId){
+    function poblarZonaSelect(selectId){
   const sel=document.getElementById(selectId);
   if(!sel) return;
   sel.innerHTML = selectId==='nuevaZona'
@@ -1293,8 +1291,7 @@ document.getElementById('buscarIA').addEventListener('click', ()=>{
   abrirBusquedaOnline(nombre);
   out.innerHTML = `<p style="color:var(--green);font-size:.82rem;">Buscando "${nombre}" en PubMed y Google Scholar.</p>`;
 });
-
-const COMPLICACIONES = {
+    const COMPLICACIONES = {
   lumbalgia:["Dolor irradiado nuevo a miembro inferior","Alteración de esfínteres (sospecha cola de caballo)"],
   ciatica:["Progresión del déficit motor","Persistencia prolongada mayor a 8 semanas"],
   cervicalgia:["Cefalea intensa súbita","Déficit neurológico en miembro superior"],
@@ -1347,6 +1344,49 @@ let sesionIndexGlobal = 0;
 let evolucionGlobal = {};
 let evolucionClaveActual = '';
 
+// ===== NUEVO: dosificación de sesión (agentes con minutos, banco, tiempo total 40-60 min) =====
+const DEF_MIN = {calor:15,frio:10,tens:20,magneto:20,us:6,ondacorta:20,manual:10,puncion:10};
+const MIN_EJ_DEFAULT = 8;
+let bancoSesionTab = 'pat';
+
+function guardarPlan(){
+  if(!evolucionClaveActual) return;
+  const o={};
+  sesionesGlobal.forEach(s=>{ o[s.n]={ej:s.ejercicios, ag:s.agentesSel, min:s.minEj}; });
+  try{ localStorage.setItem(evolucionClaveActual+'::plan', JSON.stringify(o)); }catch(e){}
+}
+function cargarPlan(){
+  try{
+    const o=JSON.parse(localStorage.getItem(evolucionClaveActual+'::plan')||'{}');
+    sesionesGlobal.forEach(s=>{
+      const p=o[s.n];
+      if(p){ s.ejercicios=p.ej||s.ejercicios; s.agentesSel=p.ag||s.agentesSel; s.minEj=p.min||{}; }
+    });
+  }catch(e){}
+}
+function minutosSesion(s){
+  return s.agentesSel.reduce((a,x)=>a+(+x.min||0),0)
+       + s.ejercicios.reduce((a,e)=>a+(s.minEj[e]!=null?+s.minEj[e]:MIN_EJ_DEFAULT),0);
+}
+function tiempoHTML(s){
+  const t=minutosSesion(s), pct=Math.min(100,Math.round(t/60*100));
+  let col,msg;
+  if(t<40){ col='var(--amber)'; msg=`Faltan ${40-t} min para llegar a 40`; }
+  else if(t<=60){ col='var(--green)'; msg='Dentro del rango (40–60 min) ✓'; }
+  else{ col='var(--red)'; msg=`Te pasás ${t-60} min del máximo de 60`; }
+  return `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:.82rem;font-weight:700;"><span>⏱ Total: ${t} min</span><span style="color:${col}">${msg}</span></div>
+  <div class="sesion-progress" style="margin:6px 0 0;"><div class="sesion-progress-fill" style="width:${pct}%;background:${col};"></div></div>`;
+}
+function capturarMarcados(s){
+  s.tmpMarc=[...document.querySelectorAll('#ejerciciosLista input[type=checkbox]:checked')].map(c=>s.ejercicios[+c.dataset.ej]);
+}
+function bancoPatologia(s){
+  const d=s.d;
+  return [["Movilidad protegida",d.mov],["Activación y control motor",d.control],["Fuerza",d.fuerza],["Fuerza funcional (adulto mayor)",d.fuerzaFunc],["Integración funcional",d.funcional]]
+    .map(([n,a])=>[n,(a||[]).filter(Boolean)]).filter(g=>g[1].length);
+}
+// ===== fin nuevo =====
+
 function construirSesiones(d, esMayor, pac, actividad){
   const esGentil = esMayor || actividad==='sedentario';
   const esExigente = actividad==='deportista' || actividad==='laboral_pesado';
@@ -1368,7 +1408,6 @@ function construirSesiones(d, esMayor, pac, actividad){
   const sesiones=[];
   for(let n=1;n<=10;n++){
     const f=faseFor(n);
-    const totalEnFase = f.fin-f.ini+1;
     const posInFase = n-f.ini+1;
     const base = f.items.length?f.items:["Ejercicio terapéutico según tolerancia"];
     let ejercicios = base;
@@ -1376,13 +1415,13 @@ function construirSesiones(d, esMayor, pac, actividad){
       const corte = (posInFase-1)%base.length;
       ejercicios = base.slice(corte).concat(base.slice(0,corte));
     }
-    let agenteKey=null, agenteObj=null, agenteContra=false;
-    if(todosAgentes.length){
-      agenteKey = todosAgentes[(n-1)%todosAgentes.length];
-      agenteObj = AGENTES[agenteKey];
-      agenteContra = contraindicado(agenteKey, pac);
-    }
-    sesiones.push({n, fase:f.nombre, ejercicios, agenteKey, agenteObj, agenteContra, posInFase, totalEnFase, notaIntensidad, esExigente});
+    const agenteKey = todosAgentes.length ? todosAgentes[(n-1)%todosAgentes.length] : null;
+    sesiones.push({
+      n, fase:f.nombre, ejercicios:[...ejercicios], d, pac,
+      sugeridos:todosAgentes,
+      agentesSel: agenteKey ? [{key:agenteKey, min:DEF_MIN[agenteKey]||15}] : [],
+      minEj:{}, notaIntensidad, esExigente
+    });
   }
   return sesiones;
 }
@@ -1432,14 +1471,39 @@ function renderSesionStep(){
   const cont = document.getElementById('sesionStepBody');
   if(!s || !cont) return;
   const registro = evolucionGlobal[s.n];
-  const marcadosPrevios = registro ? registro.marcados : [];
-  const agenteHTML2 = s.agenteObj
-    ? `<div class="agente ${s.agenteContra?'contra':''}"><b>${s.agenteObj.n}</b><br><span class="dosis">${s.agenteContra?'<span class="warn">⚠ CONTRAINDICADO — </span>':''}${s.agenteObj.d}</span></div>`
-    : `<p style="color:var(--muted);font-size:.82rem;">Sin agente físico asignado para esta sesión.</p>`;
+  const marcadosPrevios = s.tmpMarc || (registro ? registro.marcados : []);
+  const otros = Object.keys(AGENTES).filter(k=>!s.sugeridos.includes(k));
+  const opt = k=>`<option value="${k}">${AGENTES[k].n}</option>`;
+
+  const agentesHTML = s.agentesSel.length ? s.agentesSel.map((a,i)=>{
+    const A=AGENTES[a.key], contra=contraindicado(a.key,s.pac);
+    return `<div class="agente ${contra?'contra':''}"><div style="display:flex;gap:8px;align-items:center;">
+      <div style="flex:1;"><b>${A.n}</b><br><span class="dosis">${contra?'<span class="warn">⚠ CONTRAINDICADO — </span>':''}${A.d}</span></div>
+      <input type="number" min="1" max="60" value="${a.min}" data-ag="${i}" class="minAg" style="width:64px;"><span style="font-size:.76rem;">min</span>
+      <button type="button" class="quitarAg" data-ag="${i}" style="border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:6px;padding:4px 9px;cursor:pointer;">×</button>
+    </div></div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:.82rem;">Sin agentes físicos en esta sesión.</p>';
+
   const ejerciciosHTML = s.ejercicios.map((ej,i)=>{
-    const checked = marcadosPrevios.includes(ej) ? 'checked' : '';
-    return `<div class="ejercicio-row"><input type="checkbox" data-ej="${i}" ${checked}><span>${ej}</span></div>`;
-  }).join('');
+    const m = s.minEj[ej]!=null ? s.minEj[ej] : MIN_EJ_DEFAULT;
+    return `<div class="ejercicio-row"><input type="checkbox" data-ej="${i}" ${marcadosPrevios.includes(ej)?'checked':''}>
+      <span style="flex:1;">${ej}</span>
+      <input type="number" min="1" max="30" value="${m}" data-ej="${i}" class="minEj" style="width:58px;padding:4px 6px;"><span style="font-size:.74rem;">min</span>
+      <button type="button" class="quitarEj" data-ej="${i}" style="border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:6px;padding:2px 8px;cursor:pointer;">×</button></div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:.82rem;">Sin ejercicios. Agregalos desde el banco.</p>';
+
+  // Banco dentro de la sesión
+  const tabs = [['pat','Esta patología'],['banda','Banda'],['consultorio','Consultorio'],['libre','Sin elementos']];
+  const tabsHTML = tabs.map(([k,n])=>`<button type="button" class="banco-tab ${k===bancoSesionTab?'active':''}" data-tab="${k}">${n}</button>`).join('');
+  let lista=[], bancoHTML='';
+  if(bancoSesionTab==='pat'){
+    bancoPatologia(s).forEach(([n,arr])=>{
+      bancoHTML+=`<div class="banco-ref-group"><h4>${n}</h4></div>`;
+      arr.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${t}</button>`; });
+    });
+  } else {
+    BANCO[bancoSesionTab].items.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${t}</button>`; });
+  }
 
   cont.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px;">
@@ -1447,9 +1511,30 @@ function renderSesionStep(){
       <span style="font-size:.78rem;color:var(--muted);">${s.fase}</span>
     </div>
     <div style="font-size:.76rem;color:${s.esExigente?'var(--orange)':'var(--muted)'};font-weight:${s.esExigente?'700':'400'};margin-bottom:8px;">📌 ${s.notaIntensidad}</div>
-    ${agenteHTML2}
-    <div style="font-size:.8rem;color:var(--muted);margin:10px 0 4px;">Ejercicios de la sesión:</div>
+    <div id="tiempoSesion" style="margin-bottom:12px;">${tiempoHTML(s)}</div>
+
+    <div style="font-size:.8rem;color:var(--muted);margin:4px 0;">Agentes físicos:</div>
+    ${agentesHTML}
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+      <select id="agSel" style="flex:1;min-width:180px;">
+        ${s.sugeridos.length?`<optgroup label="Sugeridos para esta patología">${s.sugeridos.map(opt).join('')}</optgroup>`:''}
+        <optgroup label="Otros agentes">${otros.map(opt).join('')}</optgroup>
+      </select>
+      <input type="number" id="agMin" min="1" max="60" style="width:70px;" value="${DEF_MIN[(s.sugeridos[0]||otros[0])]||15}">
+      <button type="button" id="agAdd" class="guardar-evol-btn" style="margin-top:0;">+ Agente</button>
+    </div>
+
+    <div style="font-size:.8rem;color:var(--muted);margin:14px 0 4px;">Ejercicios de la sesión:</div>
     <div id="ejerciciosLista">${ejerciciosHTML}</div>
+
+    <details class="acc-item" style="margin-top:10px;" ${s.bancoAbierto?'open':''}>
+      <summary>🏋️ Agregar ejercicios desde el banco</summary>
+      <div>
+        <div class="banco-tabs" id="tabsBancoSesion" style="margin-bottom:8px;">${tabsHTML}</div>
+        <div id="bancoSesionLista" style="max-height:280px;overflow-y:auto;">${bancoHTML}</div>
+      </div>
+    </details>
+
     <button type="button" class="guardar-evol-btn" id="guardarEvolSesion">Guardar evolución</button>
     <div class="evol-guardado" id="evolGuardadoMsg">${registro?`Guardado el ${new Date(registro.fecha).toLocaleString()}`:''}</div>
   `;
@@ -1457,17 +1542,50 @@ function renderSesionStep(){
   const prev=document.getElementById('sesionPrev'), next=document.getElementById('sesionNext');
   if(prev) prev.disabled = sesionIndexGlobal===0;
   if(next) next.disabled = sesionIndexGlobal===sesionesGlobal.length-1;
-
   const dots=document.getElementById('sesionDots');
   if(dots) dots.innerHTML = sesionesGlobal.map((x,i)=>{
     const hecha = evolucionGlobal[x.n] ? 'done' : '';
     return `<button type="button" class="dot ${i===sesionIndexGlobal?'active':''} ${hecha}" data-i="${i}">${i+1}</button>`;
   }).join('');
 
+  const refresh = ()=>{ s.bancoAbierto = cont.querySelector('details.acc-item').open; renderSesionStep(); };
+  const actTiempo = ()=>{ document.getElementById('tiempoSesion').innerHTML = tiempoHTML(s); guardarPlan(); };
+
+  // Agentes
+  document.getElementById('agSel').addEventListener('change', e=>{ document.getElementById('agMin').value = DEF_MIN[e.target.value]||15; });
+  document.getElementById('agAdd').addEventListener('click', ()=>{
+    capturarMarcados(s);
+    s.agentesSel.push({key:document.getElementById('agSel').value, min:+document.getElementById('agMin').value||10});
+    guardarPlan(); refresh();
+  });
+  cont.querySelectorAll('.minAg').forEach(inp=>inp.addEventListener('input', ()=>{ s.agentesSel[+inp.dataset.ag].min=+inp.value||0; actTiempo(); }));
+  cont.querySelectorAll('.quitarAg').forEach(b=>b.addEventListener('click', ()=>{
+    capturarMarcados(s); s.agentesSel.splice(+b.dataset.ag,1); guardarPlan(); refresh();
+  }));
+
+  // Ejercicios
+  cont.querySelectorAll('.minEj').forEach(inp=>inp.addEventListener('input', ()=>{ s.minEj[s.ejercicios[+inp.dataset.ej]]=+inp.value||0; actTiempo(); }));
+  cont.querySelectorAll('.quitarEj').forEach(b=>b.addEventListener('click', ()=>{
+    capturarMarcados(s); s.ejercicios.splice(+b.dataset.ej,1); guardarPlan(); refresh();
+  }));
+
+  // Banco
+  cont.querySelectorAll('#tabsBancoSesion .banco-tab').forEach(b=>b.addEventListener('click', ()=>{
+    bancoSesionTab=b.dataset.tab; capturarMarcados(s); s.bancoAbierto=true; renderSesionStep();
+  }));
+  cont.querySelectorAll('#bancoSesionLista .ban-item').forEach(b=>b.addEventListener('click', ()=>{
+    const txt=lista[+b.dataset.b];
+    if(s.ejercicios.includes(txt)){ b.classList.add('added'); return; }
+    capturarMarcados(s); s.ejercicios.push(txt); guardarPlan(); s.bancoAbierto=true; renderSesionStep();
+  }));
+
+  // Guardar evolución
   document.getElementById('guardarEvolSesion').addEventListener('click', ()=>{
-    const marcados = [...document.querySelectorAll('#ejerciciosLista input:checked')].map(chk=>s.ejercicios[+chk.dataset.ej]);
+    const marcados = [...document.querySelectorAll('#ejerciciosLista input[type=checkbox]:checked')].map(chk=>s.ejercicios[+chk.dataset.ej]);
     evolucionGlobal[s.n] = {marcados, fecha:new Date().toISOString()};
+    s.tmpMarc = null;
     if(evolucionClaveActual) localStorage.setItem(evolucionClaveActual, JSON.stringify(evolucionGlobal));
+    guardarPlan();
     renderResumenEvolucion();
     renderSesionStep();
   });
@@ -1546,6 +1664,7 @@ function calc(){
   const codigoPacienteActual = obtenerCodigoPaciente(idPacienteVal);
   evolucionClaveActual = claveEvolucion(codigoPacienteActual, patKey);
   try{ evolucionGlobal = JSON.parse(localStorage.getItem(evolucionClaveActual)||'{}'); }catch(e){ evolucionGlobal={}; }
+  cargarPlan();
 
   html+=`<div class="res-block sesion-block"><h3>💪 Plan de 10 sesiones ${esMayor?'(adaptado a adulto mayor)':''}</h3>
     <div class="sesion-progress"><div class="sesion-progress-fill" id="sesionProgressFill" style="width:0%;"></div></div>
