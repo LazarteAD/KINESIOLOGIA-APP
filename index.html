@@ -1749,10 +1749,24 @@ function cargarPacienteGuardado(nombre){
   actualizarCodigoPacienteVisible();
   return true;
 }
+function irASesionPendiente(){
+  if(!sesionesGlobal.length) return;
+  let i = sesionesGlobal.findIndex(s=>!evolucionGlobal[s.n]);
+  const completo = i<0;
+  if(completo) i = sesionesGlobal.length-1;
+  sesionIndexGlobal = i;
+  renderSesionStep();
+  return completo;
+}
 document.getElementById('idPaciente').addEventListener('change', e=>{
+  const nombre = e.target.value.trim();
   const vacio=!['edad','peso','altura'].some(id=>document.getElementById(id).value);
-  if(vacio && cargarPacienteGuardado(e.target.value)){
-    document.getElementById('dbStatus').textContent='Datos cargados del último registro de '+e.target.value.trim()+' ✓';
+  if(vacio && cargarPacienteGuardado(nombre)){
+    calc();
+    const completo = irASesionPendiente();
+    document.getElementById('dbStatus').textContent = completo
+      ? `${nombre}: las 10 sesiones ya están registradas ✓`
+      : `${nombre}: continuás en la sesión ${sesionIndexGlobal+1} de ${sesionesGlobal.length} ✓`;
   }
 });
 
