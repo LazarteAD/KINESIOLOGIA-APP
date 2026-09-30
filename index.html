@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Asistente Kinésico</title>
+<title>Asistente Clínico Musculoesquelético</title>
 <style>
   :root{
     --ink:#1e2430; --paper:#f2f3fb; --panel:#ffffff; --line:#e2e4f0;
@@ -484,11 +484,12 @@ const AGENTES = {
 
 function agenteHTML(key, pac){
   const a=AGENTES[key];
+  if(!a) return '';
   let red = a.redC.some(c=>pac.comorb.includes(c)) || a.redM.some(m=>pac.medic.includes(m)) || (a.notaEmbarazo && pac.comorb.includes('embarazo'));
   return `<div class="agente ${red?'contra':''}"><b>${a.n}</b><br><span class="dosis">${red?'<span class="warn">⚠ CONTRAINDICADO en este paciente — </span>':''}${a.d}</span></div>`;
 }
 
-// Fases de ejercicio genéricas + banco por patología (adulto estándar / adulto mayor funcional)
+// Fases de ejercicio genéricas + banco por patología
 const DB = {
   lumbalgia:{ nombre:"Lumbalgia mecánica", testN:"Test de Lasègue (SLR)", testD:"Cribado de tensión neural / compromiso radicular asociado.",
     testExtra:{n:"Test de Slump", d:"Si hay irradiación o adormecimiento hacia el miembro inferior, complementar con este test de tensión neural más sensible."},
@@ -549,7 +550,7 @@ const DB = {
     fuerzaFunc:["Tareas manuales livianas de la vida diaria con carga controlada","Ejercicio de agarre funcional con objetos cotidianos"],
     funcional:["Reentrenamiento del gesto laboral/deportivo repetitivo","Progresión a carga completa según tolerancia"]},
   tunel:{ nombre:"Síndrome del túnel carpiano", testN:"Test de Phalen", testD:"Test con mayor sensibilidad para compresión del nervio mediano.",
-    testExtra:{n:"Test de Tinel (o signo de Tinel)", d:"Percusión suave sobre el retináculo flexor/nervio mediano en muñeca; la aparición de parestesias o descargas complementa el diagnóstico de irritabilidad neural."},
+    testExtra:{n:"Test de Tinel (o signo de Tinel)", d:"Percusión suave sobre el retináculo flexor/nervio mediano en muñeca."},
     agentes:["frio","tens","magneto"],
     mov:["Deslizamiento neural del nervio mediano, técnica gradual","Movilidad activa de muñeca en rango indoloro"],
     control:["Reeducación postural de muñeca en tareas manuales","Control de carga en agarre sostenido"],
@@ -563,19 +564,19 @@ const DB = {
     fuerza:["Fortalecimiento progresivo muy gradual, monitoreando síntomas neurológicos","Ejercicio en cadena cerrada de baja carga"],
     fuerzaFunc:["Entrenamiento de marcha y equilibrio supervisado","Tareas funcionales de baja demanda con monitoreo estricto de síntomas"],
     funcional:["Progresión funcional lenta hacia actividad habitual","Reevaluación neurológica periódica antes de avanzar de fase"]},
-  acv:{ nombre:"ACV / hemiparesia (neurológico central)", testN:"Escala de Ashworth Modificada", testD:"Cuantifica el grado de espasticidad y orienta la elección de técnica y dosificación del ejercicio.", escala:"ashworth",
+  acv:{ nombre:"ACV / hemiparesia (neurológico central)", testN:"Escala de Ashworth Modificada", testD:"Cuantifica el grado de espasticidad y orienta la elección de técnica.", escala:"ashworth",
     agentes:["tens","magneto"],
     mov:["Movilización pasiva/activa-asistida del hemicuerpo afectado, todos los rangos","Estimulación sensitiva y propioceptiva del lado afectado"],
-    control:["Control de tronco en sedestación (equilibrio estático y dinámico)","Activación selectiva de grupos musculares clave (evitar patrones en masa)"],
-    fuerza:["Entrenamiento orientado a la tarea (task-specific training) con repetición alta","Fortalecimiento funcional del hemicuerpo afectado según capacidad activa"],
-    fuerzaFunc:["Entrenamiento de transferencias (cama-silla, sit-to-stand) con asistencia","Entrenamiento de marcha con apoyo/andador y control de la fase de balanceo"],
-    funcional:["Reentrenamiento de actividades de la vida diaria (vestido, higiene, alimentación)","Entrenamiento de marcha comunitaria y prevención de caídas"]},
+    control:["Control de tronco en sedestación (equilibrio estático y dinámico)","Activación selectiva de grupos musculares clave"],
+    fuerza:["Entrenamiento orientado a la tarea (task-specific training) con repetición alta","Fortalecimiento funcional del hemicuerpo afectado"],
+    fuerzaFunc:["Entrenamiento de transferencias (cama-silla, sit-to-stand) con asistencia","Entrenamiento de marcha con apoyo/andador"],
+    funcional:["Reentrenamiento de actividades de la vida diaria","Entrenamiento de marcha comunitaria y prevención de caídas"]},
   ciatica:{ nombre:"Ciática / hernia discal lumbar", testN:"Test de Lasègue (SLR)", testD:"Alta sensibilidad para compromiso radicular por hernia discal lumbar.",
-    testExtra:{n:"Test de Slump", d:"Test de tensión neural complementario, útil cuando el SLR no es concluyente o hay dudas sobre el nivel comprometido."},
+    testExtra:{n:"Test de Slump", d:"Test de tensión neural complementario."},
     agentes:["tens","magneto","calor"], mov:["Movilización neural gradual (deslizamiento)",""], control:["Estabilización lumbar de bajo umbral",""],
     fuerza:["Fortalecimiento progresivo monitoreando irradiación",""], fuerzaFunc:["Marcha y sit-to-stand asistido",""],
     funcional:["Progresión funcional lenta con control neurológico periódico",""]},
-  estenosis_lumbar:{ nombre:"Estenosis de canal lumbar", testN:"Test de la bicicleta de Van Gelderen", testD:"Diferencia claudicación neurogénica (mejora en flexión) de vascular.",
+  estenosis_lumbar:{ nombre:"Estenosis de canal lumbar", testN:"Test de la bicicleta de Van Gelderen", testD:"Diferencia claudicación neurogénica de vascular.",
     agentes:["calor","tens","magneto"], mov:["Ejercicios en flexión lumbar (postura de alivio)",""], control:["Activación de core en posición flexionada",""],
     fuerza:["Fortalecimiento de miembros inferiores en descarga parcial",""], fuerzaFunc:["Marcha con apoyo/carro, tramos cortos con descanso",""],
     funcional:["Progresión de distancia de marcha tolerada",""]},
@@ -587,32 +588,32 @@ const DB = {
     agentes:["calor","tens","magneto"], mov:["Estiramiento de piriforme e isquiotibiales",""], control:["Activación de glúteo medio",""],
     fuerza:["Fortalecimiento de rotadores externos de cadera",""], fuerzaFunc:["Marcha y sit-to-stand con control pélvico",""],
     funcional:["Progresión a sedestación prolongada y actividad habitual",""]},
-  sacroileitis:{ nombre:"Disfunción / sacroileítis", testN:"Cluster de provocación sacroilíaca (FABER + compresión + distracción)", testD:"La combinación de 3 o más tests positivos del cluster tiene buena precisión diagnóstica para dolor de origen sacroilíaco.",
-    agentes:["calor","tens","manual"], mov:["Movilidad pélvica activa en rango indoloro",""], control:["Activación de core y glúteo para estabilidad de la pelvis",""],
+  sacroileitis:{ nombre:"Disfunción / sacroileítis", testN:"Cluster de provocación sacroilíaca", testD:"3 o más tests positivos del cluster indican dolor de origen sacroilíaco.",
+    agentes:["calor","tens","manual"], mov:["Movilidad pélvica activa en rango indoloro",""], control:["Activación de core y glúteo para estabilidad pélvica",""],
     fuerza:["Fortalecimiento progresivo de glúteos y core",""], fuerzaFunc:["Sit-to-stand y marcha con control pélvico",""],
     funcional:["Progresión a apoyo unipodal, escaleras y actividad habitual",""]},
-  dorsalgia:{ nombre:"Dorsalgia mecánica / síndrome de dolor torácico", testN:"Deslizamiento postero-anterior (PA glide) torácico", testD:"La presión postero-anterior sobre cada segmento torácico reproduce el dolor y orienta el nivel hipomóvil a tratar.",
+  dorsalgia:{ nombre:"Dorsalgia mecánica / síndrome de dolor torácico", testN:"Deslizamiento postero-anterior (PA glide) torácico", testD:"La presión PA sobre cada segmento torácico reproduce el dolor.",
     agentes:["calor","tens","manual"],
     mov:["Movilidad torácica activa en rotación y extensión, 2x10","Respiración diafragmática con énfasis en expansión costal"],
     control:["Movilidad en cuadrupedia tipo cat-camel con énfasis dorsal, 3x10","Control escapular en cadena cerrada"],
     fuerza:["Remo con banda enfocado en extensión torácica, 3x12","Fortalecimiento de romboides y trapecio medio con banda, 3x12"],
     fuerzaFunc:["Sit-to-stand con énfasis en postura torácica, 3x8","Extensión torácica asistida en silla, 3x10"],
     funcional:["Reeducación postural en tareas de escritorio/trabajo prolongado","Progresión a actividad habitual sin restricciones"]},
-  cervicobraquialgia:{ nombre:"Cervicobraquialgia (radiculopatía cervical)", testN:"Test de Spurling", testD:"Alta especificidad para compromiso radicular cervical con irradiación a miembro superior.",
-    testExtra:{n:"Test neurodinámico de miembro superior (ULNT 1)", d:"Ante adormecimiento/hormigueo irradiado (ej. 'me duele el cuello y se me adormece el brazo'), este test de tensión neural ayuda a confirmar el componente radicular."},
+  cervicobraquialgia:{ nombre:"Cervicobraquialgia (radiculopatía cervical)", testN:"Test de Spurling", testD:"Alta especificidad para compromiso radicular cervical.",
+    testExtra:{n:"Test neurodinámico de miembro superior (ULNT 1)", d:"Confirma el componente de tensión neural irradiado."},
     agentes:["tens","magneto","calor"], mov:["Movilización neural del miembro superior, gradual",""], control:["Control postural cervicoescapular",""],
     fuerza:["Fortalecimiento progresivo monitoreando irradiación al brazo",""], fuerzaFunc:["Tareas manuales livianas supervisadas",""],
     funcional:["Progresión funcional con control neurológico periódico",""]},
-  cefalea_cervicogenica:{ nombre:"Cefalea cervicogénica", testN:"Cervical Flexion-Rotation Test", testD:"Detecta restricción de rotación en C1-C2, característica de este cuadro.",
+  cefalea_cervicogenica:{ nombre:"Cefalea cervicogénica", testN:"Cervical Flexion-Rotation Test", testD:"Detecta restricción de rotación en C1-C2.",
     agentes:["calor","manual"], mov:["Movilidad segmentaria alta cervical (C1-C2)",""], control:["Activación de flexores profundos cervicales",""],
     fuerza:["Fortalecimiento cervicoescapular progresivo",""], fuerzaFunc:["Higiene postural funcional en AVD/trabajo",""],
     funcional:["Reentrenamiento postural sostenido en tareas diarias",""]},
-  latigazo:{ nombre:"Latigazo cervical (whiplash)", testN:"Escala de gravedad de Quebec (QTF)", testD:"Clasifica el grado de lesión y orienta el manejo (I-IV).", escala:"quebec",
+  latigazo:{ nombre:"Latigazo cervical (whiplash)", testN:"Escala de gravedad de Quebec (QTF)", testD:"Clasifica el grado de lesión y orienta el manejo.", escala:"quebec",
     agentes:["frio","tens","magneto"], mov:["Movilidad activa temprana en rango indoloro",""], control:["Activación de flexores profundos cervicales",""],
     fuerza:["Fortalecimiento progresivo cervicoescapular",""], fuerzaFunc:["Actividades funcionales de cabeza/cuello supervisadas",""],
     funcional:["Retorno gradual a actividad habitual/laboral",""]},
-  capsulitis:{ nombre:"Capsulitis adhesiva (hombro congelado)", testN:"Rango pasivo de rotación externa", testD:"Limitación pasiva marcada y proporcional es el hallazgo clave (a diferencia del manguito).",
-    agentes:["calor","us"], mov:["Movilización articular progresiva según fase (congelamiento/meseta/descongelamiento)",""],
+  capsulitis:{ nombre:"Capsulitis adhesiva (hombro congelado)", testN:"Rango pasivo de rotación externa", testD:"Limitación pasiva marcada y proporcional es el hallazgo clave.",
+    agentes:["calor","us"], mov:["Movilización articular progresiva según fase",""],
     control:["Activación suave de manguito en rango disponible",""], fuerza:["Fortalecimiento progresivo al recuperar rango",""],
     fuerzaFunc:["Tareas de AVD con el brazo (vestido, higiene)",""], funcional:["Progresión a rango funcional completo",""]},
   inestabilidad_hombro:{ nombre:"Inestabilidad glenohumeral", testN:"Test de aprensión (Apprehension test)", testD:"Reproduce sensación de inestabilidad anterior del hombro.",
@@ -623,11 +624,11 @@ const DB = {
     agentes:["frio","us","tens","magneto"], mov:["Movilidad en rango indoloro, evitar compresión",""], control:["Control escapular (ritmo escapulohumeral)",""],
     fuerza:["Fortalecimiento progresivo de manguito y escápula",""], fuerzaFunc:["Tareas de alcance funcional con carga liviana",""],
     funcional:["Progresión a actividad por encima del hombro",""]},
-  epitrocleitis:{ nombre:"Epitrocleitis (codo de golfista)", testN:"Test de flexión resistida de muñeca", testD:"Reproduce dolor en epitróclea con flexión de muñeca contra resistencia.",
+  epitrocleitis:{ nombre:"Epitrocleitis (codo de golfista)", testN:"Test de flexión resistida de muñeca", testD:"Reproduce dolor en epitróclea con flexión de muñeca.",
     agentes:["frio","us","tens","magneto"], mov:["Movilidad de muñeca y codo en rango indoloro",""], control:["Isométricos de flexores de muñeca bajo umbral",""],
     fuerza:["Fortalecimiento excéntrico de flexores de muñeca",""], fuerzaFunc:["Tareas manuales livianas con carga controlada",""],
     funcional:["Reentrenamiento del gesto laboral/deportivo",""]},
-  dequervain:{ nombre:"Tendinopatía de De Quervain", testN:"Test de Finkelstein", testD:"Reproduce dolor en la tabaquera anatómica por estiramiento de los tendones afectados.",
+  dequervain:{ nombre:"Tendinopatía de De Quervain", testN:"Test de Finkelstein", testD:"Reproduce dolor en tabaquera anatómica al estirar tendones.",
     agentes:["frio","us"], mov:["Movilidad de pulgar y muñeca en rango indoloro",""], control:["Isométricos de abductor largo/extensor corto del pulgar",""],
     fuerza:["Fortalecimiento progresivo de pulgar y muñeca",""], fuerzaFunc:["Adaptación ergonómica de agarre en tareas diarias",""],
     funcional:["Progresión a actividad manual completa",""]},
@@ -635,61 +636,942 @@ const DB = {
     agentes:["frio","tens","magneto"], mov:["Deslizamiento neural del nervio cubital, gradual",""], control:["Reeducación postural del codo en apoyo",""],
     fuerza:["Fortalecimiento progresivo de mano/antebrazo",""], fuerzaFunc:["Adaptación ergonómica de tareas manuales",""],
     funcional:["Progresión según evolución sensitivo-motora",""]},
-  bursitis_trocanterea:{ nombre:"Bursitis trocantérea", testN:"Test de palpación trocantérea + Trendelenburg", testD:"Dolor a la palpación directa y frecuente déficit de glúteo medio asociado.",
+  bursitis_trocanterea:{ nombre:"Bursitis trocantérea", testN:"Test de palpación trocantérea + Trendelenburg", testD:"Dolor directo a la palpación y déficit de glúteo medio.",
     agentes:["frio","tens","magneto"], mov:["Movilidad de cadera en rango indoloro",""], control:["Activación de glúteo medio en decúbito lateral",""],
     fuerza:["Fortalecimiento progresivo de abductores de cadera",""], fuerzaFunc:["Marcha y sit-to-stand con control pélvico",""],
     funcional:["Progresión a apoyo unipodal y marcha completa",""]},
   pubalgia:{ nombre:"Pubalgia / osteitis del pubis", testN:"Test de aducción resistida", testD:"Reproduce dolor púbico característico de sobrecarga de aductores.",
     agentes:["frio","tens","magneto"], mov:["Movilidad de cadera en rango indoloro",""], control:["Activación de core y aductores de baja carga",""],
     fuerza:["Fortalecimiento progresivo de aductores y core",""], fuerzaFunc:["Marcha funcional y transferencias sin dolor",""],
-    funcional:["Reentrenamiento gradual del gesto deportivo (cambios de dirección)",""]},
+    funcional:["Reentrenamiento gradual del gesto deportivo",""]},
   patelofemoral:{ nombre:"Síndrome patelofemoral", testN:"Test de aprensión rotuliana", testD:"Reproduce dolor/aprensión al desplazar la rótula lateralmente.",
     agentes:["frio","tens","magneto"], mov:["Movilidad de rodilla en rango indoloro",""], control:["Activación de vasto medial oblicuo y glúteo medio",""],
-    fuerza:["Fortalecimiento progresivo en cadena cerrada, rango controlado",""], fuerzaFunc:["Sit-to-stand y subida de escalón controlada",""],
+    fuerza:["Fortalecimiento progresivo en cadena cerrada",""], fuerzaFunc:["Sit-to-stand y subida de escalón controlada",""],
     funcional:["Progresión a actividad con impacto según tolerancia",""]},
-  tendinopatia_rotuliana:{ nombre:"Tendinopatía rotuliana", testN:"Test de decline squat (sentadilla en plano inclinado)", testD:"Reproduce dolor tendinoso característico bajo carga excéntrica.",
+  tendinopatia_rotuliana:{ nombre:"Tendinopatía rotuliana", testN:"Test de decline squat", testD:"Reproduce dolor tendinoso bajo carga excéntrica.",
     agentes:["frio","us"], mov:["Movilidad de rodilla en rango indoloro",""], control:["Isométricos de cuádriceps bajo umbral de dolor",""],
-    fuerza:["Fortalecimiento excéntrico progresivo (sentadilla en declive)",""], fuerzaFunc:["Sit-to-stand y subida de escalón",""],
+    fuerza:["Fortalecimiento excéntrico progresivo (sentadilla declive)",""], fuerzaFunc:["Sit-to-stand y subida de escalón",""],
     funcional:["Progresión gradual a salto/carrera según tolerancia",""]},
-  lca:{ nombre:"Rehabilitación post lesión de LCA", testN:"Test de Lachman", testD:"Test más sensible para valorar la integridad/laxitud del ligamento cruzado anterior.",
-    testExtra:{n:"Test del cajón anterior", d:"Valora el desplazamiento anterior de la tibia a 90° de flexión de rodilla para confirmar inestabilidad anteroposterior."},
+  lca:{ nombre:"Rehabilitación post lesión de LCA", testN:"Test de Lachman", testD:"Test más sensible para la laxitud del ligamento cruzado anterior.",
     agentes:["frio","tens","magneto"], mov:["Recuperación de rango de movilidad progresivo",""], control:["Activación de cuádriceps y control neuromuscular",""],
     fuerza:["Fortalecimiento progresivo en cadena cerrada y abierta",""], fuerzaFunc:["Sit-to-stand, marcha y equilibrio funcional",""],
-    funcional:["Reentrenamiento de salto/pivote y retorno deportivo gradual",""]},
-  itb:{ nombre:"Síndrome de la cintilla iliotibial", testN:"Test de Noble (Noble compression test)", testD:"Reproduce el dolor lateral de rodilla al comprimir el cóndilo femoral lateral en flexo-extensión.",
-    agentes:["frio","tens"], mov:["Movilidad de rodilla y cadera en rango indoloro",""], control:["Activación de glúteo medio (control de rotación/aducción de cadera)",""],
+    funcional:["Reentrenamiento de salto/pivote y retorno deportivo",""]},
+  itb:{ nombre:"Síndrome de la cintilla iliotibial", testN:"Test de Noble", testD:"Reproduce dolor lateral de rodilla al comprimir cóndilo lateral.",
+    agentes:["frio","tens"], mov:["Movilidad de rodilla y cadera en rango indoloro",""], control:["Activación de glúteo medio",""],
     fuerza:["Fortalecimiento progresivo de abductores y glúteo medio",""], fuerzaFunc:["Marcha y subida de escalón con control de cadera",""],
-    funcional:["Progresión gradual a carrera con control de la técnica",""]},
-  aquiles:{ nombre:"Tendinopatía de Aquiles", testN:"Test de Thompson", testD:"Descarta rotura del tendón (ausencia de flexión plantar al comprimir la pantorrilla).",
+    funcional:["Progresión gradual a carrera con control de técnica",""]},
+  aquiles:{ nombre:"Tendinopatía de Aquiles", testN:"Test de Thompson", testD:"Descarta rotura del tendón de Aquiles.",
     agentes:["frio","us"], mov:["Movilidad de tobillo en rango indoloro",""], control:["Isométricos de tríceps sural bajo umbral",""],
-    fuerza:["Fortalecimiento excéntrico progresivo (elevación de talones)",""], fuerzaFunc:["Marcha funcional con progresión de carga",""],
+    fuerza:["Fortalecimiento excéntrico progresivo (elevación talones)",""], fuerzaFunc:["Marcha funcional con progresión de carga",""],
     funcional:["Progresión gradual a carrera/salto según tolerancia",""]},
-  metatarsalgia:{ nombre:"Metatarsalgia", testN:"Test de compresión metatarsal (squeeze test)", testD:"Reproduce dolor en la región metatarsal, orienta también a neuroma de Morton.",
+  metatarsalgia:{ nombre:"Metatarsalgia", testN:"Test de compresión metatarsal (squeeze test)", testD:"Reproduce dolor en la región metatarsal.",
     agentes:["frio","us"], mov:["Movilidad de pie/tobillo en rango indoloro",""], control:["Activación de músculos intrínsecos del pie",""],
     fuerza:["Fortalecimiento progresivo de intrínsecos y tríceps sural",""], fuerzaFunc:["Marcha con calzado adecuado y descansos programados",""],
     funcional:["Progresión a bipedestación/marcha prolongada",""]},
-  neuropatia_diabetica:{ nombre:"Neuropatía diabética periférica", testN:"Monofilamento de Semmes-Weinstein", testD:"Evalúa sensibilidad protectora plantar; clave para prevención de lesiones.",
+  neuropatia_diabetica:{ nombre:"Neuropatía diabética periférica", testN:"Monofilamento de Semmes-Weinstein", testD:"Evalúa sensibilidad protectora plantar.",
     agentes:["tens","magneto"], mov:["Movilidad activa distal en rango completo",""], control:["Reeducación propioceptiva y de equilibrio",""],
     fuerza:["Fortalecimiento progresivo de miembros inferiores",""], fuerzaFunc:["Entrenamiento de equilibrio y marcha con prevención de caídas",""],
     funcional:["Educación en cuidado del pie e inspección diaria",""]},
-  pie_caido:{ nombre:"Lesión de nervio peroneo (pie caído)", testN:"Evaluación manual de fuerza de dorsiflexores (escala de Daniels)", testD:"Cuantifica el déficit motor y orienta pronóstico/progresión.", escala:"daniels",
-    testExtra:{n:"Test de Slump / SLR", d:"Si el origen es radicular (raíz L5) y no periférico puro, este test de tensión neural ayuda a diferenciar el nivel de la lesión."},
+  pie_caido:{ nombre:"Lesión de nervio peroneo (pie caído)", testN:"Evaluación de fuerza de dorsiflexores (Daniels)", testD:"Cuantifica el déficit motor y orienta pronóstico.", escala:"daniels",
+    testExtra:{n:"Test de Slump / SLR", d:"Diferencia lesión radicular L5 de nervio peroneo puro."},
     agentes:["tens","magneto"], mov:["Movilidad pasiva de tobillo en rango completo",""], control:["Estimulación y facilitación de dorsiflexores",""],
-    fuerza:["Fortalecimiento progresivo según fuerza activa disponible",""], fuerzaFunc:["Entrenamiento de marcha, considerar órtesis (AFO) si aplica",""],
+    fuerza:["Fortalecimiento progresivo según fuerza activa",""], fuerzaFunc:["Entrenamiento de marcha, considerar órtesis (AFO)",""],
     funcional:["Reentrenamiento de marcha comunitaria y prevención de caídas",""]},
-  plexo_braquial:{ nombre:"Lesión de plexo braquial", testN:"Examen motor/sensitivo por miotomas y dermatomas (C5-T1)", testD:"Mapea el alcance del compromiso plexual para definir plan de estimulación.",
-    agentes:["tens","magneto"], mov:["Movilización pasiva/activa-asistida de todo el miembro superior",""], control:["Facilitación de grupos musculares con actividad activa incipiente",""],
-    fuerza:["Fortalecimiento asistido progresivo",""], fuerzaFunc:["Tareas de alcance e higiene con asistencia adaptada",""],
-    funcional:["Progresión a autonomía funcional o uso de ortesis si aplica",""]},
-  lesion_medular:{ nombre:"Lesión medular", testN:"Escala ASIA (American Spinal Injury Association)", testD:"Establece nivel motor, sensitivo y completitud de la lesión.", escala:"asia",
-    agentes:["tens","magneto"], mov:["Movilización pasiva completa por debajo del nivel de lesión para mantener rango",""], control:["Entrenamiento de control de tronco y equilibrio en sedestación",""],
-    fuerza:["Fortalecimiento de musculatura supralesional e inervada conservada",""], fuerzaFunc:["Entrenamiento de transferencias, propulsión de silla o marcha según ASIA",""],
-    funcional:["Reintegración a AVD y actividades comunitarias adaptadas",""]},
-  parkinson:{ nombre:"Enfermedad de Parkinson", testN:"Escala de Hoehn y Yahr", testD:"Etapa el estadio de afectación motora y funcional.", escala:"hoehn_yahr",
-    agentes:["tens","magneto"], mov:["Ejercicios de movilidad activa de gran amplitud (concepto LSVT BIG)",""], control:["Entrenamiento de giros, iniciación de marcha y pistas auditivas/visuales",""],
-    fuerza:["Fortalecimiento de extensión de tronco y miembros inferiores",""], fuerzaFunc:["Estrategias para congelamiento (freezing), prevención de caídas",""],
-    funcional:["Mantenimiento de autonomía en AVD y marcha en comunidad",""]}
+  plexo_braquial:{ nombre:"Lesión de plexo braquial", testN:"Evaluación manual de fuerza por miotomas (Daniels)", testD:"Localiza el nivel de la lesión según el patrón de déficit motor.",
+    testExtra:{n:"Test neurodinámico de miembro superior (ULNT)", d:"Valora tensión neural asociada con precaución."}, escala:"daniels",
+    agentes:["tens","magneto"], mov:["Movilidad pasiva completa del miembro afectado",""], control:["Facilitación de músculos con actividad residual",""],
+    fuerza:["Fortalecimiento progresivo según recuperación motora",""], fuerzaFunc:["Entrenamiento de tareas de AVD adaptadas",""],
+    funcional:["Reevaluación periódica y progresión según reinervación",""]},
+  lesion_medular:{ nombre:"Lesión medular", testN:"Escala ASIA (AIS)", testD:"Clasifica nivel neurológico y severidad (A-E) sensitivo/motora.", escala:"asia",
+    agentes:["tens","magneto"], mov:["Movilización pasiva completa de todos los segmentos",""], control:["Control de tronco en sedestación",""],
+    fuerza:["Fortalecimiento de musculatura preservada",""], fuerzaFunc:["Entrenamiento de transferencias y silla de ruedas",""],
+    funcional:["Entrenamiento en actividades de la vida diaria adaptadas",""]},
+  parkinson:{ nombre:"Enfermedad de Parkinson", testN:"Escala de Hoehn y Yahr", testD:"Clasifica el estadio de progresión de la enfermedad.", escala:"hoehnyahr",
+    agentes:[], mov:["Movilidad activa amplia, rotaciones de tronco (LSVT BIG)",""], control:["Entrenamiento de equilibrio y estrategias anticaída",""],
+    fuerza:["Fortalecimiento progresivo global, énfasis en extensores",""], fuerzaFunc:["Entrenamiento de marcha con señales externas (cues)",""],
+    funcional:["Entrenamiento de transferencias y AVD",""]}
 };
+
+const ZONAS = {
+  "Columna lumbar":["lumbalgia","ciatica","estenosis_lumbar","facetario","piriforme","sacroileitis"],
+  "Columna torácica / dorsal":["dorsalgia"],
+  "Columna cervical":["cervicalgia","cervicobraquialgia","cefalea_cervicogenica","latigazo"],
+  "Hombro":["hombro","capsulitis","inestabilidad_hombro","bursitis_subacromial"],
+  "Codo / muñeca":["epicondilitis","epitrocleitis","dequervain","tunel","tunel_cubital"],
+  "Cadera":["cadera","bursitis_trocanterea","pubalgia"],
+  "Rodilla":["rodilla","patelofemoral","tendinopatia_rotuliana","lca","itb"],
+  "Tobillo / pie":["tobillo","aquiles","fascitis","metatarsalgia"],
+  "Neurológico central":["acv","lesion_medular","parkinson"],
+  "Neurológico periférico":["neuropatico","neuropatia_diabetica","pie_caido","plexo_braquial"]
+};
+
+function poblarZonaSelect(selectId){
+  const sel=document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = selectId==='nuevaZona'
+    ? '<option value="">— sin zona / no listar en sugerencia por zona —</option>'
+    : '<option value="">— todas las zonas —</option>';
+  Object.keys(ZONAS).forEach(z=>{const o=document.createElement('option');o.value=z;o.textContent=z;sel.appendChild(o);});
+}
+poblarZonaSelect('zona');
+poblarZonaSelect('nuevaZona');
+
+// Buscador con filtro en vivo para el selector de patologías
+let PATOLOGIA_OPCIONES = [];
+function normalizarTexto(s){
+  return s.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+}
+function refrescarOpcionesPatologia(){
+  const sel = document.getElementById('patologia');
+  if(!sel) return;
+  PATOLOGIA_OPCIONES = [...sel.options].map(o=>({key:o.value, nombre:o.textContent}));
+}
+function filtrarPatologias(){
+  const q = normalizarTexto(document.getElementById('patologiaBuscador').value.trim());
+  const zonaSel = document.getElementById('zona').value;
+  const sel = document.getElementById('patologia');
+  if(!sel) return;
+  const valorActual = sel.value;
+  let base = PATOLOGIA_OPCIONES;
+  if(zonaSel && ZONAS[zonaSel]) base = base.filter(o=>ZONAS[zonaSel].includes(o.key));
+  const filtradas = q ? base.filter(o=>normalizarTexto(o.nombre).includes(q)) : base;
+  const listaAMostrar = filtradas.length ? filtradas : (base.length ? base : PATOLOGIA_OPCIONES);
+  
+  sel.innerHTML = '';
+  listaAMostrar.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.key;
+    opt.textContent = o.nombre;
+    if (o.key === valorActual) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  const contador = document.getElementById('patologiaContador');
+  if(contador){
+    if(!zonaSel && !q) contador.textContent = `${listaAMostrar.length} patologías en el catálogo`;
+    else if(!filtradas.length) contador.textContent = `Sin coincidencias para ese filtro — mostrando el catálogo completo`;
+    else contador.textContent = `${listaAMostrar.length} patología${listaAMostrar.length===1?'':'s'} encontrada${listaAMostrar.length===1?'':'s'}`;
+  }
+}
+refrescarOpcionesPatologia();
+document.getElementById('patologiaBuscador').addEventListener('input', filtrarPatologias);
+document.getElementById('zona').addEventListener('change', filtrarPatologias);
+filtrarPatologias();
+
+// Patologías nuevas custom
+function slugify(s){
+  return s.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+function poblarAgentesCheckboxes(){
+  const cont=document.getElementById('nuevaAgentes');
+  if(!cont) return;
+  cont.innerHTML = Object.keys(AGENTES).map(k=>`<div class="check-row"><input type="checkbox" value="${k}"><span>${AGENTES[k].n}</span></div>`).join('');
+}
+poblarAgentesCheckboxes();
+
+function leerPatologiasCustom(){
+  try{ return JSON.parse(localStorage.getItem('kine_patologias_custom')||'[]'); }catch(e){ return []; }
+}
+function guardarPatologiasCustom(arr){ localStorage.setItem('kine_patologias_custom', JSON.stringify(arr)); }
+
+function cargarPatologiasCustom(){
+  const custom = leerPatologiasCustom();
+  custom.forEach(c=>{
+    DB[c.key]=c.data;
+    if(c.zona){ if(!ZONAS[c.zona]) ZONAS[c.zona]=[]; if(!ZONAS[c.zona].includes(c.key)) ZONAS[c.zona].push(c.key); }
+    if(!document.querySelector('#patologia option[value="'+c.key+'"]')){
+      const opt=document.createElement('option'); opt.value=c.key; opt.textContent=c.data.nombre;
+      document.getElementById('patologia').appendChild(opt);
+    }
+  });
+  if(custom.length){ poblarZonaSelect('zona'); poblarZonaSelect('nuevaZona'); }
+  refrescarOpcionesPatologia();
+  renderListaPatologiasCustom();
+}
+cargarPatologiasCustom();
+
+let modoEdicionKey = null;
+
+function renderListaPatologiasCustom(){
+  const cont = document.getElementById('listaPatologiasCustom');
+  if(!cont) return;
+  const custom = leerPatologiasCustom();
+  if(!custom.length){ cont.innerHTML = '<p style="color:var(--muted);">Todavía no agregaste ninguna.</p>'; return; }
+  cont.innerHTML = custom.map(c=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);">
+      <span>${c.data.nombre}</span>
+      <span style="display:flex;gap:6px;flex-shrink:0;">
+        <button type="button" class="editarPatCustom" data-key="${c.key}" style="padding:5px 10px;font-size:.76rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:3px;cursor:pointer;">Editar</button>
+        <button type="button" class="borrarPatCustom" data-key="${c.key}" style="padding:5px 10px;font-size:.76rem;border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:3px;cursor:pointer;">Borrar</button>
+      </span>
+    </div>`).join('');
+
+  cont.querySelectorAll('.editarPatCustom').forEach(btn=>btn.addEventListener('click',()=>{
+    const c = leerPatologiasCustom().find(x=>x.key===btn.dataset.key);
+    if(!c) return;
+    document.getElementById('nuevaNombre').value = c.data.nombre;
+    document.getElementById('nuevaZona').value = c.zona||'';
+    document.getElementById('nuevaTestN').value = c.data.testN||'';
+    document.getElementById('nuevaTestD').value = c.data.testD||'';
+    document.getElementById('nuevaMov').value = (c.data.mov||[]).join('\n');
+    document.getElementById('nuevaControl').value = (c.data.control||[]).join('\n');
+    document.getElementById('nuevaFuerza').value = (c.data.fuerza||[]).join('\n');
+    document.getElementById('nuevaFuerzaFunc').value = (c.data.fuerzaFunc||[]).join('\n');
+    document.getElementById('nuevaFuncional').value = (c.data.funcional||[]).join('\n');
+    document.querySelectorAll('#nuevaAgentes input').forEach(i=>{ i.checked = (c.data.agentes||[]).includes(i.value); });
+    modoEdicionKey = c.key;
+    document.getElementById('agregarPatologia').textContent = 'Guardar cambios';
+    document.getElementById('cancelarEdicionPatologia').style.display = 'block';
+    const toggle = document.querySelector('details.acc-toggle');
+    if(toggle) toggle.open = true;
+    document.getElementById('nuevaNombre').scrollIntoView({behavior:'smooth', block:'center'});
+  }));
+
+  cont.querySelectorAll('.borrarPatCustom').forEach(btn=>btn.addEventListener('click',()=>{
+    if(!confirm('¿Borrar esta patología del catálogo?')) return;
+    const key = btn.dataset.key;
+    let custom = leerPatologiasCustom();
+    custom = custom.filter(x=>x.key!==key);
+    guardarPatologiasCustom(custom);
+    delete DB[key];
+    Object.keys(ZONAS).forEach(z=>{ ZONAS[z] = ZONAS[z].filter(k=>k!==key); });
+    const opt = document.querySelector('#patologia option[value="'+key+'"]');
+    if(opt){ const eraSeleccionada = document.getElementById('patologia').value===key; opt.remove(); if(eraSeleccionada) document.getElementById('patologia').selectedIndex=0; }
+    if(modoEdicionKey===key) cancelarEdicionPatologia();
+    poblarZonaSelect('zona'); poblarZonaSelect('nuevaZona');
+    PATOLOGIA_OPCIONES = PATOLOGIA_OPCIONES.filter(o=>o.key!==key);
+    filtrarPatologias();
+    renderListaPatologiasCustom();
+  }));
+}
+
+function cancelarEdicionPatologia(){
+  modoEdicionKey = null;
+  document.getElementById('agregarPatologia').textContent = 'Agregar al catálogo';
+  document.getElementById('cancelarEdicionPatologia').style.display = 'none';
+  ['nuevaNombre','nuevaTestN','nuevaTestD','nuevaMov','nuevaControl','nuevaFuerza','nuevaFuerzaFunc','nuevaFuncional'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#nuevaAgentes input:checked').forEach(i=>i.checked=false);
+  document.getElementById('nuevaZona').value='';
+}
+document.getElementById('cancelarEdicionPatologia').addEventListener('click', cancelarEdicionPatologia);
+
+document.getElementById('agregarPatologia').addEventListener('click', ()=>{
+  const status=document.getElementById('nuevaPatologiaStatus');
+  const nombre = document.getElementById('nuevaNombre').value.trim();
+  if(!nombre){ status.textContent='Escribí el nombre de la patología.'; status.style.color='var(--red)'; return; }
+
+  const toLines = id => document.getElementById(id).value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const nuevo = {
+    nombre,
+    testN: document.getElementById('nuevaTestN').value.trim() || 'A definir',
+    testD: document.getElementById('nuevaTestD').value.trim() || '',
+    agentes: [...document.querySelectorAll('#nuevaAgentes input:checked')].map(i=>i.value),
+    mov: toLines('nuevaMov'), control: toLines('nuevaControl'),
+    fuerza: toLines('nuevaFuerza'), fuerzaFunc: toLines('nuevaFuerzaFunc'),
+    funcional: toLines('nuevaFuncional')
+  };
+  const zona = document.getElementById('nuevaZona').value;
+
+  if(modoEdicionKey){
+    const key = modoEdicionKey;
+    DB[key]=nuevo;
+    Object.keys(ZONAS).forEach(z=>{ ZONAS[z] = ZONAS[z].filter(k=>k!==key); });
+    if(zona){ if(!ZONAS[zona]) ZONAS[zona]=[]; ZONAS[zona].push(key); }
+    let custom = leerPatologiasCustom();
+    custom = custom.map(c=>c.key===key ? {key, data:nuevo, zona} : c);
+    guardarPatologiasCustom(custom);
+    const opt = document.querySelector('#patologia option[value="'+key+'"]');
+    if(opt) opt.textContent = nombre;
+    const entradaOpc = PATOLOGIA_OPCIONES.find(o=>o.key===key);
+    if(entradaOpc) entradaOpc.nombre = nombre; else PATOLOGIA_OPCIONES.push({key, nombre});
+    poblarZonaSelect('zona'); poblarZonaSelect('nuevaZona');
+    if(zona) document.getElementById('zona').value=zona;
+    filtrarPatologias();
+    status.style.color='var(--teal)';
+    status.textContent = `"${nombre}" actualizada ✓.`;
+    cancelarEdicionPatologia();
+    renderListaPatologiasCustom();
+    return;
+  }
+
+  let key = slugify(nombre);
+  if(!key){ status.textContent='Nombre no válido.'; status.style.color='var(--red)'; return; }
+  if(DB[key]) key = key+'_'+Date.now().toString().slice(-5);
+  DB[key]=nuevo;
+  if(zona){ if(!ZONAS[zona]) ZONAS[zona]=[]; ZONAS[zona].push(key); }
+
+  const custom = leerPatologiasCustom();
+  custom.push({key, data:nuevo, zona});
+  guardarPatologiasCustom(custom);
+
+  const opt=document.createElement('option'); opt.value=key; opt.textContent=nombre;
+  document.getElementById('patologia').appendChild(opt);
+  document.getElementById('patologia').value=key;
+  PATOLOGIA_OPCIONES.push({key, nombre});
+  poblarZonaSelect('zona'); poblarZonaSelect('nuevaZona');
+  if(zona) document.getElementById('zona').value=zona;
+  filtrarPatologias();
+
+  status.style.color='var(--teal)';
+  status.textContent = `"${nombre}" agregada al catálogo ✓.`;
+  ['nuevaNombre','nuevaTestN','nuevaTestD','nuevaMov','nuevaControl','nuevaFuerza','nuevaFuerzaFunc','nuevaFuncional'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#nuevaAgentes input:checked').forEach(i=>i.checked=false);
+  document.getElementById('nuevaZona').value='';
+  renderListaPatologiasCustom();
+});
+
+// Banco de ejercicios
+const BANCO = {
+  banda:{ nombre:"Banda elástica", items:[
+    "Remo horizontal con banda en bipedestación, 3x12",
+    "Rotación externa de hombro con banda (codo pegado), 3x15",
+    "Rotación interna de hombro con banda, 3x15",
+    "Extensión de rodilla con banda anclada, 3x12",
+    "Flexión de rodilla con banda anclada, 3x12",
+    "Abducción de cadera con banda en decúbito lateral, 3x15",
+    "Sentadilla con banda en rodillas (glúteo medio), 3x12",
+    "Marcha lateral con banda en tobillos (monster walk), 3x10",
+    "Extensión de muñeca con banda, 3x15",
+    "Flexión de muñeca con banda, 3x15",
+    "Dorsiflexión de tobillo resistida con banda, 3x15",
+    "Peso muerto rumano con banda bajo los pies, 3x10",
+    "Press de pecho con banda anclada detrás, 3x12"
+  ]},
+  consultorio:{ nombre:"Elementos simples de consultorio", items:[
+    "Sit-to-stand desde silla sin apoyo de manos, 3x10",
+    "Step-up en escalón bajo, 3x10 por lado",
+    "Puente de glúteos en colchoneta, 3x12",
+    "Plancha frontal sobre colchoneta, 3x20 seg",
+    "Plancha lateral sobre colchoneta, 3x15 seg",
+    "Equilibrio unipodal sobre cojín/almohadón, 3x30 seg",
+    "Marcha con obstáculos bajos (conos o cintas), 3 vueltas",
+    "Sentadilla asistida contra la pared (wall sit), 3x20 seg",
+    "Elevación de pierna recta en camilla, 3x12",
+    "Cuadrupedia con extensión contralateral (bird-dog), 3x10",
+    "Subida y bajada de escalón lateral, 3x10",
+    "Transferencias cama-silla asistidas, 3 repeticiones"
+  ]},
+  libre:{ nombre:"Sin elementos", items:[
+    "Sentadilla libre sin carga, 3x12",
+    "Zancada estática, 3x10 por lado",
+    "Elevación de talones bipodal (gemelos), 3x15",
+    "Elevación de talones unipodal, 3x10 por lado",
+    "Movilidad activa articular en rango completo, 2x10",
+    "Estiramiento activo de cadena posterior, 3x30 seg",
+    "Rotación de tronco en sedestación, 2x10 por lado",
+    "Respiración diafragmática + básculas pélvicas, 2x10",
+    "Marcha en el lugar con elevación de rodillas, 3x30 seg",
+    "Círculos de hombro (movilidad escapular), 2x10 por lado"
+  ]}
+};
+let bancoCategoriaActiva = 'banda';
+
+function renderBancoTabs(){
+  const cont=document.getElementById('bancoTabs');
+  if(!cont) return;
+  cont.innerHTML = Object.keys(BANCO).map(k=>`<button type="button" class="banco-tab ${k===bancoCategoriaActiva?'active':''}" data-cat="${k}">${BANCO[k].nombre}</button>`).join('');
+  cont.querySelectorAll('.banco-tab').forEach(btn=>btn.addEventListener('click',()=>{
+    bancoCategoriaActiva = btn.dataset.cat;
+    renderBancoTabs();
+    renderBancoLista();
+  }));
+}
+function renderBancoLista(){
+  const cont=document.getElementById('bancoLista');
+  if(!cont) return;
+  const items = BANCO[bancoCategoriaActiva].items;
+  cont.innerHTML = items.map((ej,i)=>`<button type="button" class="ban-item" data-cat="${bancoCategoriaActiva}" data-i="${i}">${ej}</button>`).join('');
+  cont.querySelectorAll('.ban-item').forEach(btn=>btn.addEventListener('click',()=>{
+    const destinoId = document.getElementById('bancoFaseDestino').value;
+    const campo = document.getElementById(destinoId);
+    const texto = BANCO[btn.dataset.cat].items[+btn.dataset.i];
+    campo.value = campo.value.trim() ? campo.value.replace(/\n?$/,'\n'+texto) : texto;
+    btn.classList.add('added');
+    setTimeout(()=>btn.classList.remove('added'), 600);
+  }));
+}
+if(document.getElementById('bancoTabs')){ renderBancoTabs(); renderBancoLista(); }
+
+// Contadores de acordeón
+function actualizarContadoresAcordeon(){
+  ['comorb','medic','rojas','amarillas','azules','negras'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const n = el.querySelectorAll('input:checked').length;
+    const span = document.querySelector('.acc-count[data-count-for="'+id+'"]');
+    if(span) span.textContent = n ? `(${n} marcada${n>1?'s':''})` : '';
+  });
+}
+document.addEventListener('change', (e)=>{
+  if(e.target.matches('#comorb input, #medic input, #rojas input, #amarillas input, #azules input, #negras input')) actualizarContadoresAcordeon();
+});
+actualizarContadoresAcordeon();
+
+document.getElementById('chkDiabetes').addEventListener('change', e=>{
+  document.getElementById('diabetesTipoWrap').style.display = e.target.checked ? 'block' : 'none';
+  if(!e.target.checked) document.getElementById('diabetesTipo').value='';
+});
+document.getElementById('chkAutoinmune').addEventListener('change', e=>{
+  document.getElementById('autoinmuneCualWrap').style.display = e.target.checked ? 'block' : 'none';
+  if(!e.target.checked) document.getElementById('autoinmuneCual').value='';
+});
+
+// Configuración de Firebase
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAL8iTV35-TsVINqtsNxtszLAps67is8Ow",
+  authDomain: "pacientes-93cc8.firebaseapp.com",
+  projectId: "pacientes-93cc8",
+  storageBucket: "pacientes-93cc8.firebasestorage.app",
+  messagingSenderId: "704437123767",
+  appId: "1:704437123767:web:4d8281feb3ededca84ab32",
+  measurementId: "G-15V92KGGTM"
+};
+
+let ultimoHistorial=[];
+function leerPacientesLS(){ try{ return JSON.parse(localStorage.getItem('kine_pacientes')||'[]'); }catch(e){ return []; } }
+function escribirPacientesLS(arr){ localStorage.setItem('kine_pacientes', JSON.stringify(arr)); }
+function cargarHistorial(){ ultimoHistorial = leerPacientesLS(); pintarHistorial(); }
+
+let firebaseListo = false;
+let usuarioActual = null;
+let dbFirestore = null;
+
+function initFirebase(){
+  const status = document.getElementById('cuentaStatus');
+  if(!window.firebase || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey==="TU_API_KEY"){
+    if(status) status.textContent = '⚠️ Configuración de Firebase no válida.';
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    dbFirestore = firebase.firestore();
+    firebaseListo = true;
+    firebase.auth().onAuthStateChanged(user=>{
+      usuarioActual = user;
+      actualizarUICuenta();
+      if(user) cargarPacientesDesdeNube();
+    });
+  }catch(e){
+    if(status) status.textContent = 'Error al inicializar Firebase.';
+  }
+}
+initFirebase();
+
+function actualizarUICuenta(){
+  const logueado = !!usuarioActual;
+  const outEl=document.getElementById('cuentaLoggedOut'), inEl=document.getElementById('cuentaLoggedIn');
+  if(outEl) outEl.style.display = logueado?'none':'block';
+  if(inEl) inEl.style.display = logueado?'block':'none';
+  if(logueado) document.getElementById('cuentaEmailActual').textContent = usuarioActual.email;
+  const bloqueo=document.getElementById('bloqueoLogin'), contenido=document.getElementById('appContent');
+  if(bloqueo) bloqueo.style.display = logueado?'none':'block';
+  if(contenido) contenido.style.display = logueado?'block':'none';
+}
+
+function traducirErrorFirebase(code){
+  const map = {
+    'auth/email-already-in-use':'El email ya está en uso.',
+    'auth/invalid-email':'El email no es válido.',
+    'auth/weak-password':'Contraseña muy débil (mínimo 6 caracteres).',
+    'auth/wrong-password':'Contraseña incorrecta.',
+    'auth/user-not-found':'Usuario no encontrado.',
+    'auth/invalid-credential':'Credenciales inválidas.',
+    'auth/too-many-requests':'Demasiados intentos. Aguardá un momento.'
+  };
+  return map[code] || 'Error al procesar la solicitud.';
+}
+
+document.getElementById('btnIngresar').addEventListener('click', async ()=>{
+  const status=document.getElementById('cuentaStatus');
+  if(!firebaseListo){ status.textContent='Firebase no está listo.'; return; }
+  const email=document.getElementById('cuentaEmail').value.trim();
+  const pass=document.getElementById('cuentaPassword').value;
+  if(!email||!pass){ status.textContent='Completá email y contraseña.'; return; }
+  status.textContent='Ingresando…';
+  try{
+    await firebase.auth().signInWithEmailAndPassword(email, pass);
+    status.textContent='';
+  }catch(e){ status.textContent='Error: '+traducirErrorFirebase(e.code); }
+});
+
+document.getElementById('btnCrearCuenta').addEventListener('click', async ()=>{
+  const status=document.getElementById('cuentaStatus');
+  if(!firebaseListo){ status.textContent='Firebase no está listo.'; return; }
+  const email=document.getElementById('cuentaEmail').value.trim();
+  const pass=document.getElementById('cuentaPassword').value;
+  if(!email||!pass){ status.textContent='Completá email y contraseña.'; return; }
+  if(pass.length<6){ status.textContent='Mínimo 6 caracteres en la contraseña.'; return; }
+  status.textContent='Creando cuenta…';
+  try{
+    await firebase.auth().createUserWithEmailAndPassword(email, pass);
+    status.textContent='';
+  }catch(e){ status.textContent='Error: '+traducirErrorFirebase(e.code); }
+});
+
+document.getElementById('btnCerrarSesion').addEventListener('click', async ()=>{
+  if(firebaseListo && firebase.auth()) await firebase.auth().signOut();
+});
+
+async function cargarPacientesDesdeNube(){
+  const status=document.getElementById('dbStatus');
+  if(!firebaseListo || !usuarioActual) return;
+  status.textContent='Sincronizando con la nube…';
+  try{
+    const doc = await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).get();
+    ultimoHistorial = doc.exists ? (doc.data().registros||[]) : [];
+    status.textContent = `Conectado ✓ (${ultimoHistorial.length} sesiones sincronizadas).`;
+    pintarHistorial();
+  }catch(e){
+    status.textContent='Error al sincronizar con la nube; cargando historial local.';
+    cargarHistorial();
+  }
+}
+
+async function guardarPacientesEnNube(arr){
+  if(!firebaseListo || !usuarioActual) return false;
+  await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).set({registros:arr});
+  return true;
+}
+
+function recolectarEstado(){
+  return {
+    idPaciente: document.getElementById('idPaciente').value||'(sin nombre)',
+    edad: document.getElementById('edad').value,
+    peso: document.getElementById('peso').value,
+    altura: document.getElementById('altura').value,
+    actividad: document.getElementById('actividad').value,
+    patologia: document.getElementById('patologia').value,
+    comorb:[...document.querySelectorAll('#comorb input:checked')].map(i=>i.value),
+    medic:[...document.querySelectorAll('#medic input:checked')].map(i=>i.value),
+    fecha: new Date().toISOString()
+  };
+}
+
+document.getElementById('guardar').addEventListener('click', async ()=>{
+  const status=document.getElementById('dbStatus');
+  const registro = recolectarEstado();
+  const arr=leerPacientesLS(); arr.unshift(registro); escribirPacientesLS(arr);
+  ultimoHistorial = arr;
+  pintarHistorial();
+  if(firebaseListo && usuarioActual){
+    try{
+      await guardarPacientesEnNube(arr);
+      status.textContent='Sesión guardada y sincronizada ✓';
+    }catch(e){
+      status.textContent='Guardada localmente (falló sincronización).';
+    }
+  } else {
+    status.textContent='Sesión guardada en navegador local ✓';
+  }
+});
+
+function pintarHistorial(){
+  const cont=document.getElementById('historial');
+  if(!cont) return;
+  if(!ultimoHistorial.length){cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>';return;}
+  const filas = ultimoHistorial.map(p=>{
+    const f=new Date(p.fecha);
+    return `<tr><td>${f.toLocaleDateString()}</td><td>${p.idPaciente}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
+  }).join('');
+  cont.innerHTML = `<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th></tr>${filas}</table>`;
+}
+
+document.getElementById('exportarCsv').addEventListener('click', ()=>{
+  const status=document.getElementById('dbStatus');
+  if(!ultimoHistorial.length){status.textContent='No hay datos para exportar.';return;}
+  const encabezado="Fecha,Paciente,Patologia,Edad,Peso,Altura,Actividad,Comorbilidades,Medicacion\n";
+  const filas = ultimoHistorial.map(p=>[
+    new Date(p.fecha).toLocaleString(), p.idPaciente, (DB[p.patologia]?DB[p.patologia].nombre:p.patologia),
+    p.edad, p.peso, p.altura, p.actividad, (p.comorb||[]).join('; '), (p.medic||[]).join('; ')
+  ].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([encabezado+filas], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='historial_pacientes.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+});
+
+// Historia clínica en PDF / impresión
+const ETQ_COMORB = {diabetes:"Diabetes", osteoporosis:"Osteoporosis / osteopenia", cardio:"Enfermedad cardiovascular / marcapasos", cancer:"Cáncer activo o reciente", embarazo:"Embarazo", implante:"Implantes metálicos / prótesis", epilepsia:"Epilepsia", sobrepeso:"Sobrepeso / obesidad", tabaquismo:"Tabaquismo", celiaquia:"Celiaquía", autoinmune:"Enfermedad autoinmune"};
+const ETQ_MEDIC = {anticoagulantes:"Anticoagulantes / antiagregantes", corticoides:"Corticoides crónicos", opioides:"Opioides", aines:"AINES de uso crónico", hormonas:"Hormonas (anabólicos/esteroides)", antihipertensivos:"Antihipertensivos", hipoglucemiantes:"Hipoglucemiantes", estatinas:"Estatinas", psiquiatrica:"Medicación psiquiátrica"};
+const ETQ_ROJAS = {peso:"Pérdida de peso inexplicada", nocturno:"Dolor nocturno no mecánico", fiebre:"Fiebre o malestar general", cancerhist:"Antecedente de cáncer", neurologico:"Déficit neurológico progresivo", esfinteres:"Alteración de esfínteres", trauma:"Trauma significativo reciente"};
+const ETQ_AMARILLAS = {catastrofismo:"Catastrofismo", miedo:"Kinesiofobia", animo:"Ansiolítico / depresión"};
+const ETQ_AZULES = {trabajoempeora:"Trebalho empeora dolor", soporte:"Baja percepción de apoyo"};
+const ETQ_NEGRAS = {litigio:"Litigio laboral", licencia:"Licencia prolongada"};
+function etiquetar(arr, mapa){ return arr.length ? arr.map(v=>mapa[v]||v).join(', ') : 'Ninguna registrada'; }
+
+function generarHistoriaClinica(){
+  const idPacienteVal = document.getElementById('idPaciente').value.trim() || '(sin nombre)';
+  const codigoPacienteActual = obtenerCodigoPaciente(idPacienteVal);
+  const matricula = document.getElementById('matriculaProfesional').value.trim();
+  const edad=+document.getElementById('edad').value||0;
+  const peso=+document.getElementById('peso').value||0;
+  const alturaCm=+document.getElementById('altura').value||0;
+  const altura=alturaCm/100;
+  const actividadTxt = document.getElementById('actividad').selectedOptions[0].textContent;
+  const patKey=document.getElementById('patologia').value;
+  const d=DB[patKey];
+  if(!d) return;
+  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
+  const comorb=marcado('comorb'), medic=marcado('medic');
+  const rojas=marcado('rojas'), amarillas=marcado('amarillas'), azules=marcado('azules'), negras=marcado('negras');
+  const imc = altura>0 ? (peso/(altura*altura)) : null;
+
+  let html = `
+    <div class="ph-title">Historia Clínica — Informe Kinesiológico</div>
+    <div class="ph-sub">${matricula||'Lic. Adrián Lazarte'} · Emitido el ${new Date().toLocaleDateString()}</div>
+
+    <div class="ph-h">Datos del paciente</div>
+    <div class="ph-row"><b>Paciente / HC:</b> ${idPacienteVal} ${codigoPacienteActual?`&nbsp; <b>Código:</b> ${codigoPacienteActual}`:''}</div>
+    <div class="ph-row"><b>Edad:</b> ${edad||'—'} años &nbsp; <b>Peso:</b> ${peso||'—'} kg &nbsp; <b>Altura:</b> ${alturaCm||'—'} cm ${imc!==null?`&nbsp; <b>IMC:</b> ${imc.toFixed(1)} kg/m²`:''}</div>
+    <div class="ph-row"><b>Actividad:</b> ${actividadTxt}</div>
+
+    <div class="ph-h">Diagnóstico</div>
+    <div class="ph-row"><b>${d.nombre}</b></div>
+    <div class="ph-row">Test principal: <b>${d.testN}.</b> ${d.testD}</div>
+    ${d.testExtra?`<div class="ph-row">Test complementario: <b>${d.testExtra.n}.</b>${d.testExtra.d}</div>`:''}
+    ${d.escala?`<div class="ph-row">Escala: <b>${ESCALAS[d.escala]?.n\vert{}\vert{}''}.</b>${ESCALAS[d.escala]?.d||''}</div>`:''}
+
+    <div class="ph-h">Comorbilidades y Medicación</div>
+    <div class="ph-row"><b>Comorbilidades:</b> ${etiquetar(comorb, ETQ_COMORB)}</div>
+    <div class="ph-row"><b>Medicación:</b> ${etiquetar(medic, ETQ_MEDIC)}</div>
+
+    <div class="ph-h">Cribado de banderas</div>
+    <div class="ph-row"><b>Rojas:</b> ${etiquetar(rojas, ETQ_ROJAS)}</div>
+    <div class="ph-row"><b>Amarillas:</b> ${etiquetar(amarillas, ETQ_AMARILLAS)}</div>
+
+    <div class="ph-h">Agentes Físicos</div>
+    ${(d.agentes&&d.agentes.length) ? d.agentes.map(k=>{
+      const a=AGENTES[k]; const contra=contraindicado(k,{comorb,medic});
+      return `<div class="ph-row">${contra?'⚠ CONTRAINDICADO — ':''}<b>${a?a.n:k}</b> — ${a?a.d:''}</div>`;
+    }).join('') : '<div class="ph-row">Sin agentes físicos específicos.</div>'}
+  `;
+
+  if(sesionesGlobal.length){
+    const registradas = sesionesGlobal.filter(s=>evolucionGlobal[s.n]).length;
+    const filas = sesionesGlobal.map(s=>{
+      const reg = evolucionGlobal[s.n];
+      const total = s.ejercicios.length;
+      const hechos = reg ? reg.marcados.length : 0;
+      const fecha = reg ? new Date(reg.fecha).toLocaleDateString() : '—';
+      return `<tr><td>${s.n}</td><td>${s.fase}</td><td>${hechos}/${total}</td><td>${fecha}</td></tr>`;
+    }).join('');
+    html += `
+      <div class="ph-h">Evolución de Sesiones</div>
+      <div class="ph-row">${registradas} de ${sesionesGlobal.length} sesiones registradas.</div>
+      <table class="ph-table"><tr><th>Sesión</th><th>Fase</th><th>Realizados</th><th>Fecha</th></tr>${filas}</table>
+    `;
+  }
+
+  html += `
+    <div class="ph-h" style="margin-top:26px;">Firma</div>
+    <div style="margin-top:26px;">
+      _________________________________<br>
+      ${matricula||'Firma y sello del profesional'}
+    </div>
+  `;
+
+  document.getElementById('printArea').innerHTML = html;
+  window.print();
+}
+document.getElementById('generarPdf').addEventListener('click', generarHistoriaClinica);
+
+function abrirBusquedaOnline(nombre){
+  const q = encodeURIComponent(nombre);
+  window.open(`https://pubmed.ncbi.nlm.nih.gov/?term=${q}`, '_blank');
+  window.open(`https://scholar.google.com/scholar?q=${encodeURIComponent(nombre+' physiotherapy treatment')}`, '_blank');
+}
+document.getElementById('buscarIA').addEventListener('click', ()=>{
+  const nombre = document.getElementById('nuevaNombre').value.trim();
+  const out = document.getElementById('sugerenciaResultado');
+  if(!nombre){out.innerHTML='<p style="color:var(--muted);">Escribí el nombre arriba primero.</p>';return;}
+  abrirBusquedaOnline(nombre);
+  out.innerHTML = `<p style="color:var(--green);font-size:.82rem;">Buscando "${nombre}" en PubMed y Google Scholar.</p>`;
+});
+
+const COMPLICACIONES = {
+  lumbalgia:["Dolor irradiado nuevo a miembro inferior","Alteración de esfínteres (sospecha cola de caballo)"],
+  ciatica:["Progresión del déficit motor","Persistencia prolongada mayor a 8 semanas"],
+  cervicalgia:["Cefalea intensa súbita","Déficit neurológico en miembro superior"],
+  hombro:["Pérdida de fuerza brusca (posible rotura)","Dolor nocturno constante"],
+  rodilla:["Bloqueo articular agudo","Derrame articular recurrente"],
+  tobillo:["Incapacidad de apoyo (reglas de Ottawa)","Inestabilidad crónica"]
+};
+
+const ESCALAS = {
+  ashworth:{n:"Escala de Ashworth Modificada", d:"Cuantifica el tono muscular / espasticidad (0 a 4)."},
+  daniels:{n:"Escala de Daniels", d:"Fuerza muscular de 0 (ausencia) a 5 (normal)."},
+  asia:{n:"Escala ASIA (AIS)", d:"Clasifica nivel motor y sensitivo en lesión medular (A-E)."},
+  hoehnyahr:{n:"Escala de Hoehn y Yahr", d:"Estadio evolutivo en Parkinson (I-V)."},
+  quebec:{n:"Escala de Quebec (QTF)", d:"Gravedad en latigazo cervical (Grado 0-IV)."}
+};
+
+const NIVELES = {
+  "C5":{dermatoma:"Cara lateral del brazo", miotoma:"Flexión de codo / abducción de hombro", reflejo:"Bicipital", clinica:"Nivel C4-C5 / tronco superior plexo braquial."},
+  "C6":{dermatoma:"Antebrazo lateral y pulgar", miotoma:"Extensión de muñeca", reflejo:"Braquiorradial", clinica:"Frecuente radiculopatía C5-C6."},
+  "C7":{dermatoma:"Dedo medio", miotoma:"Extensión de codo (tríceps)", reflejo:"Tricipital", clinica:"Radiculopatía C6-C7."},
+  "L4":{dermatoma:"Cara medial de la pierna", miotoma:"Dorsiflexión (tibial anterior)", reflejo:"Rotuliano", clinica:"Radiculopatía L3-L4."},
+  "L5":{dermatoma:"Dorso del pie y 1º dedo", miotoma:"Extensión del hallux", reflejo:"Sin reflejo específico", clinica:"Frecuente en pie caído / radiculopatía L4-L5."},
+  "S1":{dermatoma:"Borde lateral y planta del pie", miotoma:"Flexión plantar (gemelos)", reflejo:"Aquiliano", clinica:"Radiculopatía L5-S1."}
+};
+
+function actualizarNivel(k){
+  const n=NIVELES[k];
+  const el = document.getElementById('nivelInfoResult');
+  if(!el || !n) return;
+  el.innerHTML = `<div class="agente"><b>Dermatoma:</b> ${n.dermatoma}</div><div class="agente"><b>Miotoma:</b> ${n.miotoma}</div><div class="agente"><b>Reflejo:</b> ${n.reflejo}</div><div class="agente"><b>Clínica:</b> ${n.clinica}</div>`;
+}
+
+function bloqueNeuroHTML(){
+  const opciones = Object.keys(NIVELES).map(k=>`<option value="${k}">Nivel ${k}</option>`).join('');
+  return `<div class="res-block"><h3>Mapa neurológico por nivel</h3>
+    <label>Nivel a revisar</label>
+    <select onchange="actualizarNivel(this.value)">${opciones}</select>
+    <div id="nivelInfoResult" style="margin-top:10px;"></div>
+  </div>`;
+}
+
+function contraindicado(key,pac){
+  const a=AGENTES[key];
+  if(!a) return false;
+  return a.redC.some(c=>pac.comorb.includes(c)) || a.redM.some(m=>pac.medic.includes(m)) || (a.notaEmbarazo && pac.comorb.includes('embarazo'));
+}
+
+let sesionesGlobal = [];
+let sesionIndexGlobal = 0;
+let evolucionGlobal = {};
+let evolucionClaveActual = '';
+
+function construirSesiones(d, esMayor, pac, actividad){
+  const esGentil = esMayor || actividad==='sedentario';
+  const esExigente = actividad==='deportista' || actividad==='laboral_pesado';
+  const fzas = esGentil ? (d.fuerzaFunc.length?d.fuerzaFunc:d.fuerza) : d.fuerza;
+  const notaIntensidad =
+    actividad==='sedentario' ? 'Sedentario: progresión gradual enfocada en técnica y tolerancia.' :
+    actividad==='deportista' ? 'Deportista: alta carga e intensidad según tolerancia.' :
+    actividad==='laboral_pesado' ? 'Trabajo pesado: simulación de gestos laborales.' :
+    'Activo: progresión estándar.';
+
+  const rangosFase = [
+    {ini:1, fin:2, nombre:"Educación + movilidad protegida", items:d.mov.filter(Boolean)},
+    {ini:3, fin:5, nombre:"Activación y control motor", items:d.control.filter(Boolean)},
+    {ini:6, fin:8, nombre: esGentil?"Fuerza funcional adaptada":"Fuerza progresiva", items:fzas.filter(Boolean)},
+    {ini:9, fin:10, nombre:"Integración funcional / alta", items:d.funcional.filter(Boolean)}
+  ];
+  const faseFor = n => rangosFase.find(r=>n>=r.ini && n<=r.fin);
+  const todosAgentes = d.agentes||[];
+  const sesiones=[];
+  for(let n=1;n<=10;n++){
+    const f=faseFor(n);
+    const totalEnFase = f.fin-f.ini+1;
+    const posInFase = n-f.ini+1;
+    const base = f.items.length?f.items:["Ejercicio terapéutico según tolerancia"];
+    let ejercicios = base;
+    if(base.length>1){
+      const corte = (posInFase-1)%base.length;
+      ejercicios = base.slice(corte).concat(base.slice(0,corte));
+    }
+    let agenteKey=null, agenteObj=null, agenteContra=false;
+    if(todosAgentes.length){
+      agenteKey = todosAgentes[(n-1)%todosAgentes.length];
+      agenteObj = AGENTES[agenteKey];
+      agenteContra = contraindicado(agenteKey, pac);
+    }
+    sesiones.push({n, fase:f.nombre, ejercicios, agenteKey, agenteObj, agenteContra, posInFase, totalEnFase, notaIntensidad, esExigente});
+  }
+  return sesiones;
+}
+
+function normalizarPaciente(s){
+  return s.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
+}
+
+function obtenerCodigoPaciente(idPacienteVal){
+  const norm = normalizarPaciente(idPacienteVal||'');
+  if(!norm) return null;
+  let mapa={};
+  try{ mapa = JSON.parse(localStorage.getItem('kine_pacientes_ids')||'{}'); }catch(e){ mapa={}; }
+  if(mapa[norm]) return mapa[norm];
+  if(Object.values(mapa).includes(idPacienteVal.trim())) return idPacienteVal.trim();
+  const nuevoCodigo = 'PAC-' + Math.floor(1000+Math.random()*9000);
+  mapa[norm]=nuevoCodigo;
+  localStorage.setItem('kine_pacientes_ids', JSON.stringify(mapa));
+  return nuevoCodigo;
+}
+
+function actualizarCodigoPacienteVisible(){
+  const val = document.getElementById('idPaciente').value.trim();
+  const disp = document.getElementById('codigoPacienteDisplay');
+  if(!disp) return;
+  if(!val){ disp.textContent=''; return; }
+  const codigo = obtenerCodigoPaciente(val);
+  disp.textContent = `Código interno: ${codigo}`;
+}
+document.getElementById('idPaciente').addEventListener('blur', actualizarCodigoPacienteVisible);
+document.getElementById('idPaciente').addEventListener('input', actualizarCodigoPacienteVisible);
+
+(function initMatricula(){
+  const campo = document.getElementById('matriculaProfesional');
+  if(!campo) return;
+  const guardada = localStorage.getItem('kine_matricula_profesional');
+  if(guardada) campo.value = guardada;
+  campo.addEventListener('change', ()=> localStorage.setItem('kine_matricula_profesional', campo.value.trim()));
+})();
+
+function claveEvolucion(codigoPaciente, patKey){
+  return 'kine_evol::' + (codigoPaciente||'(sin nombre)') + '::' + patKey;
+}
+
+function renderSesionStep(){
+  const s = sesionesGlobal[sesionIndexGlobal];
+  const cont = document.getElementById('sesionStepBody');
+  if(!s || !cont) return;
+  const registro = evolucionGlobal[s.n];
+  const marcadosPrevios = registro ? registro.marcados : [];
+  const agenteHTML2 = s.agenteObj
+    ? `<div class="agente ${s.agenteContra?'contra':''}"><b>${s.agenteObj.n}</b><br><span class="dosis">${s.agenteContra?'<span class="warn">⚠ CONTRAINDICADO — </span>':''}${s.agenteObj.d}</span></div>`
+    : `<p style="color:var(--muted);font-size:.82rem;">Sin agente físico asignado para esta sesión.</p>`;
+  const ejerciciosHTML = s.ejercicios.map((ej,i)=>{
+    const checked = marcadosPrevios.includes(ej) ? 'checked' : '';
+    return `<div class="ejercicio-row"><input type="checkbox" data-ej="${i}" ${checked}><span>${ej}</span></div>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px;">
+      <span class="imc-pill">Sesión ${s.n} de ${sesionesGlobal.length}</span>
+      <span style="font-size:.78rem;color:var(--muted);">${s.fase}</span>
+    </div>
+    <div style="font-size:.76rem;color:${s.esExigente?'var(--orange)':'var(--muted)'};font-weight:${s.esExigente?'700':'400'};margin-bottom:8px;">📌 ${s.notaIntensidad}</div>
+    ${agenteHTML2}
+    <div style="font-size:.8rem;color:var(--muted);margin:10px 0 4px;">Ejercicios de la sesión:</div>
+    <div id="ejerciciosLista">${ejerciciosHTML}</div>
+    <button type="button" class="guardar-evol-btn" id="guardarEvolSesion">Guardar evolución</button>
+    <div class="evol-guardado" id="evolGuardadoMsg">${registro?`Guardado el ${new Date(registro.fecha).toLocaleString()}`:''}</div>
+  `;
+
+  const prev=document.getElementById('sesionPrev'), next=document.getElementById('sesionNext');
+  if(prev) prev.disabled = sesionIndexGlobal===0;
+  if(next) next.disabled = sesionIndexGlobal===sesionesGlobal.length-1;
+
+  const dots=document.getElementById('sesionDots');
+  if(dots) dots.innerHTML = sesionesGlobal.map((x,i)=>{
+    const hecha = evolucionGlobal[x.n] ? 'done' : '';
+    return `<button type="button" class="dot ${i===sesionIndexGlobal?'active':''} ${hecha}" data-i="${i}">${i+1}</button>`;
+  }).join('');
+
+  document.getElementById('guardarEvolSesion').addEventListener('click', ()=>{
+    const marcados = [...document.querySelectorAll('#ejerciciosLista input:checked')].map(chk=>s.ejercicios[+chk.dataset.ej]);
+    evolucionGlobal[s.n] = {marcados, fecha:new Date().toISOString()};
+    if(evolucionClaveActual) localStorage.setItem(evolucionClaveActual, JSON.stringify(evolucionGlobal));
+    renderResumenEvolucion();
+    renderSesionStep();
+  });
+}
+
+function renderResumenEvolucion(){
+  const cont = document.getElementById('resumenEvolucion');
+  if(!cont || !sesionesGlobal.length) return;
+  const registradas = sesionesGlobal.filter(s=>evolucionGlobal[s.n]).length;
+  const fill = document.getElementById('sesionProgressFill');
+  if(fill) fill.style.width = Math.round((registradas/sesionesGlobal.length)*100) + '%';
+  const filas = sesionesGlobal.map(s=>{
+    const reg = evolucionGlobal[s.n];
+    const total = s.ejercicios.length;
+    const hechos = reg ? reg.marcados.length : 0;
+    const fecha = reg ? new Date(reg.fecha).toLocaleDateString() : '—';
+    return `<tr><td class="n">${s.n}</td><td>${hechos}/${total} ejercicios</td><td>${fecha}</td></tr>`;
+  }).join('');
+  cont.innerHTML = `<p style="font-size:.82rem;margin:0 0 8px;"><b>${registradas} de ${sesionesGlobal.length}</b> sesiones registradas.</p>
+  <table class="sesiones"><tr><th>Sesión</th><th>Realizados</th><th>Fecha</th></tr>${filas}</table>`;
+}
+
+function attachSesionNav(){
+  document.getElementById('sesionPrev').addEventListener('click',()=>{
+    if(sesionIndexGlobal>0){ sesionIndexGlobal--; renderSesionStep(); }
+  });
+  document.getElementById('sesionNext').addEventListener('click',()=>{
+    if(sesionIndexGlobal<sesionesGlobal.length-1){ sesionIndexGlobal++; renderSesionStep(); }
+  });
+  document.getElementById('sesionDots').addEventListener('click',(e)=>{
+    const b=e.target.closest('.dot');
+    if(b){ sesionIndexGlobal=+b.dataset.i; renderSesionStep(); }
+  });
+}
+
+function calc(){
+  const edad=+document.getElementById('edad').value||0;
+  const peso=+document.getElementById('peso').value||0;
+  const altura=(+document.getElementById('altura').value||0)/100;
+  const actividad=document.getElementById('actividad').value;
+  const patKey=document.getElementById('patologia').value;
+  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
+  const comorb=marcado('comorb'), medic=marcado('medic');
+  const rojas=marcado('rojas'), amarillas=marcado('amarillas'), azules=marcado('azules'), negras=marcado('negras');
+  const imc = altura>0 ? (peso/(altura*altura)) : null;
+  const esMayor = edad>=65;
+  const pac={comorb,medic};
+
+  let html='';
+
+  if(rojas.length){
+    html+=`<div class="res-block alerta"><h3>⚠ Bandera roja detectada</h3>
+    <p>Se marcaron ${rojas.length} indicador(es) de alarma. Priorizar <b>derivación médica</b> antes de continuar.</p></div>`;
+  }
+
+  if(imc!==null){
+    let cat = imc<18.5?"bajo peso": imc<25?"normal": imc<30?"sobrepeso":"obesidad";
+    html+=`<div class="res-block"><h3>Datos antropométricos</h3><p>IMC estimado: <span class="imc-pill">${imc.toFixed(1)} kg/m² — ${cat}</span></p></div>`;
+  }
+
+  const d=DB[patKey];
+  if(!d) return;
+  html+=`<div class="res-block"><h3>${d.nombre} — test clínico</h3><p><b>${d.testN}.</b> ${d.testD}</p>
+  ${d.testExtra?`<p style="margin-top:8px;"><b>${d.testExtra.n}.</b>${d.testExtra.d}</p>`:''}
+  ${d.escala?`<p style="margin-top:8px;color:var(--muted);"><b>${ESCALAS[d.escala]?.n}:</b>${ESCALAS[d.escala]?.d}</p>`:''}</div>`;
+
+  if(COMPLICACIONES[patKey] && COMPLICACIONES[patKey].length){
+    html+=`<div class="res-block alerta"><h3>⚠️ Complicaciones a vigilar</h3><ul>${COMPLICACIONES[patKey].map(c=>`<li>${c}</li>`).join('')}</ul></div>`;
+  }
+
+  html+=`<div class="res-block"><h3>Agentes físicos</h3>${(d.agentes&&d.agentes.length)?d.agentes.map(k=>agenteHTML(k,pac)).join(''):'<p style="color:var(--muted);">Sin agentes físicos específicos.</p>'}</div>`;
+
+  sesionesGlobal = construirSesiones(d, esMayor, pac, actividad);
+  sesionIndexGlobal = 0;
+  const idPacienteVal = document.getElementById('idPaciente').value.trim();
+  const codigoPacienteActual = obtenerCodigoPaciente(idPacienteVal);
+  evolucionClaveActual = claveEvolucion(codigoPacienteActual, patKey);
+  try{ evolucionGlobal = JSON.parse(localStorage.getItem(evolucionClaveActual)||'{}'); }catch(e){ evolucionGlobal={}; }
+  
+  html+=`<div class="res-block sesion-block"><h3>💪 Plan de 10 sesiones ${esMayor?'(adaptado a adulto mayor)':''}</h3>
+    <div class="sesion-progress"><div class="sesion-progress-fill" id="sesionProgressFill" style="width:0%;"></div></div>
+    <div id="sesionStepBody"></div>
+    <div class="sesion-nav">
+      <button type="button" id="sesionPrev" class="stepbtn">← Anterior</button>
+      <div id="sesionDots" class="sesion-dots"></div>
+      <button type="button" id="sesionNext" class="stepbtn">Siguiente →</button>
+    </div>
+    <details class="acc-item" style="margin-top:14px;">
+      <summary>📈 Evolución del paciente (resumen)</summary>
+      <div id="resumenEvolucion" style="padding:0 12px 12px;"></div>
+    </details>
+  </div>`;
+
+  let psico=[];
+  if(amarillas.length) psico.push("Factores psicosociales: educar en dolor.");
+  if(azules.length) psico.push("Percepción laboral: planificar retorno gradual.");
+  if(negras.length) psico.push("Licencia / compensación: documentar evolución.");
+  if(psico.length) html+=`<div class="res-block"><h3>Factores de contexto</h3><ul>${psico.map(p=>`<li>${p}</li>`).join('')}</ul></div>`;
+
+  const esNeuro = document.getElementById('antecedenteNeuro').checked;
+  if(esNeuro) html += bloqueNeuroHTML();
+
+  document.getElementById('results').innerHTML=html;
+  attachSesionNav();
+  renderSesionStep();
+  renderResumenEvolucion();
+  if(esNeuro) actualizarNivel(Object.keys(NIVELES)[0]);
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('run').addEventListener('click',calc);
 </script>
 </body>
 </html>
