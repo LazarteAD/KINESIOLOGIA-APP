@@ -1210,7 +1210,7 @@ function pintarHistorial(){
   if(!ultimoHistorial.length){cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>';return;}
   const filas = ultimoHistorial.map(p=>{
     const f=new Date(p.fecha);
-    return `<tr><td>${f.toLocaleDateString()}</td><td><td>${esc(p.idPaciente)}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
+    return `<tr><td>${f.toLocaleDateString()}</td><td>${esc(p.idPaciente)}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
   }).join('');
   cont.innerHTML = `<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th></tr>${filas}</table>`;
 }
@@ -1801,7 +1801,6 @@ function irASesionPendiente(){
   renderSesionStep();
   return completo;
 }
-let ultimoCargado='';
 let ultimoCargado='';
 document.getElementById('idPaciente').addEventListener('change', e=>{
   const nombre=e.target.value.trim(), k=normalizarPaciente(nombre);
