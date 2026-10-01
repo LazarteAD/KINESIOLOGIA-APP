@@ -1311,7 +1311,7 @@ function generarHistoriaClinica(){
     </div>
   `;
 
-  document.getElementById('printArea').innerHTML = html;
+  document.getElementById('printArea').innerHTML = html.replace('<div class="ph-h" style="margin-top:26px;">Firma</div>', evalPrintHTML()+'<div class="ph-h" style="margin-top:26px;">Firma</div>');
   window.print();
 }
 document.getElementById('generarPdf').addEventListener('click', generarHistoriaClinica);
@@ -1746,6 +1746,7 @@ function calc(){
   renderSesionStep();
   renderResumenEvolucion();
   if(esNeuro) actualizarNivel(Object.keys(NIVELES)[0]);
+    renderEvaluacion();
     const destino = (rojas.length ? document.getElementById('results') : document.getElementById('bloqueSesion'));
   destino.scrollIntoView({behavior:'smooth', block:'start'});
 }
@@ -1851,6 +1852,410 @@ document.getElementById('btnGuardarRapido').addEventListener('click', e=>{
   setTimeout(()=>b.textContent=txt,1500);
 });
 document.getElementById('btnNuevoPaciente').addEventListener('click', limpiarFormulario);
+    // ===== MÓDULO: pacientes, diagnóstico por zona, tests y examen neurológico =====
+const NEURO_PAT=['acv','lesion_medular','parkinson','neuropatico','neuropatia_diabetica','pie_caido','plexo_braquial','cervicobraquialgia','ciatica'];
+const ESC_OPT={ashworth:['0','1','1+','2','3','4'],hoehnyahr:['I','II','III','IV','V'],asia:['A','B','C','D','E'],quebec:['0','I','II','III','IV'],daniels:['0','1','2','3','4','5']};
+const MIO=[['C5','Abd. hombro / flex. codo'],['C6','Ext. muñeca'],['C7','Ext. codo'],['C8','Flex. dedos'],['T1','Abd. dedos'],['L2','Flex. cadera'],['L3','Ext. rodilla'],['L4','Dorsiflexión'],['L5','Ext. hallux'],['S1','Flex. plantar']];
+const REF=[['Bicipital','C5'],['Estiloradial','C6'],['Tricipital','C7'],['Rotuliano','L4'],['Aquiliano','S1']];
+const SEL=(g,k,l,o)=>`<select data-g="${g}" data-k="${k}" data-l="${l}"><option value=""></option>${o.map(x=>`<option>${x}</option>`).join('')}</select>`;
+const TXT=(g,k,l,ph,r=2)=>`<textarea rows="${r}" data-g="${g}" data-k="${k}" data-l="${l}" placeholder="${esc(ph)}"></textarea>`;
+
+function cardTest(g,nom,desc,escala,custom){
+  const o=(escala&&ESC_OPT[escala])||['Positivo','Negativo','No concluyente','No realizado'];
+  return `<div data-sec="${custom?'Test adicional':esc(nom)}" style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;">`
+   +(custom?`<input type="text" data-g="${g}" data-k="n" data-l="Test" placeholder="Nombre del test (ej: Test de Thomas)">`:`<b>${esc(nom)}</b><div style="font-size:.76rem;color:var(--muted);">${esc(desc||'')}</div>`)
+   +`<label>Cómo se realizó</label>`+TXT(g,'como','Cómo se realizó','Posición del paciente, maniobra, lado evaluado...')
+   +`<label>Resultado</label>`+SEL(g,'res','Resultado',o)
+   +`<label>Observaciones</label>`+TXT(g,'obs','Observaciones','Dolor, rango, respuesta del paciente...')+`</div>`;
+}
+function neuroHTML(){
+  const g='neuro',D=['0','1','2','3','4','5'],R=['0','1+','2+','3+','4+'],A=['0','1','1+','2','3','4'],S=['Normal','Disminuida','Ausente'];
+  const gr='display:grid;grid-template-columns:1fr 66px 66px;gap:6px;align-items:center;font-size:.8rem;margin-bottom:4px;';
+  const fila=(k,l,o)=>`<div style="${gr}"><span>${l}</span>${SEL(g,k+'D',l+' D',o)}${SEL(g,k+'I',l+' I',o)}</div>`;
+  const cab=`<div style="${gr}color:var(--muted);font-size:.7rem;"><span></span><span>Der.</span><span>Izq.</span></div>`;
+  const sec=(t,b)=>`<div data-sec="${t}" style="margin-bottom:12px;"><b style="font-size:.82rem;">${t}</b>${cab}${b}</div>`;
+  return sec('Fuerza muscular (Daniels 0-5)',MIO.map(m=>fila('f'+m[0],m[0]+' '+m[1],D)).join(''))
+   +sec('Reflejos (0 a 4+)',REF.map(m=>fila('r'+m[1],m[0]+' ('+m[1]+')',R)).join('')+fila('bab','Babinski',['Ausente','Presente']))
+   +sec('Tono (Ashworth modificada)',fila('tono','Tono muscular',A))
+   +`<div data-sec="Sensibilidad y marcha"><b style="font-size:.82rem;">Sensibilidad y marcha</b>`
+   +['Tacto','Dolor','Propiocepción'].map(s=>`<label>${s}</label>${SEL(g,'s'+s,s,S)}`).join('')
+   +`<label>Zona / dermatomas alterados</label>`+TXT(g,'zona','Zona alterada','Ej: cara lateral de pierna derecha (L5)')
+   +`<label>Marcha y equilibrio</label>`+TXT(g,'marcha','Marcha y equilibrio','Tipo de marcha, ayudas, Romberg, Tinetti...')
+   +`<label>Cómo se realizó / resultados</label>`+TXT(g,'obs','Observaciones neurológicas','Maniobras, hallazgos...',3)+`</div>`;
+}
+function saveEval(){
+  if(!evolucionClaveActual) return;
+  const key=evolucionClaveActual+'::eval'; let sv={};
+  try{ sv=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  const nu={};
+  document.querySelectorAll('#evalBloque [data-g]').forEach(e=>{ (nu[e.dataset.g]=nu[e.dataset.g]||{})[e.dataset.k]=e.value; });
+  Object.keys(nu).forEach(g=>{
+    const p=sv[g]||{}, ch=Object.keys(nu[g]).some(k=>nu[g][k]!==(p[k]||''));
+    nu[g].fecha=(ch||!p.fecha)?new Date().toISOString():p.fecha; sv[g]=nu[g];
+  });
+  localStorage.setItem(key,JSON.stringify(sv));
+}
+function renderEvaluacion(){
+  const ref=document.getElementById('bloqueSesion'); if(!ref) return;
+  const old=document.getElementById('evalBloque'); if(old) old.remove();
+  const pk=document.getElementById('patologia').value, d=DB[pk]; if(!d) return;
+  let sv={}; try{ sv=JSON.parse(localStorage.getItem(evolucionClaveActual+'::eval')||'{}'); }catch(e){}
+  const neuro=NEURO_PAT.includes(pk)||document.getElementById('antecedenteNeuro').checked;
+  const xs=Object.keys(sv).filter(k=>/^x\d+$/.test(k));
+  const div=document.createElement('div'); div.className='res-block'; div.id='evalBloque'; div.style.scrollMarginTop='64px';
+  div.innerHTML=`<h3>🧪 Evaluación clínica y tests</h3>`
+   +`<details class="acc-item" open><summary>Tests clínicos</summary><div>${cardTest('principal',d.testN,d.testD,d.escala)}${d.testExtra?cardTest('extra',d.testExtra.n,d.testExtra.d):''}<div id="testsExtra">${xs.map(x=>cardTest(x,'','',null,true)).join('')}</div><button type="button" class="banco-tab" id="addTest">➕ Agregar otro test</button></div></details>`
+   +(neuro?`<details class="acc-item" open><summary>🧠 Examen neurológico</summary><div>${neuroHTML()}</div></details>`:'')
+   +`<button type="button" class="guardar-evol-btn" id="guardarEval">💾 Guardar evaluación</button> <span class="evol-guardado" id="evalMsg"></span>`;
+  ref.parentNode.insertBefore(div,ref);
+  div.querySelectorAll('[data-g]').forEach(e=>{ const v=(sv[e.dataset.g]||{})[e.dataset.k]; if(v!=null) e.value=v; });
+  div.addEventListener('change',saveEval);
+  div.querySelector('#addTest').onclick=()=>document.getElementById('testsExtra').insertAdjacentHTML('beforeend',cardTest('x'+Date.now(),'','',null,true));
+  div.querySelector('#guardarEval').onclick=()=>{ saveEval(); guardarPacienteRapido(); document.getElementById('evalMsg').textContent='Guardada ✓'; };
+  renderChips();
+}
+function evalPrintHTML(){
+  const b=document.getElementById('evalBloque'); if(!b) return '';
+  let h='';
+  b.querySelectorAll('[data-sec]').forEach(sec=>{
+    const rows=[...sec.querySelectorAll('[data-g]')].filter(e=>e.value).map(e=>`<b>${esc(e.dataset.l)}:</b> ${esc(e.value)}`);
+    if(rows.length) h+=`<div class="ph-row"><b>${esc(sec.dataset.sec)}</b><br>${rows.join(' · ')}</div>`;
+  });
+  return h?'<div class="ph-h">Evaluación clínica</div>'+h:'';
+}
+
+// ---- Diagnóstico: zona → patologías posibles ----
+function renderChips(){
+  const z=document.getElementById('zona').value, cur=document.getElementById('patologia').value, box=document.getElementById('chipsPat');
+  const chip=(t,a,on)=>`<button type="button" class="banco-tab ${on?'active':''}" ${a}>${t}</button>`;
+  box.innerHTML=`<div style="width:100%;font-size:.8rem;">Seleccionado: <b>${esc(DB[cur]?DB[cur].nombre:'—')}</b></div>`
+   +(z?chip('← Zonas','data-z=""')+(ZONAS[z]||[]).filter(k=>DB[k]).map(k=>chip(esc(DB[k].nombre),`data-p="${k}"`,k===cur)).join('')+chip('➕ Otra patología','data-nueva="1"')
+      :Object.keys(ZONAS).map(k=>chip(esc(k),`data-z="${esc(k)}"`)).join(''));
+}
+function nuevaPatZona(z){
+  const nombre=(prompt('Nombre de la nueva patología en '+z+':')||'').trim(); if(!nombre) return;
+  const testN=(prompt('Test clínico principal (opcional):')||'').trim()||'A definir';
+  let key=slugify(nombre)||'pat'; if(DB[key]) key+='_'+Date.now().toString().slice(-5);
+  const data={nombre,testN,testD:'',agentes:[],mov:[],control:[],fuerza:[],fuerzaFunc:[],funcional:[]};
+  DB[key]=data; ZONAS[z].push(key);
+  const c=leerPatologiasCustom(); c.push({key,data,zona:z}); guardarPatologiasCustom(c);
+  const o=document.createElement('option'); o.value=key; o.textContent=nombre; document.getElementById('patologia').appendChild(o);
+  PATOLOGIA_OPCIONES.push({key,nombre}); document.getElementById('patologiaBuscador').value=''; filtrarPatologias();
+  document.getElementById('patologia').value=key;
+}
+document.getElementById('zona').insertAdjacentHTML('afterend','<div id="chipsPat" class="banco-tabs" style="margin:8px 0;"></div>');
+document.getElementById('chipsPat').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const zs=document.getElementById('zona'), ps=document.getElementById('patologia');
+  if('z' in b.dataset){ zs.value=b.dataset.z; zs.dispatchEvent(new Event('change')); }
+  else if(b.dataset.p){ document.getElementById('patologiaBuscador').value=''; filtrarPatologias(); ps.value=b.dataset.p; }
+  else if(b.dataset.nueva){ nuevaPatZona(zs.value); }
+  renderChips();
+});
+document.getElementById('zona').addEventListener('change',renderChips);
+document.getElementById('patologia').addEventListener('change',renderChips);
+renderChips();
+
+// ---- Lista de pacientes con acceso a su historia ----
+function renderListaPacientes(){
+  const c=document.getElementById('listaPac'); if(!c) return;
+  const q=normalizarTexto(document.getElementById('busPac').value||''), vistos=new Set(), items=[];
+  registrosConocidos().forEach(r=>{
+    const n=(r.idPaciente||'').trim(), k=normalizarPaciente(n)+'|'+r.patologia;
+    if(!n||vistos.has(k)) return; vistos.add(k);
+    if(!q||normalizarTexto(n).includes(q)) items.push(r);
+  });
+  document.getElementById('cntPac').textContent=items.length?`(${items.length})`:'';
+  c.innerHTML=items.length?items.map((r,i)=>{
+    let h=0; try{ h=Object.keys(JSON.parse(localStorage.getItem(claveEvolucion(obtenerCodigoPaciente(r.idPaciente),r.patologia))||'{}')).length; }catch(e){}
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;"><b>${esc(r.idPaciente)}</b> <span style="color:var(--muted);font-size:.76rem;">${esc(DB[r.patologia]?DB[r.patologia].nombre:r.patologia)} · ${r.edad||'-'} años · ${h}/10 sesiones · ${new Date(r.fecha).toLocaleDateString()}</span><div style="display:flex;gap:6px;margin-top:6px;"><button type="button" class="banco-tab" data-i="${i}" data-a="s">💪 Sesión</button><button type="button" class="banco-tab" data-i="${i}" data-a="h">📋 Historia</button></div></div>`;
+  }).join(''):'<p style="color:var(--muted);font-size:.8rem;">Sin pacientes guardados.</p>';
+  c.onclick=e=>{ const b=e.target.closest('button[data-a]'); if(b) abrirPaciente(items[+b.dataset.i],b.dataset.a); };
+}
+function abrirPaciente(r,a){
+  const n=r.idPaciente;
+  ['edad','peso','altura'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('idPaciente').value=n;
+  if(!cargarPacienteGuardado(n)) return;
+  ultimoCargado=normalizarPaciente(n);
+  if(DB[r.patologia]){ document.getElementById('zona').value=''; document.getElementById('patologiaBuscador').value=''; filtrarPatologias(); document.getElementById('patologia').value=r.patologia; }
+  calc(); irASesionPendiente();
+  const ev=document.getElementById('evalBloque');
+  (a==='h'&&ev?ev:document.getElementById('bloqueSesion')).scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('dbStatus').textContent=`${n}: sesión ${sesionIndexGlobal+1} de ${sesionesGlobal.length} ✓`;
+}
+document.querySelector('#secPaciente h2').insertAdjacentHTML('afterend',`<details class="acc-item" id="detPac"><summary>📂 Mis pacientes <span class="acc-count" id="cntPac"></span></summary><div><input type="text" id="busPac" placeholder="Buscar por nombre..." style="margin-bottom:8px;"><div id="listaPac" style="max-height:320px;overflow-y:auto;"></div></div></details>`);
+document.getElementById('busPac').addEventListener('input',renderListaPacientes);
+const _alp=actualizarListaPacientes;
+actualizarListaPacientes=function(){ _alp(); renderListaPacientes(); };
+renderListaPacientes();
+(function(){
+  const b=document.createElement('button'); b.type='button'; b.className='banco-tab'; b.textContent='🧪 Evaluación';
+  b.onclick=()=>(document.getElementById('evalBloque')||document.getElementById('results')).scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('btnGuardarRapido').before(b);
+})();
+    // ===== MÓDULO: evolución del paciente + EVA =====
+let evaSel='';
+function leerNotas(){ try{ return JSON.parse(localStorage.getItem(evolucionClaveActual+'::notas')||'{}'); }catch(e){ return {}; } }
+function guardarNotas(o){ localStorage.setItem(evolucionClaveActual+'::notas',JSON.stringify(o)); }
+const evaColor=v=>v<=3?'var(--green)':v<=6?'var(--amber)':'var(--red)';
+const tieneEva=n=>n.eva!==''&&n.eva!=null;
+function listaNotas(){
+  if(!evolucionClaveActual) return [];
+  return Object.entries(leerNotas()).map(([id,n])=>Object.assign({id},n)).filter(n=>!n.del).sort((a,b)=>new Date(a.f)-new Date(b.f));
+}
+function evaChart(L){
+  const P=L.filter(tieneEva); if(!P.length) return '';
+  const W=300,H=100,m=16, x=i=>P.length>1?m+i*(W-2*m)/(P.length-1):W/2, y=v=>H-m-(v/10)*(H-2*m);
+  const grid=[0,5,10].map(v=>`<line x1="${m}" x2="${W-m}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)"/><text x="2" y="${y(v)+3}" font-size="8" style="fill:var(--muted)">${v}</text>`).join('');
+  const pts=P.map((n,i)=>`${x(i)},${y(+n.eva)}`).join(' ');
+  const dots=P.map((n,i)=>`<circle cx="${x(i)}" cy="${y(+n.eva)}" r="4" style="fill:${evaColor(+n.eva)}"><title>${new Date(n.f).toLocaleDateString()} · EVA ${n.eva}</title></circle>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:520px;margin:8px 0;">${grid}<polyline points="${pts}" style="fill:none;stroke:var(--teal);stroke-width:2"/>${dots}</svg>`;
+}
+function renderEvolucion(){
+  const ref=document.getElementById('bloqueSesion'); if(!ref||!evolucionClaveActual) return;
+  const old=document.getElementById('evolBloque'); if(old) old.remove();
+  evaSel='';
+  const L=listaNotas(), V=L.filter(tieneEva);
+  let res='';
+  if(V.length>1){
+    const a=+V[0].eva, b=+V[V.length-1].eva;
+    res=`<div style="font-size:.82rem;">EVA inicial <b>${a}</b> → actual <b>${b}</b> · ${b<a?'↓ mejora':b>a?'↑ empeora':'sin cambios'}${a>0&&a!==b?' ('+Math.round(Math.abs(a-b)/a*100)+'%)':''}</div>`;
+  }
+  const hoy=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const btns=Array.from({length:11},(_,i)=>`<button type="button" class="dot" data-eva="${i}" style="width:30px;height:30px;">${i}</button>`).join('');
+  const items=L.slice().reverse().map(n=>`<div style="border-bottom:1px dashed var(--line);padding:6px 0;font-size:.82rem;display:flex;gap:8px;align-items:flex-start;">
+    <div style="flex:1;"><b>${new Date(n.f).toLocaleDateString()}</b> · ses. ${n.ses||'-'} ${tieneEva(n)?`<span style="background:${evaColor(+n.eva)};color:#fff;border-radius:10px;padding:1px 8px;font-weight:700;">EVA ${n.eva}</span>`:''}
+    <div style="white-space:pre-wrap;">${esc(n.nota||'')}</div></div>
+    <button type="button" class="banco-tab" data-del="${n.id}" title="Borrar">✕</button></div>`).join('');
+  const div=document.createElement('div'); div.className='res-block'; div.id='evolBloque'; div.style.scrollMarginTop='64px';
+  div.innerHTML=`<h3>📈 Evolución y dolor (EVA)</h3>
+    <label>Dolor hoy — EVA <span id="evaLbl" style="color:var(--muted);font-weight:400;">(tocá un número: 0 sin dolor · 10 el peor dolor)</span></label>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">${btns}</div>
+    <label>Fecha</label><input type="date" id="evolFecha" value="${hoy}" style="max-width:180px;">
+    <label>Evolución de la sesión</label>
+    <textarea id="evolNota" rows="3" placeholder="Cómo llegó, qué se hizo, cómo respondió, indicaciones para casa, plan para la próxima sesión..."></textarea>
+    <button type="button" class="guardar-evol-btn" id="evolGuardar">➕ Registrar evolución</button> <span class="evol-guardado" id="evolMsg"></span>
+    ${evaChart(L)}${res}
+    <div id="evolLista" style="max-height:300px;overflow-y:auto;margin-top:8px;">${items||'<p style="color:var(--muted);font-size:.8rem;">Todavía no hay registros.</p>'}</div>`;
+  ref.parentNode.insertBefore(div,ref);
+
+  div.addEventListener('click',e=>{
+    const b=e.target.closest('[data-eva]');
+    if(b){
+      const v=b.dataset.eva; evaSel=(evaSel===v)?'':v;
+      div.querySelectorAll('[data-eva]').forEach(x=>{
+        const on=x.dataset.eva===evaSel;
+        x.style.background=on?evaColor(+x.dataset.eva):''; x.style.color=on?'#fff':''; x.style.borderColor=on?'transparent':'';
+      });
+      div.querySelector('#evaLbl').textContent=evaSel===''?'(tocá un número: 0 sin dolor · 10 el peor dolor)':evaSel+' / 10';
+      return;
+    }
+    const d=e.target.closest('[data-del]');
+    if(d){
+      if(!confirm('¿Borrar este registro?')) return;
+      const o=leerNotas(), n=o[d.dataset.del];
+      if(n){ n.del=true; n.fecha=new Date().toISOString(); guardarNotas(o); guardarPacienteRapido(); renderEvolucion(); }
+    }
+  });
+  div.querySelector('#evolGuardar').onclick=()=>{
+    const nota=div.querySelector('#evolNota').value.trim(), msg=div.querySelector('#evolMsg');
+    if(evaSel===''&&!nota){ msg.style.color='var(--red)'; msg.textContent='Elegí una EVA o escribí la evolución.'; return; }
+    const f=div.querySelector('#evolFecha').value, ahora=new Date().toISOString();
+    const o=leerNotas();
+    o['n'+Date.now()]={fecha:ahora, f:f?new Date(f+'T12:00:00').toISOString():ahora, eva:evaSel, nota, ses:sesionIndexGlobal+1};
+    guardarNotas(o); guardarPacienteRapido(); renderEvolucion();
+    const m2=document.getElementById('evolMsg'); if(m2) m2.textContent='Registrada ✓';
+  };
+}
+function evolPrintHTML(){
+  const L=listaNotas(); if(!L.length) return '';
+  return '<div class="ph-h">Evolución y dolor (EVA)</div><table class="ph-table"><tr><th>Fecha</th><th>Ses.</th><th>EVA</th><th>Evolución</th></tr>'
+   +L.map(n=>`<tr><td>${new Date(n.f).toLocaleDateString()}</td><td>${n.ses||'-'}</td><td>${tieneEva(n)?n.eva+'/10':'—'}</td><td>${esc(n.nota||'')}</td></tr>`).join('')+'</table>';
+}
+const _re=renderEvaluacion; renderEvaluacion=function(){ _re(); renderEvolucion(); };
+const _ep=evalPrintHTML; evalPrintHTML=function(){ return _ep()+evolPrintHTML(); };
+(function(){
+  const b=document.createElement('button'); b.type='button'; b.className='banco-tab'; b.textContent='📈 Evolución';
+  b.onclick=()=>(document.getElementById('evolBloque')||document.getElementById('results')).scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('btnGuardarRapido').before(b);
+})();
+    // ===== MÓDULO: catálogo editable en vivo (patologías, tratamiento, agentes, banco) =====
+const ORIG_DB=JSON.parse(JSON.stringify(DB)), ORIG_ZONAS=JSON.parse(JSON.stringify(ZONAS));
+const CAT_KEY='kine_cat', G=id=>document.getElementById(id);
+let unsubCat=null, ultimoCatStr='';
+
+function leerCat(){ let c={}; try{ c=JSON.parse(localStorage.getItem(CAT_KEY)||'{}'); }catch(e){} c.pats=c.pats||{}; c.ag=c.ag||{}; c.banco=c.banco||{}; return c; }
+function hayCat(c){ return Object.keys(c.pats).length||Object.keys(c.ag).length||Object.keys(c.banco).length; }
+function mezclarCat(a,b){
+  const r={pats:Object.assign({},a.pats),ag:Object.assign({},a.ag),banco:{}};
+  ['pats','ag'].forEach(t=>Object.keys(b[t]||{}).forEach(k=>{ if(!r[t][k]||new Date(b[t][k].fecha)>new Date(r[t][k].fecha)) r[t][k]=b[t][k]; }));
+  new Set([...Object.keys(a.banco),...Object.keys(b.banco||{})]).forEach(k=>{ r.banco[k]=[...new Set([...(a.banco[k]||[]),...((b.banco||{})[k]||[])])]; });
+  return r;
+}
+function aplicarEntrada(k,e){
+  if(e.del){
+    delete DB[k];
+    Object.keys(ZONAS).forEach(z=>{ ZONAS[z]=ZONAS[z].filter(x=>x!==k); });
+    PATOLOGIA_OPCIONES=PATOLOGIA_OPCIONES.filter(x=>x.key!==k); return;
+  }
+  DB[k]=e.data;
+  Object.keys(ZONAS).forEach(z=>{ if(z!==e.zona) ZONAS[z]=ZONAS[z].filter(x=>x!==k); });
+  if(e.zona){ ZONAS[e.zona]=ZONAS[e.zona]||[]; if(!ZONAS[e.zona].includes(k)) ZONAS[e.zona].push(k); }
+  const po=PATOLOGIA_OPCIONES.find(x=>x.key===k);
+  if(po) po.nombre=e.data.nombre; else PATOLOGIA_OPCIONES.push({key:k,nombre:e.data.nombre});
+}
+function aplicarCat(c){
+  Object.keys(c.pats).forEach(k=>aplicarEntrada(k,c.pats[k]));
+  Object.keys(c.ag).forEach(k=>{ if(AGENTES[k]){ AGENTES[k].d=c.ag[k].d; DEF_MIN[k]=+c.ag[k].min||DEF_MIN[k]; } });
+  Object.keys(c.banco).forEach(k=>{ if(BANCO[k]) c.banco[k].forEach(t=>{ if(!BANCO[k].items.includes(t)) BANCO[k].items.push(t); }); });
+  filtrarPatologias(); renderChips(); renderBancoLista(); renderListaPacientes();
+}
+function subirCat(c){
+  if(!firebaseListo||!usuarioActual||!hayCat(c)) return;
+  dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).set({catalogo:JSON.stringify(c)},{merge:true}).catch(()=>{});
+}
+function cambiarCat(fn){
+  const c=leerCat(); fn(c);
+  const s=JSON.stringify(c); localStorage.setItem(CAT_KEY,s); ultimoCatStr=s;
+  aplicarCat(c); subirCat(c);
+}
+function iniciarCatalogoVivo(){
+  if(!firebaseListo||!usuarioActual||unsubCat) return;
+  unsubCat=dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).onSnapshot(doc=>{
+    let nube={}; try{ const t=doc.exists&&doc.data().catalogo; nube=t?JSON.parse(t):{}; }catch(e){}
+    nube.pats=nube.pats||{}; nube.ag=nube.ag||{}; nube.banco=nube.banco||{};
+    const m=mezclarCat(leerCat(),nube), s=JSON.stringify(m);
+    if(s===ultimoCatStr) return;
+    ultimoCatStr=s; localStorage.setItem(CAT_KEY,s); aplicarCat(m);
+    if(JSON.stringify(nube)!==s) subirCat(m);
+  },()=>{});
+}
+const _auc=actualizarUICuenta;
+actualizarUICuenta=function(){ _auc(); if(usuarioActual) iniciarCatalogoVivo(); else if(unsubCat){ unsubCat(); unsubCat=null; } };
+
+// ---- Editor ----
+G('patologia').insertAdjacentHTML('afterend',`
+<details class="acc-item" id="detEditor" style="margin-top:10px;"><summary>✏️ Editar patología y tratamiento (en vivo)</summary><div>
+  <p style="font-size:.78rem;color:var(--muted);margin:0 0 6px;">Los cambios se aplican al instante, quedan en tu cuenta y se actualizan en tus otros dispositivos. Editás la patología que está seleccionada arriba.</p>
+  <label>Nombre</label><input type="text" id="edNombre">
+  <label>Zona</label><select id="edZona"></select>
+  <label>Test clínico principal</label>
+  <input type="text" id="edTestN" placeholder="Nombre del test"><input type="text" id="edTestD" placeholder="Qué evalúa" style="margin-top:4px;">
+  <label>Test complementario (opcional)</label>
+  <input type="text" id="edExtraN" placeholder="Nombre del test"><input type="text" id="edExtraD" placeholder="Qué evalúa" style="margin-top:4px;">
+  <label>Agentes físicos</label><fieldset id="edAgentes"></fieldset>
+  <label>Fase 1-2 — Movilidad protegida (un ejercicio por línea)</label><textarea id="edMov" rows="3"></textarea>
+  <label>Fase 3-5 — Activación y control motor</label><textarea id="edControl" rows="3"></textarea>
+  <label>Fase 6-8 — Fuerza (adulto estándar)</label><textarea id="edFuerza" rows="3"></textarea>
+  <label>Fase 6-8 — Fuerza funcional (adulto mayor)</label><textarea id="edFuerzaFunc" rows="3"></textarea>
+  <label>Fase 9-10 — Integración funcional / alta</label><textarea id="edFuncional" rows="3"></textarea>
+  <button type="button" class="guardar-evol-btn" id="edGuardar" style="width:100%;">💾 Guardar cambios (en vivo)</button>
+  <div style="display:flex;gap:6px;margin-top:6px;">
+    <button type="button" class="banco-tab" id="edRestaurar" style="flex:1;">↺ Restaurar original</button>
+    <button type="button" class="banco-tab" id="edEliminar" style="flex:1;display:none;border-color:var(--red);color:var(--red);">🗑 Eliminar</button>
+  </div>
+  <div id="edMsg" style="font-size:.8rem;font-weight:600;margin-top:6px;"></div>
+  <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:8px;">
+    <b style="font-size:.82rem;">💊 Dosis de agentes físicos</b>
+    <select id="edAgSel" style="margin-top:6px;"></select>
+    <input type="text" id="edAgDosis" placeholder="Dosis / parámetros" style="margin-top:4px;">
+    <input type="number" id="edAgMin" min="1" max="60" placeholder="Minutos por defecto" style="margin-top:4px;">
+    <button type="button" class="banco-tab" id="edAgGuardar" style="margin-top:6px;">Guardar dosis</button>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">Las contraindicaciones no se editan, por seguridad.</div>
+  </div>
+  <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:8px;">
+    <b style="font-size:.82rem;">🏋️ Agregar ejercicio al banco general</b>
+    <select id="edBcCat" style="margin-top:6px;"></select>
+    <input type="text" id="edBcTxt" placeholder="Ej: Remo unilateral con banda, 3x12" style="margin-top:4px;">
+    <button type="button" class="banco-tab" id="edBcAdd" style="margin-top:6px;">➕ Agregar al banco</button>
+  </div>
+</div></details>`);
+G('edAgSel').innerHTML=Object.keys(AGENTES).map(k=>`<option value="${k}">${AGENTES[k].n}</option>`).join('');
+G('edBcCat').innerHTML=Object.keys(BANCO).map(k=>`<option value="${k}">${BANCO[k].nombre}</option>`).join('');
+const edMsg=(t,ok=true)=>{ const m=G('edMsg'); m.style.color=ok?'var(--green)':'var(--red)'; m.textContent=t; setTimeout(()=>{ m.textContent=''; },3000); };
+function cargarAgDosis(){ const k=G('edAgSel').value; G('edAgDosis').value=AGENTES[k].d; G('edAgMin').value=DEF_MIN[k]||15; }
+function cargarEditor(){
+  const k=G('patologia').value, d=DB[k]; if(!d) return;
+  const L=a=>(a||[]).filter(Boolean).join('\n');
+  G('edNombre').value=d.nombre; G('edTestN').value=d.testN||''; G('edTestD').value=d.testD||'';
+  G('edExtraN').value=d.testExtra?d.testExtra.n:''; G('edExtraD').value=d.testExtra?d.testExtra.d:'';
+  G('edMov').value=L(d.mov); G('edControl').value=L(d.control); G('edFuerza').value=L(d.fuerza);
+  G('edFuerzaFunc').value=L(d.fuerzaFunc); G('edFuncional').value=L(d.funcional);
+  const z=Object.keys(ZONAS).find(x=>ZONAS[x].includes(k))||'';
+  G('edZona').innerHTML='<option value="">— sin zona —</option>'+Object.keys(ZONAS).map(x=>`<option ${x===z?'selected':''}>${esc(x)}</option>`).join('');
+  G('edAgentes').innerHTML=Object.keys(AGENTES).map(a=>`<div class="check-row"><input type="checkbox" value="${a}" ${(d.agentes||[]).includes(a)?'checked':''}><span>${AGENTES[a].n}</span></div>`).join('');
+  const c=leerCat(); G('edEliminar').style.display=(c.pats[k]&&c.pats[k].nueva&&!c.pats[k].del)?'block':'none';
+  cargarAgDosis();
+}
+function aplicarCambioAlPlan(k){
+  if(!sesionesGlobal.length||!evolucionClaveActual||!evolucionClaveActual.endsWith('::'+k)) return;
+  if(!confirm('¿Aplicar los cambios al plan del paciente actual?\n(Se reinician ejercicios y agentes de las sesiones aún no registradas)')) return;
+  try{
+    const kk=evolucionClaveActual+'::plan', o=JSON.parse(localStorage.getItem(kk)||'{}');
+    Object.keys(o).forEach(n=>{ if(!evolucionGlobal[n]) delete o[n]; });
+    localStorage.setItem(kk,JSON.stringify(o));
+  }catch(e){}
+  const y=window.scrollY; calc(); irASesionPendiente(); window.scrollTo(0,y);
+}
+G('detEditor').addEventListener('toggle',function(){ if(this.open) cargarEditor(); });
+G('patologia').addEventListener('change',()=>{ if(G('detEditor').open) cargarEditor(); });
+G('edAgSel').addEventListener('change',cargarAgDosis);
+const _rc=renderChips;
+renderChips=function(){ _rc(); const d=G('detEditor'); if(d&&d.open&&!d.contains(document.activeElement)) cargarEditor(); };
+
+G('edGuardar').onclick=()=>{
+  const k=G('patologia').value; if(!DB[k]) return;
+  const v=id=>G(id).value.trim(), L=id=>v(id).split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!v('edNombre')){ edMsg('Escribí el nombre de la patología.',false); return; }
+  const data=Object.assign({},DB[k],{
+    nombre:v('edNombre'), testN:v('edTestN')||'A definir', testD:v('edTestD'),
+    agentes:[...document.querySelectorAll('#edAgentes input:checked')].map(i=>i.value),
+    mov:L('edMov'), control:L('edControl'), fuerza:L('edFuerza'), fuerzaFunc:L('edFuerzaFunc'), funcional:L('edFuncional')
+  });
+  if(v('edExtraN')) data.testExtra={n:v('edExtraN'),d:v('edExtraD')}; else delete data.testExtra;
+  const zona=G('edZona').value;
+  cambiarCat(c=>{ c.pats[k]={data,zona,nueva:!!(c.pats[k]&&c.pats[k].nueva),fecha:new Date().toISOString()}; });
+  edMsg('Guardado en vivo ✓');
+  aplicarCambioAlPlan(k);
+};
+G('edRestaurar').onclick=()=>{
+  const k=G('patologia').value;
+  if(!ORIG_DB[k]){ edMsg('Esta patología no tiene versión original.',false); return; }
+  if(!confirm('¿Volver a la versión original de esta patología?')) return;
+  const zona=Object.keys(ORIG_ZONAS).find(z=>ORIG_ZONAS[z].includes(k))||'';
+  cambiarCat(c=>{ c.pats[k]={data:JSON.parse(JSON.stringify(ORIG_DB[k])),zona,nueva:false,fecha:new Date().toISOString()}; });
+  cargarEditor(); edMsg('Versión original restaurada ✓'); aplicarCambioAlPlan(k);
+};
+G('edEliminar').onclick=()=>{
+  const k=G('patologia').value;
+  if(!confirm('¿Eliminar esta patología que creaste?')) return;
+  cambiarCat(c=>{ c.pats[k]={del:true,nueva:true,fecha:new Date().toISOString()}; });
+  G('detEditor').open=false;
+};
+G('edAgGuardar').onclick=()=>{
+  const k=G('edAgSel').value;
+  cambiarCat(c=>{ c.ag[k]={d:G('edAgDosis').value.trim()||AGENTES[k].d,min:+G('edAgMin').value||15,fecha:new Date().toISOString()}; });
+  edMsg('Dosis actualizada ✓');
+};
+G('edBcAdd').onclick=()=>{
+  const k=G('edBcCat').value, t=G('edBcTxt').value.trim(); if(!t) return;
+  cambiarCat(c=>{ c.banco[k]=c.banco[k]||[]; if(!c.banco[k].includes(t)) c.banco[k].push(t); });
+  G('edBcTxt').value=''; edMsg('Ejercicio agregado al banco ✓');
+};
+
+// "➕ Otra patología" ahora crea la patología en la nube y abre el editor
+nuevaPatZona=function(z){
+  const nombre=(prompt('Nombre de la nueva patología en '+z+':')||'').trim(); if(!nombre) return;
+  let k=slugify(nombre)||'pat'; if(DB[k]) k+='_'+Date.now().toString().slice(-5);
+  const data={nombre,testN:'A definir',testD:'',agentes:[],mov:[],control:[],fuerza:[],fuerzaFunc:[],funcional:[]};
+  cambiarCat(c=>{ c.pats[k]={data,zona:z,nueva:true,fecha:new Date().toISOString()}; });
+  G('patologiaBuscador').value=''; filtrarPatologias(); G('patologia').value=k; renderChips();
+  const det=G('detEditor'); det.open=true; cargarEditor(); det.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+aplicarCat(leerCat());
+if(usuarioActual) iniciarCatalogoVivo();
 </script>
 </body>
 </html>
