@@ -1054,6 +1054,7 @@ function initFirebase(){
   try{
     firebase.initializeApp(FIREBASE_CONFIG);
     dbFirestore = firebase.firestore();
+    try{ dbFirestore.enablePersistence({synchronizeTabs:true}).catch(()=>{}); }catch(e){}
     firebaseListo = true;
     firebase.auth().onAuthStateChanged(user=>{
       usuarioActual = user;
@@ -1122,16 +1123,39 @@ document.getElementById('btnCrearCuenta').addEventListener('click', async ()=>{
 });
 
 document.getElementById('btnCerrarSesion').addEventListener('click', async ()=>{
-  if(firebaseListo && firebase.auth()) await firebase.auth().signOut();
+  if(firebaseListo && firebase.auth()){
+    await firebase.auth().signOut();
+    Object.keys(localStorage).filter(k=>k.startsWith('kine_evol::')||k==='kine_pacientes'||k==='kine_pacientes_ids').forEach(k=>localStorage.removeItem(k));
+    ultimoHistorial=[]; limpiarFormulario(); pintarHistorial();
+  }
 });
-
+function recolectarExtras(){
+  const a=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k.startsWith('kine_evol::')||k==='kine_pacientes_ids') a.push({k, v:localStorage.getItem(k)});
+  }
+  return a;
+}
+function mezclarExtra(k,v){
+  try{
+    const loc=JSON.parse(localStorage.getItem(k)||'null'), nube=JSON.parse(v);
+    if(k==='kine_pacientes_ids'){ localStorage.setItem(k, JSON.stringify(Object.assign({},loc||{},nube))); return; }
+    if(!loc){ localStorage.setItem(k,v); return; }
+    if(k.endsWith('::plan')) return;
+    Object.keys(nube).forEach(n=>{ if(!loc[n]||new Date(nube[n].fecha)>new Date(loc[n].fecha)) loc[n]=nube[n]; });
+    localStorage.setItem(k, JSON.stringify(loc));
+  }catch(e){}
+}
 async function cargarPacientesDesdeNube(){
   const status=document.getElementById('dbStatus');
   if(!firebaseListo || !usuarioActual) return;
   status.textContent='Sincronizando con la nube…';
   try{
     const doc = await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).get();
-    ultimoHistorial = doc.exists ? (doc.data().registros||[]) : [];
+    const dat = doc.exists ? doc.data() : {};
+    ultimoHistorial = dat.registros||[];
+    (dat.extras||[]).forEach(x=>mezclarExtra(x.k,x.v));
     status.textContent = `Conectado ✓ (${ultimoHistorial.length} sesiones sincronizadas).`;
     pintarHistorial();
   }catch(e){
@@ -1142,42 +1166,43 @@ async function cargarPacientesDesdeNube(){
 
 async function guardarPacientesEnNube(arr){
   if(!firebaseListo || !usuarioActual) return false;
-  await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).set({registros:arr});
+  await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).set({registros:arr, extras:recolectarExtras()}, {merge:true});
   return true;
 }
 
 function recolectarEstado(){
+  const m=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
   return {
-    idPaciente: document.getElementById('idPaciente').value||'(sin nombre)',
+    idPaciente: document.getElementById('idPaciente').value.trim(),
     edad: document.getElementById('edad').value,
     peso: document.getElementById('peso').value,
     altura: document.getElementById('altura').value,
     actividad: document.getElementById('actividad').value,
     patologia: document.getElementById('patologia').value,
-    comorb:[...document.querySelectorAll('#comorb input:checked')].map(i=>i.value),
-    medic:[...document.querySelectorAll('#medic input:checked')].map(i=>i.value),
+    comorb:m('comorb').filter(v=>v!=='on'), medic:m('medic'),
+    rojas:m('rojas'), amarillas:m('amarillas'), azules:m('azules'), negras:m('negras'),
+    neuro:document.getElementById('antecedenteNeuro').checked,
+    diabetesTipo:document.getElementById('diabetesTipo').value,
+    autoinmuneCual:document.getElementById('autoinmuneCual').value,
     fecha: new Date().toISOString()
   };
 }
 
-document.getElementById('guardar').addEventListener('click', async ()=>{
+async function guardarPacienteRapido(){
   const status=document.getElementById('dbStatus');
-  const registro = recolectarEstado();
-  const arr=leerPacientesLS(); arr.unshift(registro); escribirPacientesLS(arr);
-  ultimoHistorial = arr;
-  pintarHistorial();
+  const registro=recolectarEstado();
+  if(!registro.idPaciente){ status.textContent='Escribí el nombre del paciente antes de guardar.'; return; }
+  const k=normalizarPaciente(registro.idPaciente);
+  const base=ultimoHistorial.length?ultimoHistorial:leerPacientesLS();
+  const arr=[registro].concat(base.filter(r=>!(normalizarPaciente(r.idPaciente||'')===k && r.patologia===registro.patologia)));
+  escribirPacientesLS(arr); ultimoHistorial=arr; pintarHistorial();
   if(firebaseListo && usuarioActual){
-    try{
-      await guardarPacientesEnNube(arr);
-      status.textContent='Sesión guardada y sincronizada ✓';
-    }catch(e){
-      status.textContent='Guardada localmente (falló sincronización).';
-    }
-  } else {
-    status.textContent='Sesión guardada en navegador local ✓';
-  }
-});
-
+    try{ await guardarPacientesEnNube(arr); status.textContent='Guardado y sincronizado ✓'; }
+    catch(e){ status.textContent='Guardado local (falló la sincronización).'; }
+  } else status.textContent='Guardado en este navegador ✓';
+}
+document.getElementById('guardar').addEventListener('click', guardarPacienteRapido);
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function pintarHistorial(){
   const cont=document.getElementById('historial');
   if(!cont) return;
@@ -1185,7 +1210,7 @@ function pintarHistorial(){
   if(!ultimoHistorial.length){cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>';return;}
   const filas = ultimoHistorial.map(p=>{
     const f=new Date(p.fecha);
-    return `<tr><td>${f.toLocaleDateString()}</td><td>${p.idPaciente}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
+    return `<tr><td>${f.toLocaleDateString()}</td><td><td>${esc(p.idPaciente)}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
   }).join('');
   cont.innerHTML = `<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th></tr>${filas}</table>`;
 }
@@ -1235,7 +1260,7 @@ function generarHistoriaClinica(){
     <div class="ph-sub">${matricula||'Lic. Adrián Lazarte'} · Emitido el ${new Date().toLocaleDateString()}</div>
 
     <div class="ph-h">Datos del paciente</div>
-    <div class="ph-row"><b>Paciente / HC:</b> ${idPacienteVal} ${codigoPacienteActual?`&nbsp; <b>Código:</b> ${codigoPacienteActual}`:''}</div>
+    <div class="ph-row"><b>Paciente / HC:</b> ${esc(idPacienteVal)} ${codigoPacienteActual?`&nbsp; <b>Código:</b> ${codigoPacienteActual}`:''}</div>
     <div class="ph-row"><b>Edad:</b> ${edad||'—'} años &nbsp; <b>Peso:</b> ${peso||'—'} kg &nbsp; <b>Altura:</b> ${alturaCm||'—'} cm ${imc!==null?`&nbsp; <b>IMC:</b> ${imc.toFixed(1)} kg/m²`:''}</div>
     <div class="ph-row"><b>Actividad:</b> ${actividadTxt}</div>
 
@@ -1536,7 +1561,13 @@ function renderSesionStep(){
       <button type="button" id="agAdd" class="guardar-evol-btn" style="margin-top:0;">+ Agente</button>
     </div>
 
-    <div style="font-size:.8rem;color:var(--muted);margin:14px 0 4px;">Ejercicios de la sesión:</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin:14px 0 4px;">
+      <span style="font-size:.8rem;color:var(--muted);">Ejercicios de la sesión:</span>
+      <span style="display:flex;gap:6px;">
+        ${s.n>1?'<button type="button" id="copiarAnterior" class="banco-tab">↩ Copiar sesión anterior</button>':''}
+        <button type="button" id="marcarTodos" class="banco-tab">✓ Todos realizados</button>
+      </span>
+    </div>
     <div id="ejerciciosLista">${ejerciciosHTML}</div>
 
     <details class="acc-item" style="margin-top:10px;" ${s.bancoAbierto?'open':''}>
@@ -1590,14 +1621,23 @@ function renderSesionStep(){
     if(s.ejercicios.includes(txt)){ b.classList.add('added'); return; }
     capturarMarcados(s); s.ejercicios.push(txt); guardarPlan(); s.bancoAbierto=true; renderSesionStep();
   }));
-
+  document.getElementById('marcarTodos').addEventListener('click',()=>{
+    cont.querySelectorAll('#ejerciciosLista input[type=checkbox]').forEach(c=>c.checked=true);
+  });
+  const ca=document.getElementById('copiarAnterior');
+  if(ca) ca.addEventListener('click',()=>{
+    const p=sesionesGlobal[sesionIndexGlobal-1];
+    s.ejercicios=[...p.ejercicios]; s.agentesSel=p.agentesSel.map(a=>({...a})); s.minEj={...p.minEj}; s.tmpMarc=null;
+    guardarPlan(); renderSesionStep();
+  });
   // Guardar evolución
   document.getElementById('guardarEvolSesion').addEventListener('click', ()=>{
     const marcados = [...document.querySelectorAll('#ejerciciosLista input[type=checkbox]:checked')].map(chk=>s.ejercicios[+chk.dataset.ej]);
-    evolucionGlobal[s.n] = {marcados, fecha:new Date().toISOString()};
+    evolucionGlobal[s.n] = {marcados, fecha:new Date().toISOString(), min:minutosSesion(s)};
     s.tmpMarc = null;
     if(evolucionClaveActual) localStorage.setItem(evolucionClaveActual, JSON.stringify(evolucionGlobal));
-    guardarPlan();
+      guardarPlan();
+      guardarPacienteRapido();
     renderResumenEvolucion();
     renderSesionStep();
   });
@@ -1738,13 +1778,16 @@ function cargarPacienteGuardado(nombre){
   document.getElementById('patologiaBuscador').value='';
   filtrarPatologias();
   if(DB[r.patologia]) document.getElementById('patologia').value=r.patologia;
-  [['comorb',r.comorb],['medic',r.medic]].forEach(([id,arr])=>{
+  [['comorb',r.comorb],['medic',r.medic],['rojas',r.rojas],['amarillas',r.amarillas],['azules',r.azules],['negras',r.negras]].forEach(([id,arr])=>{
     document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(c=>{
       if(c.id==='antecedenteNeuro') return;
       c.checked=(arr||[]).includes(c.value);
     });
   });
+  document.getElementById('antecedenteNeuro').checked = !!r.neuro || (r.comorb||[]).includes('on');
   ['chkDiabetes','chkAutoinmune'].forEach(id=>document.getElementById(id).dispatchEvent(new Event('change',{bubbles:true})));
+  document.getElementById('diabetesTipo').value=r.diabetesTipo||'';
+  document.getElementById('autoinmuneCual').value=r.autoinmuneCual||'';
   actualizarContadoresAcordeon();
   actualizarCodigoPacienteVisible();
   return true;
@@ -1758,12 +1801,20 @@ function irASesionPendiente(){
   renderSesionStep();
   return completo;
 }
+let ultimoCargado='';
+let ultimoCargado='';
 document.getElementById('idPaciente').addEventListener('change', e=>{
-  const nombre = e.target.value.trim();
+  const nombre=e.target.value.trim(), k=normalizarPaciente(nombre);
+  if(!k) return;
+  if(ultimoCargado && k!==ultimoCargado){
+    limpiarFormulario();
+    document.getElementById('idPaciente').value=nombre;
+  }
   const vacio=!['edad','peso','altura'].some(id=>document.getElementById(id).value);
   if(vacio && cargarPacienteGuardado(nombre)){
+    ultimoCargado=k;
     calc();
-    const completo = irASesionPendiente();
+    const completo=irASesionPendiente();
     document.getElementById('dbStatus').textContent = completo
       ? `${nombre}: las 10 sesiones ya están registradas ✓`
       : `${nombre}: continuás en la sesión ${sesionIndexGlobal+1} de ${sesionesGlobal.length} ✓`;
@@ -1783,7 +1834,7 @@ function limpiarFormulario(){
   document.getElementById('codigoPacienteDisplay').textContent='';
   document.getElementById('dbStatus').textContent='';
   document.getElementById('results').innerHTML='';
-  sesionesGlobal=[]; sesionIndexGlobal=0; evolucionGlobal={}; evolucionClaveActual='';
+  sesionesGlobal=[]; sesionIndexGlobal=0; evolucionGlobal={}; evolucionClaveActual=''; ultimoCargado='';
   const det=document.getElementById('detAntecedentes'); if(det) det.open=false;
   window.scrollTo({top:0,behavior:'smooth'});
   document.getElementById('idPaciente').focus({preventScroll:true});
