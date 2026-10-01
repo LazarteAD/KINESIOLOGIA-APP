@@ -191,7 +191,7 @@
 
   <section class="card acc-pink">
     <h2>🔐 Tu cuenta (guarda tus pacientes en la nube)</h2>
-    <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 6px;">Creá tu cuenta una vez — tus pacientes quedan guardados solo para vos, accesibles desde cualquier dispositivo. Si no iniciás sesión, igual podés usar la app: se guarda solo en este navegador.</p>
+    <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 6px;">Creá tu cuenta una vez — tus pacientes quedan guardados solo para vos, accesibles desde cualquier dispositivo. Necesitás iniciar sesión para usar la app. Los datos también quedan guardados en este dispositivo para trabajar sin conexión.</p>
     <div id="cuentaLoggedOut">
       <label>Email</label>
       <input type="text" id="cuentaEmail" placeholder="tu@email.com">
@@ -201,6 +201,7 @@
         <button type="button" id="btnIngresar" style="flex:1;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:linear-gradient(120deg,var(--purple),var(--pink));color:#fff;border:none;border-radius:8px;cursor:pointer;">Ingresar</button>
         <button type="button" id="btnCrearCuenta" style="flex:1;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;">Crear cuenta</button>
       </div>
+      <button type="button" id="btnOlvide" style="margin-top:8px;background:none;border:none;color:var(--blue);font-size:.8rem;cursor:pointer;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
     </div>
     <div id="cuentaLoggedIn" style="display:none;">
       <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.88rem;">Conectado como <b id="cuentaEmailActual"></b></p>
@@ -239,10 +240,22 @@
     <div id="codigoPacienteDisplay" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:4px;"></div>
     <div id="dbStatus" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:2px;"></div>
     <div class="grid3" style="margin-top:8px;">
-      <div><label>Edad (años)</label><input type="number" id="edad" min="0" max="120"></div>
-      <div><label>Peso (kg)</label><input type="number" id="peso" min="0"></div>
-      <div><label>Altura (cm)</label><input type="number" id="altura" min="0"></div>
-    </div>
+      <div><label>Edad (años)</label><input type="number" id="edad" min="0" max="120"inputmode="numeric"></div>
+      <div><label>Peso (kg)</label><input type="number" id="peso" min="0"inputmode="numeric"></div>
+      <div><label>Altura (cm)</label><input type="number" id="altura" min="0"inputmode="numeric"></div>
+       </div>
+      <div class="grid3" style="margin-top:4px;">
+  <div><label for="fechaNac">Fecha de nacimiento</label><input type="date" id="fechaNac"></div>
+  <div><label for="sexo">Sexo</label>
+    <select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro / no informa</option></select></div>
+  <div><label for="lateralidad">Lado afectado</label>
+    <select id="lateralidad"><option value="">—</option><option>Derecho</option><option>Izquierdo</option><option>Bilateral</option><option>Central / no aplica</option></select></div>
+</div>
+<div class="grid3" style="margin-top:4px;">
+  <div><label for="obraSocial">Obra social / prepaga</label><input type="text" id="obraSocial"></div>
+  <div><label for="nAfiliado">N.º de afiliado</label><input type="text" id="nAfiliado"></div>
+  <div><label for="sesionesAut">Sesiones autorizadas</label><input type="number" id="sesionesAut" min="0" inputmode="numeric"></div>
+</div>
     <label>Tipo de vida / actividad</label>
     <select id="actividad">
       <option value="sedentario">Sedentario</option>
@@ -1121,13 +1134,35 @@ document.getElementById('btnCrearCuenta').addEventListener('click', async ()=>{
     status.textContent='';
   }catch(e){ status.textContent='Error: '+traducirErrorFirebase(e.code); }
 });
-
+document.getElementById('btnOlvide').addEventListener('click', async ()=>{
+  const status=document.getElementById('cuentaStatus');
+  if(!firebaseListo){ status.textContent='Firebase no está listo.'; return; }
+  const email=document.getElementById('cuentaEmail').value.trim();
+  if(!email){ status.textContent='Escribí tu email arriba y volvé a tocar el enlace.'; return; }
+  try{
+    await firebase.auth().sendPasswordResetEmail(email);
+    status.textContent='Te enviamos un correo para restablecer la contraseña (revisá spam).';
+  }catch(e){ status.textContent='Error: '+traducirErrorFirebase(e.code); }
+});
 document.getElementById('btnCerrarSesion').addEventListener('click', async ()=>{
-  if(firebaseListo && firebase.auth()){
-    await firebase.auth().signOut();
-    Object.keys(localStorage).filter(k=>k.startsWith('kine_evol::')||k==='kine_pacientes'||k==='kine_pacientes_ids').forEach(k=>localStorage.removeItem(k));
-    ultimoHistorial=[]; limpiarFormulario(); pintarHistorial();
+  if(!(firebaseListo && firebase.auth())) return;
+  const status=document.getElementById('cuentaStatus');
+  status.textContent='Sincronizando antes de salir…';
+  try{
+    await Promise.race([
+      dbFirestore.waitForPendingWrites(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),6000))
+    ]);
+  }catch(e){
+    if(!confirm('Hay cambios que todavía no se sincronizaron (¿sin conexión?). Si cerrás sesión ahora se pueden perder. ¿Cerrar igual?')){
+      status.textContent=''; return;
+    }
   }
+  await firebase.auth().signOut();
+  const propias=k=>k.startsWith('kine_evol::')||['kine_pacientes','kine_pacientes_ids','kine_cat','kine_patologias_custom','kine_matricula_profesional'].includes(k);
+  Object.keys(localStorage).filter(propias).forEach(k=>localStorage.removeItem(k));
+  try{ await dbFirestore.terminate(); await dbFirestore.clearPersistence(); }catch(e){}
+  location.reload();
 });
 function recolectarExtras(){
   const a=[];
@@ -1147,63 +1182,159 @@ function mezclarExtra(k,v){
     localStorage.setItem(k, JSON.stringify(loc));
   }catch(e){}
 }
+function colPac(){
+  return dbFirestore.collection('users').doc(usuarioActual.uid).collection('pacientes');
+}
+function conTimeout(p,ms=4000){
+  return Promise.race([p,new Promise(r=>setTimeout(()=>r('pendiente'),ms))]);
+}
+function extrasDePaciente(code){
+  const pref='kine_evol::'+code+'::', a=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k.startsWith(pref)) a.push({k,v:localStorage.getItem(k)});
+  }
+  return a;
+}
+// Guarda SOLO el documento del paciente indicado. Devuelve 'ok' | 'pendiente' | 'local'
+async function guardarPacienteNube(nombre,opc={}){
+  if(!firebaseListo||!usuarioActual) return 'local';
+  const code=obtenerCodigoPaciente(nombre);
+  if(!code) return 'local';
+  const ref=colPac().doc(code);
+  const codigoDe=r=>obtenerCodigoPaciente(r.idPaciente||'',false);
+  const regs=ultimoHistorial.filter(r=>codigoDe(r)===code);
+  if(!opc.sinMerge){
+    // Evita pisar lo que otro dispositivo haya guardado de este paciente
+    try{
+      const s=await ref.get();
+      if(s.exists){
+        const x=s.data();
+        (x.registros||[]).forEach(r=>{
+          const existe=regs.some(l=>normalizarPaciente(l.idPaciente||'')===normalizarPaciente(r.idPaciente||'') && l.patologia===r.patologia);
+          if(!existe) regs.push(r);
+        });
+        (x.extras||[]).forEach(e=>mezclarExtra(e.k,e.v));
+      }
+    }catch(e){}
+  }
+  const mapa=leerMapaIds(), idMap={};
+  Object.keys(mapa).forEach(n=>{ if(mapa[n]===code) idMap[n]=code; });
+  const op = regs.length
+    ? ref.set({code,nombre,idMap,registros:regs,extras:extrasDePaciente(code),actualizado:new Date().toISOString()})
+    : ref.delete();
+  const r=await conTimeout(op);
+  return r==='pendiente'?'pendiente':'ok';
+}
+// Migra el documento único anterior (pacientes_historial/{uid}) a un documento por paciente
+async function migrarLegacy(){
+  const ref=dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid);
+  const doc=await ref.get();
+  if(!doc.exists) return;
+  const dat=doc.data(), regs=dat.registros||[];
+  if(!regs.length) return;
+  (dat.extras||[]).forEach(x=>mezclarExtra(x.k,x.v));
+  ultimoHistorial=regs;
+  const vistos=new Set();
+  let todoOk=true;
+  for(const r of regs){
+    const code=obtenerCodigoPaciente(r.idPaciente||'');
+    if(!code||vistos.has(code)) continue;
+    vistos.add(code);
+    const res=await guardarPacienteNube(r.idPaciente,{sinMerge:true});
+    if(res!=='ok') todoOk=false;
+  }
+  // Solo se borran los datos viejos si TODO se migró con confirmación del servidor
+  if(todoOk){
+    await ref.update({
+      registros:firebase.firestore.FieldValue.delete(),
+      extras:firebase.firestore.FieldValue.delete()
+    });
+  }
+}
 async function cargarPacientesDesdeNube(){
   const status=document.getElementById('dbStatus');
-  if(!firebaseListo || !usuarioActual) return;
+  if(!firebaseListo||!usuarioActual) return;
   status.textContent='Sincronizando con la nube…';
   try{
-    const doc = await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).get();
-    const dat = doc.exists ? doc.data() : {};
-    ultimoHistorial = dat.registros||[];
-    (dat.extras||[]).forEach(x=>mezclarExtra(x.k,x.v));
-    status.textContent = `Conectado ✓ (${ultimoHistorial.length} sesiones sincronizadas).`;
+    let snap=await colPac().get();
+    if(snap.empty){ await migrarLegacy(); snap=await colPac().get(); }
+    const mapa=leerMapaIds(), nube=[];
+    snap.forEach(d=>{
+      const x=d.data();
+      (x.registros||[]).forEach(r=>nube.push(r));
+      (x.extras||[]).forEach(e=>mezclarExtra(e.k,e.v));
+      Object.assign(mapa,x.idMap||{});
+    });
+    localStorage.setItem('kine_pacientes_ids',JSON.stringify(mapa));
+    // Une lo local con lo de la nube: gana el registro más nuevo de cada paciente+patología
+    const mez=new Map();
+    leerPacientesLS().concat(nube).forEach(r=>{
+      const k=normalizarPaciente(r.idPaciente||'')+'|'+r.patologia, p=mez.get(k);
+      if(!p||new Date(r.fecha)>new Date(p.fecha)) mez.set(k,r);
+    });
+    ultimoHistorial=[...mez.values()].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+    escribirPacientesLS(ultimoHistorial);
+    const info=limpiarCodigosHuerfanos();
     pintarHistorial();
+    status.textContent=`Conectado ✓ (${ultimoHistorial.length} registros).`;
+    if(info.dup.length) status.textContent+=' ⚠ Códigos repetidos en: '+info.dup.join(' / ')+' — revisá sus evoluciones.';
   }catch(e){
+    console.error(e);
     status.textContent='Error al sincronizar con la nube; cargando historial local.';
     cargarHistorial();
   }
 }
-
-async function guardarPacientesEnNube(arr){
-  if(!firebaseListo || !usuarioActual) return false;
-  await dbFirestore.collection('pacientes_historial').doc(usuarioActual.uid).set({registros:arr, extras:recolectarExtras()}, {merge:true});
-  return true;
-}
-
-function recolectarEstado(){
-  const m=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
-  return {
-    idPaciente: document.getElementById('idPaciente').value.trim(),
-    edad: document.getElementById('edad').value,
-    peso: document.getElementById('peso').value,
-    altura: document.getElementById('altura').value,
-    actividad: document.getElementById('actividad').value,
-    patologia: document.getElementById('patologia').value,
-    comorb:m('comorb').filter(v=>v!=='on'), medic:m('medic'),
-    rojas:m('rojas'), amarillas:m('amarillas'), azules:m('azules'), negras:m('negras'),
-    neuro:document.getElementById('antecedenteNeuro').checked,
-    diabetesTipo:document.getElementById('diabetesTipo').value,
-    autoinmuneCual:document.getElementById('autoinmuneCual').value,
-    fecha: new Date().toISOString()
-  };
-}
-
-async function guardarPacienteRapido(){
-  const status=document.getElementById('dbStatus');
-  const registro=recolectarEstado();
-  if(!registro.idPaciente){ status.textContent='Escribí el nombre del paciente antes de guardar.'; return; }
-  const k=normalizarPaciente(registro.idPaciente);
-  const base=ultimoHistorial.length?ultimoHistorial:leerPacientesLS();
-  const arr=[registro].concat(base.filter(r=>!(normalizarPaciente(r.idPaciente||'')===k && r.patologia===registro.patologia)));
-  escribirPacientesLS(arr); ultimoHistorial=arr; pintarHistorial();
-  if(firebaseListo && usuarioActual){
-    try{ await guardarPacientesEnNube(arr); status.textContent='Guardado y sincronizado ✓'; }
-    catch(e){ status.textContent='Guardado local (falló la sincronización).'; }
-  } else status.textContent='Guardado en este navegador ✓';
-}
 document.getElementById('guardar').addEventListener('click', guardarPacienteRapido);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let historialLimite=25;
 function pintarHistorial(){
+  const cont=document.getElementById('historial');
+  if(!cont) return;
+  actualizarListaPacientes();
+  if(!ultimoHistorial.length){ cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>'; return; }
+  const ord=[...ultimoHistorial].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const filas=ord.slice(0,historialLimite).map((p,i)=>{
+    const f=new Date(p.fecha);
+    return `<tr><td>${f.toLocaleDateString()}</td><td>${esc(p.idPaciente)}</td><td>${esc(DB[p.patologia]?DB[p.patologia].nombre:p.patologia)}</td><td>${esc(p.edad||'-')}</td><td>${esc((p.comorb||[]).join(', ')||'-')}</td><td><button type="button" class="banco-tab" data-d="${i}" style="border-color:var(--red);color:var(--red);">🗑</button></td></tr>`;
+  }).join('');
+  const mas=ord.length>historialLimite?`<button type="button" class="banco-tab" id="verMasHist" style="margin-top:8px;">Ver más (${ord.length-historialLimite} restantes)</button>`:'';
+  cont.innerHTML=`<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th><th></th></tr>${filas}</table>${mas}`;
+  cont.onclick=e=>{
+    const b=e.target.closest('[data-d]');
+    if(b){ borrarRegistroPaciente(ord[+b.dataset.d]); return; }
+    if(e.target.closest('#verMasHist')){ historialLimite+=25; pintarHistorial(); }
+  };
+}
+async function borrarRegistroPaciente(r){
+  if(!r) return;
+  const nombrePat=DB[r.patologia]?DB[r.patologia].nombre:r.patologia;
+  if(!confirm(`¿Borrar "${r.idPaciente}" — ${nombrePat}?\nSe eliminan sus sesiones, evaluaciones y evoluciones. No se puede deshacer.`)) return;
+  const norm=normalizarPaciente(r.idPaciente||'');
+  const code=obtenerCodigoPaciente(r.idPaciente,false);
+  const base=ultimoHistorial.length?ultimoHistorial:leerPacientesLS();
+  const arr=base.filter(x=>!(normalizarPaciente(x.idPaciente||'')===norm && x.patologia===r.patologia));
+  ultimoHistorial=arr; escribirPacientesLS(arr);
+  if(code){
+    const raiz='kine_evol::'+code+'::'+r.patologia;
+    Object.keys(localStorage).filter(k=>k===raiz||k.startsWith(raiz+'::')).forEach(k=>localStorage.removeItem(k));
+  }
+  const quedan=arr.some(x=>normalizarPaciente(x.idPaciente||'')===norm);
+  if(!quedan && code){
+    const mapa=leerMapaIds(); delete mapa[norm];
+    localStorage.setItem('kine_pacientes_ids',JSON.stringify(mapa));
+  }
+  const st=document.getElementById('dbStatus');
+  try{
+    if(firebaseListo && usuarioActual && code){
+      if(quedan){ await guardarPacienteNube(r.idPaciente,{sinMerge:true}); }
+      else { await conTimeout(colPac().doc(code).delete()); }
+    }
+    st.textContent='Registro eliminado ✓';
+  }catch(e){ console.error(e); st.textContent='Eliminado en este dispositivo (falló la nube).'; }
+  if(normalizarPaciente(document.getElementById('idPaciente').value)===norm) limpiarFormulario();
+  pintarHistorial();
+}
   const cont=document.getElementById('historial');
   if(!cont) return;
     actualizarListaPacientes();
@@ -1467,20 +1598,56 @@ function normalizarPaciente(s){
   return s.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
 }
 
-function obtenerCodigoPaciente(idPacienteVal){
-  const norm = normalizarPaciente(idPacienteVal||'');
-  if(!norm) return null;
-  let mapa={};
-  try{ mapa = JSON.parse(localStorage.getItem('kine_pacientes_ids')||'{}'); }catch(e){ mapa={}; }
-  if(mapa[norm]) return mapa[norm];
-  if(Object.values(mapa).includes(idPacienteVal.trim())) return idPacienteVal.trim();
-  const nuevoCodigo = 'PAC-' + Math.floor(1000+Math.random()*9000);
-  mapa[norm]=nuevoCodigo;
-  localStorage.setItem('kine_pacientes_ids', JSON.stringify(mapa));
-  return nuevoCodigo;
+function leerMapaIds(){
+  try{ return JSON.parse(localStorage.getItem('kine_pacientes_ids')||'{}'); }catch(e){ return {}; }
 }
-
+function nuevoCodigoUnico(mapa){
+  const usados=new Set(Object.values(mapa));
+  let c;
+  do{
+    const b=new Uint32Array(2); crypto.getRandomValues(b);
+    c='PAC-'+(b[0].toString(36).padStart(7,'0')+b[1].toString(36).padStart(7,'0')).slice(0,8).toUpperCase();
+  }while(usados.has(c));
+  return c;
+}
+// crear=false: solo busca, no genera código (se usa mientras se escribe el nombre)
+function obtenerCodigoPaciente(idPacienteVal, crear=true){
+  const norm=normalizarPaciente(idPacienteVal||'');
+  if(!norm) return null;
+  const mapa=leerMapaIds();
+  if(mapa[norm]) return mapa[norm];
+  if(Object.values(mapa).includes((idPacienteVal||'').trim())) return (idPacienteVal||'').trim();
+  if(!crear) return null;
+  const c=nuevoCodigoUnico(mapa);
+  mapa[norm]=c;
+  localStorage.setItem('kine_pacientes_ids',JSON.stringify(mapa));
+  return c;
+}
 function actualizarCodigoPacienteVisible(){
+  const val=document.getElementById('idPaciente').value.trim();
+  const disp=document.getElementById('codigoPacienteDisplay');
+  if(!disp) return;
+  if(!val){ disp.textContent=''; return; }
+  const c=obtenerCodigoPaciente(val,false);
+  disp.textContent = c ? `Código interno: ${c}` : 'Paciente nuevo — el código se asigna al guardar';
+}
+// Borra códigos "fantasma" creados por el bug anterior y detecta códigos repetidos
+function limpiarCodigosHuerfanos(){
+  const mapa=leerMapaIds();
+  const conocidos=new Set(registrosConocidos().map(r=>normalizarPaciente(r.idPaciente||'')));
+  const claves=Object.keys(localStorage);
+  let borrados=0;
+  Object.keys(mapa).forEach(n=>{
+    if(conocidos.has(n)) return;
+    const usado=claves.some(k=>k.startsWith('kine_evol::'+mapa[n]+'::'));
+    if(!usado){ delete mapa[n]; borrados++; }
+  });
+  if(borrados) localStorage.setItem('kine_pacientes_ids',JSON.stringify(mapa));
+  const porCodigo={};
+  Object.entries(mapa).forEach(([n,c])=>{ (porCodigo[c]=porCodigo[c]||[]).push(n); });
+  const dup=Object.values(porCodigo).filter(a=>a.length>1).flat();
+  return {borrados,dup};
+}
   const val = document.getElementById('idPaciente').value.trim();
   const disp = document.getElementById('codigoPacienteDisplay');
   if(!disp) return;
@@ -1968,9 +2135,13 @@ function renderListaPacientes(){
   document.getElementById('cntPac').textContent=items.length?`(${items.length})`:'';
   c.innerHTML=items.length?items.map((r,i)=>{
     let h=0; try{ h=Object.keys(JSON.parse(localStorage.getItem(claveEvolucion(obtenerCodigoPaciente(r.idPaciente),r.patologia))||'{}')).length; }catch(e){}
-    return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;"><b>${esc(r.idPaciente)}</b> <span style="color:var(--muted);font-size:.76rem;">${esc(DB[r.patologia]?DB[r.patologia].nombre:r.patologia)} · ${r.edad||'-'} años · ${h}/10 sesiones · ${new Date(r.fecha).toLocaleDateString()}</span><div style="display:flex;gap:6px;margin-top:6px;"><button type="button" class="banco-tab" data-i="${i}" data-a="s">💪 Sesión</button><button type="button" class="banco-tab" data-i="${i}" data-a="h">📋 Historia</button></div></div>`;
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;"><b>${esc(r.idPaciente)}</b> <span style="color:var(--muted);font-size:.76rem;">${esc(DB[r.patologia]?DB[r.patologia].nombre:r.patologia)} · ${r.edad||'-'} años · ${h}/10 sesiones · ${new Date(r.fecha).toLocaleDateString()}</span><div style="display:flex;gap:6px;margin-top:6px;"><button type="button" class="banco-tab" data-i="${i}" data-a="s">💪 Sesión</button><button type="button" class="banco-tab" data-i="${i}" data-a="h">📋 Historia</button><button type="button" class="banco-tab" data-i="${i}" data-a="d" style="margin-left:auto;border-color:var(--red);color:var(--red);">🗑</button></div></div>`;
   }).join(''):'<p style="color:var(--muted);font-size:.8rem;">Sin pacientes guardados.</p>';
-  c.onclick=e=>{ const b=e.target.closest('button[data-a]'); if(b) abrirPaciente(items[+b.dataset.i],b.dataset.a); };
+  c.onclick=e=>{
+  const b=e.target.closest('button[data-a]'); if(!b) return;
+  if(b.dataset.a==='d') borrarRegistroPaciente(items[+b.dataset.i]);
+  else abrirPaciente(items[+b.dataset.i],b.dataset.a);
+};
 }
 function abrirPaciente(r,a){
   const n=r.idPaciente;
@@ -2256,6 +2427,37 @@ nuevaPatZona=function(z){
 
 aplicarCat(leerCat());
 if(usuarioActual) iniciarCatalogoVivo();
+    let _tAuto=null, _cargandoPac=false;
+function guardarAuto(){
+  if(_cargandoPac||!sesionesGlobal.length||!evolucionClaveActual) return;
+  const nombre=document.getElementById('idPaciente').value.trim();
+  const code=obtenerCodigoPaciente(nombre,false);
+  const pat=document.getElementById('patologia').value;
+  if(!code||evolucionClaveActual!=='kine_evol::'+code+'::'+pat) return;
+  clearTimeout(_tAuto);
+  _tAuto=setTimeout(guardarPacienteRapido,1200);
+}
+document.addEventListener('change',e=>{
+  if(e.target.closest('#secPaciente,#detAntecedentes')) guardarAuto();
+});
+// Evita autoguardar mientras se carga un paciente guardado
+const _cpgBase=cargarPacienteGuardado;
+cargarPacienteGuardado=function(n){
+  _cargandoPac=true;
+  try{ return _cpgBase(n); } finally{ _cargandoPac=false; }
+};
+    function edadDesde(fn){
+  if(!fn) return '';
+  const n=new Date(fn+'T12:00:00'), h=new Date();
+  let e=h.getFullYear()-n.getFullYear();
+  const m=h.getMonth()-n.getMonth();
+  if(m<0||(m===0&&h.getDate()<n.getDate())) e--;
+  return (e>=0&&e<=120)?e:'';
+}
+document.getElementById('fechaNac').addEventListener('change',e=>{
+  const a=edadDesde(e.target.value);
+  if(a!=='') document.getElementById('edad').value=a;
+});
 </script>
 </body>
 </html>
