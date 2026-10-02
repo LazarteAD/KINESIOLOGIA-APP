@@ -35,12 +35,14 @@
   body{
     margin:0; color:var(--ink); font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif; line-height:1.45;
     background-color:var(--paper);
+  }
+  body::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; transform:translateZ(0);
     background-image:
       radial-gradient(circle at 12% 18%, rgba(139,92,246,.14), transparent 42%),
       radial-gradient(circle at 88% 12%, rgba(0,184,169,.14), transparent 42%),
       radial-gradient(circle at 80% 82%, rgba(236,72,153,.11), transparent 45%),
       radial-gradient(circle at 15% 88%, rgba(61,126,245,.11), transparent 45%);
-    background-attachment:fixed;
     background-repeat:no-repeat;
   }
   .wrap{max-width:900px;margin:0 auto;padding:20px 16px 80px;}
@@ -68,7 +70,7 @@
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 16px;}
   @media(max-width:600px){.grid3{grid-template-columns:1fr;}}
   fieldset{border:none;padding:0;margin:8px 0 0;}
-  .check-row{display:flex;align-items:flex-start;gap:8px;padding:6px 4px;border-radius:6px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.83rem;border-bottom:1px dashed var(--line);transition:background .15s;}
+  .check-row{display:flex;align-items:flex-start;gap:8px;padding:9px 6px;border-radius:6px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.83rem;border-bottom:1px dashed var(--line);transition:background .15s;cursor:pointer;}
   .check-row:hover{background:rgba(0,184,169,.06);}
   .check-row input{margin-top:3px;accent-color:var(--teal-deep);}
   .flagband{border-radius:20px;padding:4px 12px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.03em;display:inline-block;margin-bottom:8px;}
@@ -228,7 +230,7 @@
     <summary>🩺 Datos del profesional (para la historia clínica en PDF)</summary>
     <div>
       <label>Nombre y matrícula profesional</label>
-      <input type="text" id="matriculaProfesional" placeholder="Ej: Lic. Adrián Lazarte — MP 12345">
+      <input type="text" id="matriculaProfesional" placeholder="Ej: Estudiante de Kinesiología — supervisor: Lic. Nombre, MP 12345">
     </div>
   </details>
 
@@ -240,22 +242,22 @@
     <div id="codigoPacienteDisplay" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:4px;"></div>
     <div id="dbStatus" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:2px;"></div>
     <div class="grid3" style="margin-top:8px;">
-      <div><label>Edad (años)</label><input type="number" id="edad" min="0" max="120"inputmode="numeric"></div>
-      <div><label>Peso (kg)</label><input type="number" id="peso" min="0"inputmode="numeric"></div>
-      <div><label>Altura (cm)</label><input type="number" id="altura" min="0"inputmode="numeric"></div>
-       </div>
-      <div class="grid3" style="margin-top:4px;">
-  <div><label for="fechaNac">Fecha de nacimiento</label><input type="date" id="fechaNac"></div>
-  <div><label for="sexo">Sexo</label>
-    <select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro / no informa</option></select></div>
-  <div><label for="lateralidad">Lado afectado</label>
-    <select id="lateralidad"><option value="">—</option><option>Derecho</option><option>Izquierdo</option><option>Bilateral</option><option>Central / no aplica</option></select></div>
-</div>
-<div class="grid3" style="margin-top:4px;">
-  <div><label for="obraSocial">Obra social / prepaga</label><input type="text" id="obraSocial"></div>
-  <div><label for="nAfiliado">N.º de afiliado</label><input type="text" id="nAfiliado"></div>
-  <div><label for="sesionesAut">Sesiones autorizadas</label><input type="number" id="sesionesAut" min="0" inputmode="numeric"></div>
-</div>
+      <div><label>Edad (años)</label><input type="number" id="edad" min="0" max="120" inputmode="numeric"></div>
+      <div><label>Peso (kg)</label><input type="number" id="peso" min="0" inputmode="numeric"></div>
+      <div><label>Altura (cm)</label><input type="number" id="altura" min="0" inputmode="numeric"></div>
+    </div>
+    <div class="grid3" style="margin-top:4px;">
+      <div><label for="fechaNac">Fecha de nacimiento</label><input type="date" id="fechaNac"></div>
+      <div><label for="sexo">Sexo</label>
+        <select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro / no informa</option></select></div>
+      <div><label for="lateralidad">Lado afectado</label>
+        <select id="lateralidad"><option value="">—</option><option>Derecho</option><option>Izquierdo</option><option>Bilateral</option><option>Central / no aplica</option></select></div>
+    </div>
+    <div class="grid3" style="margin-top:4px;">
+      <div><label for="obraSocial">Obra social / prepaga</label><input type="text" id="obraSocial"></div>
+      <div><label for="nAfiliado">N.º de afiliado</label><input type="text" id="nAfiliado"></div>
+      <div><label for="sesionesAut">Sesiones autorizadas</label><input type="number" id="sesionesAut" min="0" inputmode="numeric"></div>
+    </div>
     <label>Tipo de vida / actividad</label>
     <select id="actividad">
       <option value="sedentario">Sedentario</option>
@@ -343,6 +345,11 @@
         <div id="autoinmuneCualWrap" style="display:none;margin:-2px 0 8px 28px;">
           <input type="text" id="autoinmuneCual" placeholder="¿Cuál? Ej: artritis reumatoidea, lupus, psoriasis...">
         </div>
+        <div class="check-row"><input type="checkbox" value="hipertension"><span>Hipertensión arterial</span></div>
+        <div class="check-row"><input type="checkbox" value="sensibilidad"><span>Sensibilidad alterada en la zona / neuropatía (térmica o táctil)</span></div>
+        <div class="check-row"><input type="checkbox" value="infeccion"><span>Infección activa / fiebre</span></div>
+        <div class="check-row"><input type="checkbox" value="trombosis"><span>Sospecha o antecedente de trombosis (TVP)</span></div>
+        <div class="check-row"><input type="checkbox" value="piel"><span>Piel lesionada o herida en la zona a tratar</span></div>
         <div class="check-row"><input type="checkbox" id="antecedenteNeuro"><span>Antecedente o sospecha de problema neurológico (ACV, lesión medular, Parkinson, neuropatía, radiculopatía, etc.)</span></div>
       </fieldset>
     </details>
@@ -359,6 +366,7 @@
         <div class="check-row"><input type="checkbox" value="hipoglucemiantes"><span>Hipoglucemiantes</span></div>
         <div class="check-row"><input type="checkbox" value="estatinas"><span>Estatinas (hipolipemiantes — pueden dar efectos secundarios musculoesqueléticos)</span></div>
         <div class="check-row"><input type="checkbox" value="psiquiatrica"><span>Medicación psiquiátrica</span></div>
+        <div class="check-row"><input type="checkbox" value="fluoroquinolonas"><span>Fluoroquinolonas (ciprofloxacina, levofloxacina — riesgo tendinoso)</span></div>
       </fieldset>
     </details>
 
@@ -483,9 +491,10 @@
 <!-- SDK de Firebase (Auth + Firestore) — se usa para que cada usuario guarde sus pacientes en su propia cuenta -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>  
-  <script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
 // Catálogo de agentes físicos: dosis orientativa + condiciones que lo vuelven contraindicado (rojo)
+// (las reglas de contraindicación/precaución viven en REGLAS_AGENTE, más abajo)
 const AGENTES = {
   calor:{n:"Termoterapia superficial (calor)", d:"15-20 min · 40-45°C · previo a la movilidad",
     redC:["cancer"], redM:[], notaEmbarazo:true},
@@ -505,11 +514,11 @@ const AGENTES = {
     redC:["cardio"], redM:["anticoagulantes"]}
 };
 
-function agenteHTML(key, pac){
+function agenteHTML(key,pac){
   const a=AGENTES[key];
   if(!a) return '';
-  let red = a.redC.some(c=>pac.comorb.includes(c)) || a.redM.some(m=>pac.medic.includes(m)) || (a.notaEmbarazo && pac.comorb.includes('embarazo'));
-  return `<div class="agente ${red?'contra':''}"><b>${a.n}</b><br><span class="dosis">${red?'<span class="warn">⚠ CONTRAINDICADO en este paciente — </span>':''}${a.d}</span></div>`;
+  const niv=nivelAgente(key,pac);
+  return `<div class="agente ${niv.n==='contra'?'contra':''}"><b>${esc(a.n)}</b><br><span class="dosis">${badgeAgente(niv)}${esc(a.d)}</span></div>`;
 }
 
 // Fases de ejercicio genéricas + banco por patología
@@ -727,7 +736,7 @@ const ZONAS = {
   "Neurológico central":["acv","lesion_medular","parkinson"],
   "Neurológico periférico":["neuropatico","neuropatia_diabetica","pie_caido","plexo_braquial"]
 };
-    function poblarZonaSelect(selectId){
+function poblarZonaSelect(selectId){
   const sel=document.getElementById(selectId);
   if(!sel) return;
   sel.innerHTML = selectId==='nuevaZona'
@@ -821,7 +830,7 @@ function renderListaPatologiasCustom(){
   if(!custom.length){ cont.innerHTML = '<p style="color:var(--muted);">Todavía no agregaste ninguna.</p>'; return; }
   cont.innerHTML = custom.map(c=>`
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);">
-      <span>${c.data.nombre}</span>
+      <span>${esc(c.data.nombre)}</span>
       <span style="display:flex;gap:6px;flex-shrink:0;">
         <button type="button" class="editarPatCustom" data-key="${c.key}" style="padding:5px 10px;font-size:.76rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:3px;cursor:pointer;">Editar</button>
         <button type="button" class="borrarPatCustom" data-key="${c.key}" style="padding:5px 10px;font-size:.76rem;border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:3px;cursor:pointer;">Borrar</button>
@@ -1002,7 +1011,7 @@ function renderBancoLista(){
   const cont=document.getElementById('bancoLista');
   if(!cont) return;
   const items = BANCO[bancoCategoriaActiva].items;
-  cont.innerHTML = items.map((ej,i)=>`<button type="button" class="ban-item" data-cat="${bancoCategoriaActiva}" data-i="${i}">${ej}</button>`).join('');
+  cont.innerHTML = items.map((ej,i)=>`<button type="button" class="ban-item" data-cat="${bancoCategoriaActiva}" data-i="${i}">${esc(ej)}</button>`).join('');
   cont.querySelectorAll('.ban-item').forEach(btn=>btn.addEventListener('click',()=>{
     const destinoId = document.getElementById('bancoFaseDestino').value;
     const campo = document.getElementById(destinoId);
@@ -1164,14 +1173,7 @@ document.getElementById('btnCerrarSesion').addEventListener('click', async ()=>{
   try{ await dbFirestore.terminate(); await dbFirestore.clearPersistence(); }catch(e){}
   location.reload();
 });
-function recolectarExtras(){
-  const a=[];
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(k.startsWith('kine_evol::')||k==='kine_pacientes_ids') a.push({k, v:localStorage.getItem(k)});
-  }
-  return a;
-}
+
 function mezclarExtra(k,v){
   try{
     const loc=JSON.parse(localStorage.getItem(k)||'null'), nube=JSON.parse(v);
@@ -1285,6 +1287,59 @@ async function cargarPacientesDesdeNube(){
     cargarHistorial();
   }
 }
+
+// Foto del estado actual del formulario (lo que se guarda por paciente + patología)
+function recolectarEstado(){
+  const v=id=>document.getElementById(id).value;
+  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].filter(i=>i.id!=='antecedenteNeuro').map(i=>i.value);
+  return {
+    idPaciente:v('idPaciente').trim(),
+    fecha:new Date().toISOString(),
+    edad:v('edad'), peso:v('peso'), altura:v('altura'),
+    actividad:v('actividad'),
+    fechaNac:v('fechaNac'),
+    sexo:v('sexo'),
+    lateralidad:v('lateralidad'),
+    obraSocial:v('obraSocial').trim(),
+    nAfiliado:v('nAfiliado').trim(),
+    sesionesAut:v('sesionesAut'),
+    patologia:v('patologia'),
+    comorb:marcado('comorb'), medic:marcado('medic'),
+    rojas:marcado('rojas'), amarillas:marcado('amarillas'), azules:marcado('azules'), negras:marcado('negras'),
+    neuro:document.getElementById('antecedenteNeuro').checked,
+    diabetesTipo:v('diabetesTipo'),
+    autoinmuneCual:v('autoinmuneCual').trim()
+  };
+}
+async function guardarPacienteRapido(){
+  const status=document.getElementById('dbStatus');
+  const registro=recolectarEstado();
+  if(!registro.idPaciente){ status.textContent='Escribí el nombre del paciente antes de guardar.'; return; }
+  obtenerCodigoPaciente(registro.idPaciente); // asegura el código
+  const k=normalizarPaciente(registro.idPaciente);
+  const base=ultimoHistorial.length?ultimoHistorial:leerPacientesLS();
+  const prev=base.find(r=>normalizarPaciente(r.idPaciente||'')===k && r.patologia===registro.patologia);
+  // Historial de cambios clínicos (banderas, comorbilidades, medicación), máx. 20
+  const clin=r=>JSON.stringify([r.comorb,r.medic,r.rojas,r.amarillas,r.azules,r.negras,r.lateralidad]);
+  registro.cambios=((prev&&prev.cambios)||[]).slice(-19);
+  if(!registro.cambios.length || !prev || clin(prev)!==clin(registro)){
+    registro.cambios.push({fecha:registro.fecha,comorb:registro.comorb,medic:registro.medic,rojas:registro.rojas,amarillas:registro.amarillas,azules:registro.azules,negras:registro.negras});
+  }
+  const arr=[registro].concat(base.filter(r=>!(normalizarPaciente(r.idPaciente||'')===k && r.patologia===registro.patologia)));
+  escribirPacientesLS(arr); ultimoHistorial=arr; pintarHistorial();
+  if(firebaseListo && usuarioActual){
+    status.textContent='Guardando…';
+    try{
+      const r=await guardarPacienteNube(registro.idPaciente);
+      status.textContent = r==='pendiente'
+        ? 'Guardado en este dispositivo — se sincroniza al reconectar ⏳'
+        : 'Guardado y sincronizado ✓';
+    }catch(e){
+      console.error(e);
+      status.textContent='Guardado local (falló la sincronización: '+(e.code||'error')+').';
+    }
+  } else status.textContent='Guardado en este navegador ✓';
+}
 document.getElementById('guardar').addEventListener('click', guardarPacienteRapido);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 let historialLimite=25;
@@ -1296,7 +1351,7 @@ function pintarHistorial(){
   const ord=[...ultimoHistorial].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   const filas=ord.slice(0,historialLimite).map((p,i)=>{
     const f=new Date(p.fecha);
-    return `<tr><td>${f.toLocaleDateString()}</td><td>${esc(p.idPaciente)}</td><td>${esc(DB[p.patologia]?DB[p.patologia].nombre:p.patologia)}</td><td>${esc(p.edad||'-')}</td><td>${esc((p.comorb||[]).join(', ')||'-')}</td><td><button type="button" class="banco-tab" data-d="${i}" style="border-color:var(--red);color:var(--red);">🗑</button></td></tr>`;
+    return `<tr><td>${f.toLocaleDateString()}</td><td>${(p.rojas||[]).length?'🚩 ':''}${esc(p.idPaciente)}</td><td>${esc(DB[p.patologia]?DB[p.patologia].nombre:p.patologia)}</td><td>${esc(p.edad||'-')}</td><td>${esc((p.comorb||[]).join(', ')||'-')}</td><td><button type="button" class="banco-tab" data-d="${i}" style="border-color:var(--red);color:var(--red);">🗑</button></td></tr>`;
   }).join('');
   const mas=ord.length>historialLimite?`<button type="button" class="banco-tab" id="verMasHist" style="margin-top:8px;">Ver más (${ord.length-historialLimite} restantes)</button>`:'';
   cont.innerHTML=`<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th><th></th></tr>${filas}</table>${mas}`;
@@ -1335,17 +1390,12 @@ async function borrarRegistroPaciente(r){
   if(normalizarPaciente(document.getElementById('idPaciente').value)===norm) limpiarFormulario();
   pintarHistorial();
 }
-  const cont=document.getElementById('historial');
-  if(!cont) return;
-    actualizarListaPacientes();
-  if(!ultimoHistorial.length){cont.innerHTML='<p style="color:var(--muted);">Todavía no hay sesiones guardadas.</p>';return;}
-  const filas = ultimoHistorial.map(p=>{
-    const f=new Date(p.fecha);
-    return `<tr><td>${f.toLocaleDateString()}</td><td>${esc(p.idPaciente)}</td><td>${DB[p.patologia]?DB[p.patologia].nombre:p.patologia}</td><td>${p.edad||'-'}</td><td>${(p.comorb||[]).join(', ')||'-'}</td></tr>`;
-  }).join('');
-  cont.innerHTML = `<table class="sesiones"><tr><th>Fecha</th><th>Paciente</th><th>Patología</th><th>Edad</th><th>Comorbilidades</th></tr>${filas}</table>`;
-}
 
+// Evita inyección de fórmulas al abrir el CSV en Excel / Sheets
+function celdaSegura(v){
+  const s=String(v==null?'':v);
+  return /^[=+\-@\t\r]/.test(s)?"'"+s:s;
+}
 document.getElementById('exportarCsv').addEventListener('click', ()=>{
   const status=document.getElementById('dbStatus');
   if(!ultimoHistorial.length){status.textContent='No hay datos para exportar.';return;}
@@ -1353,7 +1403,7 @@ document.getElementById('exportarCsv').addEventListener('click', ()=>{
   const filas = ultimoHistorial.map(p=>[
     new Date(p.fecha).toLocaleString(), p.idPaciente, (DB[p.patologia]?DB[p.patologia].nombre:p.patologia),
     p.edad, p.peso, p.altura, p.actividad, (p.comorb||[]).join('; '), (p.medic||[]).join('; ')
-  ].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  ].map(v=>`"${celdaSegura(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([encabezado+filas], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='historial_pacientes.csv';
@@ -1367,7 +1417,7 @@ const ETQ_ROJAS = {peso:"Pérdida de peso inexplicada", nocturno:"Dolor nocturno
 const ETQ_AMARILLAS = {catastrofismo:"Catastrofismo", miedo:"Kinesiofobia", animo:"Bajo ánimo / ansiedad marcada"};
 const ETQ_AZULES = {trabajoempeora:"El trabajo empeora el dolor", soporte:"Baja percepción de apoyo"};
 const ETQ_NEGRAS = {litigio:"Litigio laboral", licencia:"Licencia prolongada"};
-function etiquetar(arr, mapa){ return arr.length ? arr.map(v=>mapa[v]||v).join(', ') : 'Ninguna registrada'; }
+function etiquetar(arr, mapa){ return arr.length ? arr.map(v=>esc(mapa[v]||v)).join(', ') : 'Ninguna registrada'; }
 
 function generarHistoriaClinica(){
   const idPacienteVal = document.getElementById('idPaciente').value.trim() || '(sin nombre)';
@@ -1381,24 +1431,26 @@ function generarHistoriaClinica(){
   const patKey=document.getElementById('patologia').value;
   const d=DB[patKey];
   if(!d) return;
-  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
+  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].filter(i=>i.id!=='antecedenteNeuro').map(i=>i.value);
   const comorb=marcado('comorb'), medic=marcado('medic');
   const rojas=marcado('rojas'), amarillas=marcado('amarillas'), azules=marcado('azules'), negras=marcado('negras');
   const imc = altura>0 ? (peso/(altura*altura)) : null;
 
   let html = `
     <div class="ph-title">Historia Clínica — Informe Kinesiológico</div>
-    <div class="ph-sub">${matricula||'Lic. Adrián Lazarte'} · Emitido el ${new Date().toLocaleDateString()}</div>
+    <div class="ph-sub">${esc(matricula)||'Estudiante de Kinesiología — práctica supervisada'} · Emitido el ${new Date().toLocaleDateString()}</div>
 
     <div class="ph-h">Datos del paciente</div>
-    <div class="ph-row"><b>Paciente / HC:</b> ${esc(idPacienteVal)} ${codigoPacienteActual?`&nbsp; <b>Código:</b> ${codigoPacienteActual}`:''}</div>
+    <div class="ph-row"><b>Paciente / HC:</b> ${esc(idPacienteVal)} ${codigoPacienteActual?`&nbsp; <b>Código:</b> ${esc(codigoPacienteActual)}`:''}</div>
     <div class="ph-row"><b>Edad:</b> ${edad||'—'} años &nbsp; <b>Peso:</b> ${peso||'—'} kg &nbsp; <b>Altura:</b> ${alturaCm||'—'} cm ${imc!==null?`&nbsp; <b>IMC:</b> ${imc.toFixed(1)} kg/m²`:''}</div>
-    <div class="ph-row"><b>Actividad:</b> ${actividadTxt}</div>
+    <div class="ph-row"><b>Actividad:</b> ${esc(actividadTxt)}</div>
+    <div class="ph-row"><b>Sexo:</b> ${esc(document.getElementById('sexo').value||'—')} &nbsp; <b>F. nac.:</b> ${esc(document.getElementById('fechaNac').value||'—')} &nbsp; <b>Lado afectado:</b> ${esc(document.getElementById('lateralidad').value||'—')}</div>
+    <div class="ph-row"><b>Obra social:</b> ${esc(document.getElementById('obraSocial').value||'—')} &nbsp; <b>Afiliado:</b> ${esc(document.getElementById('nAfiliado').value||'—')}</div>
 
     <div class="ph-h">Diagnóstico</div>
-    <div class="ph-row"><b>${d.nombre}</b></div>
-    <div class="ph-row">Test principal: <b>${d.testN}.</b> ${d.testD}</div>
-    ${d.testExtra?`<div class="ph-row">Test complementario: <b>${d.testExtra.n}.</b> ${d.testExtra.d}</div>`:''}
+    <div class="ph-row"><b>${esc(d.nombre)}</b>${document.getElementById('lateralidad').value?' — lado '+esc(document.getElementById('lateralidad').value.toLowerCase()):''}</div>
+    <div class="ph-row">Test principal: <b>${esc(d.testN)}.</b> ${esc(d.testD)}</div>
+    ${d.testExtra?`<div class="ph-row">Test complementario: <b>${esc(d.testExtra.n)}.</b> ${esc(d.testExtra.d)}</div>`:''}
     ${d.escala?`<div class="ph-row">Escala: <b>${(ESCALAS[d.escala]&&ESCALAS[d.escala].n)||''}.</b> ${(ESCALAS[d.escala]&&ESCALAS[d.escala].d)||''}</div>`:''}
 
     <div class="ph-h">Comorbilidades y Medicación</div>
@@ -1413,8 +1465,8 @@ function generarHistoriaClinica(){
 
     <div class="ph-h">Agentes Físicos</div>
     ${(d.agentes&&d.agentes.length) ? d.agentes.map(k=>{
-      const a=AGENTES[k]; const contra=contraindicado(k,{comorb,medic});
-      return `<div class="ph-row">${contra?'⚠ CONTRAINDICADO — ':''}<b>${a?a.n:k}</b> — ${a?a.d:''}</div>`;
+      const a=AGENTES[k]; const niv=nivelAgente(k,{comorb,medic,patKey});
+      return `<div class="ph-row">${niv.n==='contra'?'⚠ CONTRAINDICADO ('+esc(niv.t)+') — ':niv.n==='precaucion'?'⚠ PRECAUCIÓN ('+esc(niv.t)+') — ':''}<b>${esc(a?a.n:k)}</b> — ${esc(a?a.d:'')}</div>`;
     }).join('') : '<div class="ph-row">Sin agentes físicos específicos.</div>'}
   `;
 
@@ -1425,7 +1477,7 @@ function generarHistoriaClinica(){
       const total = s.ejercicios.length;
       const hechos = reg ? reg.marcados.length : 0;
       const fecha = reg ? new Date(reg.fecha).toLocaleDateString() : '—';
-      return `<tr><td>${s.n}</td><td>${s.fase}</td><td>${hechos}/${total}</td><td>${fecha}</td></tr>`;
+      return `<tr><td>${s.n}</td><td>${esc(s.fase)}</td><td>${hechos}/${total}</td><td>${fecha}</td></tr>`;
     }).join('');
     html += `
       <div class="ph-h">Evolución de Sesiones</div>
@@ -1438,28 +1490,28 @@ function generarHistoriaClinica(){
     <div class="ph-h" style="margin-top:26px;">Firma</div>
     <div style="margin-top:26px;">
       _________________________________<br>
-      ${matricula||'Firma y sello del profesional'}
+      ${esc(matricula)||'Firma y sello del profesional'}
     </div>
   `;
 
-  document.getElementById('printArea').innerHTML = html.replace('<div class="ph-h" style="margin-top:26px;">Firma</div>', evalPrintHTML()+'<div class="ph-h" style="margin-top:26px;">Firma</div>');
+  const extraPrint = evalPrintHTML();
+  document.getElementById('printArea').innerHTML = html.replace('<div class="ph-h" style="margin-top:26px;">Firma</div>', ()=>extraPrint+'<div class="ph-h" style="margin-top:26px;">Firma</div>');
   window.print();
 }
 document.getElementById('generarPdf').addEventListener('click', generarHistoriaClinica);
 
 function abrirBusquedaOnline(nombre){
-  const q = encodeURIComponent(nombre);
-  window.open(`https://pubmed.ncbi.nlm.nih.gov/?term=${q}`, '_blank');
-  window.open(`https://scholar.google.com/scholar?q=${encodeURIComponent(nombre+' physiotherapy treatment')}`, '_blank');
+  window.open('https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(nombre),'_blank','noopener');
 }
 document.getElementById('buscarIA').addEventListener('click', ()=>{
   const nombre = document.getElementById('nuevaNombre').value.trim();
   const out = document.getElementById('sugerenciaResultado');
   if(!nombre){out.innerHTML='<p style="color:var(--muted);">Escribí el nombre arriba primero.</p>';return;}
   abrirBusquedaOnline(nombre);
-  out.innerHTML = `<p style="color:var(--green);font-size:.82rem;">Buscando "${nombre}" en PubMed y Google Scholar.</p>`;
+  out.innerHTML=`<p style="font-size:.82rem;">Abierto en PubMed. También: <a href="https://scholar.google.com/scholar?q=${encodeURIComponent(nombre+' physiotherapy treatment')}" target="_blank" rel="noopener">Google Scholar</a></p>`;
 });
-    const COMPLICACIONES = {
+
+const COMPLICACIONES = {
   lumbalgia:["Dolor irradiado nuevo a miembro inferior","Alteración de esfínteres (sospecha cola de caballo)"],
   ciatica:["Progresión del déficit motor","Persistencia prolongada mayor a 8 semanas"],
   cervicalgia:["Cefalea intensa súbita","Déficit neurológico en miembro superior"],
@@ -1501,18 +1553,14 @@ function bloqueNeuroHTML(){
   </div>`;
 }
 
-function contraindicado(key,pac){
-  const a=AGENTES[key];
-  if(!a) return false;
-  return a.redC.some(c=>pac.comorb.includes(c)) || a.redM.some(m=>pac.medic.includes(m)) || (a.notaEmbarazo && pac.comorb.includes('embarazo'));
-}
+function contraindicado(key,pac){ return nivelAgente(key,pac).n==='contra'; }
 
 let sesionesGlobal = [];
 let sesionIndexGlobal = 0;
 let evolucionGlobal = {};
 let evolucionClaveActual = '';
 
-// ===== NUEVO: dosificación de sesión (agentes con minutos, banco, tiempo total 40-60 min) =====
+// ===== Dosificación de sesión (agentes con minutos, banco, tiempo total 40-60 min) =====
 const DEF_MIN = {calor:15,frio:10,tens:20,magneto:20,us:6,ondacorta:20,manual:10,puncion:10};
 const MIN_EJ_DEFAULT = 8;
 let bancoSesionTab = 'pat';
@@ -1553,7 +1601,6 @@ function bancoPatologia(s){
   return [["Movilidad protegida",d.mov],["Activación y control motor",d.control],["Fuerza",d.fuerza],["Fuerza funcional (adulto mayor)",d.fuerzaFunc],["Integración funcional",d.funcional]]
     .map(([n,a])=>[n,(a||[]).filter(Boolean)]).filter(g=>g[1].length);
 }
-// ===== fin nuevo =====
 
 function construirSesiones(d, esMayor, pac, actividad){
   const esGentil = esMayor || actividad==='sedentario';
@@ -1566,10 +1613,18 @@ function construirSesiones(d, esMayor, pac, actividad){
     'Activo: progresión estándar.';
 
   const rangosFase = [
-    {ini:1, fin:2, nombre:"Educación + movilidad protegida", items:d.mov.filter(Boolean)},
-    {ini:3, fin:5, nombre:"Activación y control motor", items:d.control.filter(Boolean)},
-    {ini:6, fin:8, nombre: esGentil?"Fuerza funcional adaptada":"Fuerza progresiva", items:fzas.filter(Boolean)},
-    {ini:9, fin:10, nombre:"Integración funcional / alta", items:d.funcional.filter(Boolean)}
+    {ini:1, fin:2, nombre:"Educación + movilidad protegida", items:d.mov.filter(Boolean),
+      dosis:"2-3 series × 10-15 rep · RPE 2-3/10 · descanso 30-60 s",
+      criterio:"Para pasar a la fase 3: EVA en reposo ≤3/10, rango sin dolor en mejora y sin empeoramiento a las 24 h."},
+    {ini:3, fin:5, nombre:"Activación y control motor", items:d.control.filter(Boolean),
+      dosis:"3 series × 8-12 rep · RPE 3-5/10 · priorizar calidad del movimiento",
+      criterio:"Para pasar a fuerza: control motor sin compensaciones y dolor durante el ejercicio ≤4/10 que se normalice en 24 h."},
+    {ini:6, fin:8, nombre: esGentil?"Fuerza funcional adaptada":"Fuerza progresiva", items:fzas.filter(Boolean),
+      dosis:"3-4 series × 6-12 rep · RPE 6-8/10 · subir 5-10 % la carga cuando se completan todas las repeticiones con buena técnica",
+      criterio:"Para pasar a integración: fuerza cercana al lado sano (≥80-90 %) o a la carga objetivo, sin dolor persistente tras la carga (en patología neurológica central usar metas funcionales)."},
+    {ini:9, fin:10, nombre:"Integración funcional / alta", items:d.funcional.filter(Boolean),
+      dosis:"Gesto laboral/deportivo específico · progresar volumen e intensidad según tolerancia",
+      criterio:"Para el alta: objetivos funcionales del paciente cumplidos (revisar PSFS / escala funcional), EVA ≤2/10 en la actividad objetivo y plan de autogestión entregado."}
   ];
   const faseFor = n => rangosFase.find(r=>n>=r.ini && n<=r.fin);
   const todosAgentes = d.agentes||[];
@@ -1585,7 +1640,7 @@ function construirSesiones(d, esMayor, pac, actividad){
     }
     const agenteKey = todosAgentes.length ? todosAgentes[(n-1)%todosAgentes.length] : null;
     sesiones.push({
-      n, fase:f.nombre, ejercicios:[...ejercicios], d, pac,
+      n, fase:f.nombre, dosis:f.dosis, criterio:f.criterio, ejercicios:[...ejercicios], d, pac,
       sugeridos:todosAgentes,
       agentesSel: agenteKey ? [{key:agenteKey, min:DEF_MIN[agenteKey]||15}] : [],
       minEj:{}, notaIntensidad, esExigente
@@ -1648,13 +1703,6 @@ function limpiarCodigosHuerfanos(){
   const dup=Object.values(porCodigo).filter(a=>a.length>1).flat();
   return {borrados,dup};
 }
-  const val = document.getElementById('idPaciente').value.trim();
-  const disp = document.getElementById('codigoPacienteDisplay');
-  if(!disp) return;
-  if(!val){ disp.textContent=''; return; }
-  const codigo = obtenerCodigoPaciente(val);
-  disp.textContent = `Código interno: ${codigo}`;
-}
 document.getElementById('idPaciente').addEventListener('blur', actualizarCodigoPacienteVisible);
 document.getElementById('idPaciente').addEventListener('input', actualizarCodigoPacienteVisible);
 
@@ -1680,9 +1728,9 @@ function renderSesionStep(){
   const opt = k=>`<option value="${k}">${AGENTES[k].n}</option>`;
 
   const agentesHTML = s.agentesSel.length ? s.agentesSel.map((a,i)=>{
-    const A=AGENTES[a.key], contra=contraindicado(a.key,s.pac);
+    const A=AGENTES[a.key], niv=nivelAgente(a.key,s.pac), contra=niv.n==='contra';
     return `<div class="agente ${contra?'contra':''}"><div style="display:flex;gap:8px;align-items:center;">
-      <div style="flex:1;"><b>${A.n}</b><br><span class="dosis">${contra?'<span class="warn">⚠ CONTRAINDICADO — </span>':''}${A.d}</span></div>
+      <div style="flex:1;"><b>${esc(A.n)}</b><br><span class="dosis">${badgeAgente(niv)}${esc(A.d)}</span></div>
       <input type="number" min="1" max="60" value="${a.min}" data-ag="${i}" class="minAg" style="width:64px;"><span style="font-size:.76rem;">min</span>
       <button type="button" class="quitarAg" data-ag="${i}" style="border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:6px;padding:4px 9px;cursor:pointer;">×</button>
     </div></div>`;
@@ -1691,7 +1739,7 @@ function renderSesionStep(){
   const ejerciciosHTML = s.ejercicios.map((ej,i)=>{
     const m = s.minEj[ej]!=null ? s.minEj[ej] : MIN_EJ_DEFAULT;
     return `<div class="ejercicio-row"><input type="checkbox" data-ej="${i}" ${marcadosPrevios.includes(ej)?'checked':''}>
-      <span style="flex:1;">${ej}</span>
+      <span style="flex:1;">${esc(ej)}</span>
       <input type="number" min="1" max="30" value="${m}" data-ej="${i}" class="minEj" style="width:58px;padding:4px 6px;"><span style="font-size:.74rem;">min</span>
       <button type="button" class="quitarEj" data-ej="${i}" style="border:1px solid var(--red);background:var(--panel);color:var(--red);border-radius:6px;padding:2px 8px;cursor:pointer;">×</button></div>`;
   }).join('') || '<p style="color:var(--muted);font-size:.82rem;">Sin ejercicios. Agregalos desde el banco.</p>';
@@ -1703,10 +1751,10 @@ function renderSesionStep(){
   if(bancoSesionTab==='pat'){
     bancoPatologia(s).forEach(([n,arr])=>{
       bancoHTML+=`<div class="banco-ref-group"><h4>${n}</h4></div>`;
-      arr.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${t}</button>`; });
+      arr.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${esc(t)}</button>`; });
     });
   } else {
-    BANCO[bancoSesionTab].items.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${t}</button>`; });
+    BANCO[bancoSesionTab].items.forEach(t=>{ lista.push(t); bancoHTML+=`<button type="button" class="ban-item" data-b="${lista.length-1}">${esc(t)}</button>`; });
   }
 
   cont.innerHTML = `
@@ -1715,6 +1763,8 @@ function renderSesionStep(){
       <span style="font-size:.78rem;color:var(--muted);">${s.fase}</span>
     </div>
     <div style="font-size:.76rem;color:${s.esExigente?'var(--orange)':'var(--muted)'};font-weight:${s.esExigente?'700':'400'};margin-bottom:8px;">📌 ${s.notaIntensidad}</div>
+    <div style="font-size:.76rem;margin-bottom:4px;">💊 <b>Dosis sugerida:</b> ${esc(s.dosis||'')}</div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:8px;">🎯 ${esc(s.criterio||'')}</div>
     <div id="tiempoSesion" style="margin-bottom:12px;">${tiempoHTML(s)}</div>
 
     <div style="font-size:.8rem;color:var(--muted);margin:4px 0;">Agentes físicos:</div>
@@ -1745,7 +1795,7 @@ function renderSesionStep(){
       </div>
     </details>
 
-    <button type="button" class="guardar-evol-btn" id="guardarEvolSesion">Guardar evolución</button>
+    <button type="button" class="guardar-evol-btn" id="guardarEvolSesion">Guardar evolución</button><button type="button" class="guardar-evol-btn" id="waEj" style="background:linear-gradient(120deg,#25d366,#128c7e);margin-left:6px;">📲 Enviar ejercicios por WhatsApp</button>
     <div class="evol-guardado" id="evolGuardadoMsg">${registro?`Guardado el ${new Date(registro.fecha).toLocaleString()}`:''}</div>
   `;
 
@@ -1808,6 +1858,12 @@ function renderSesionStep(){
     renderResumenEvolucion();
     renderSesionStep();
   });
+  // WhatsApp: ejercicios para casa (sin nombre del paciente)
+  document.getElementById('waEj').addEventListener('click',()=>{
+    const lista=s.ejercicios.map(ej=>'• '+ej).join('\n');
+    const txt='Hola 👋 Estos son tus ejercicios para hacer en casa:\n\n'+lista+'\n\nSi el dolor sube a más de 4/10 o no se calma dentro de las 24 h, avisame.';
+    window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank','noopener');
+  });
 }
 
 function renderResumenEvolucion(){
@@ -1823,8 +1879,8 @@ function renderResumenEvolucion(){
     const fecha = reg ? new Date(reg.fecha).toLocaleDateString() : '—';
     return `<tr><td class="n">${s.n}</td><td>${hechos}/${total} ejercicios</td><td>${fecha}</td></tr>`;
   }).join('');
-  cont.innerHTML = `<p style="font-size:.82rem;margin:0 0 8px;"><b>${registradas} de ${sesionesGlobal.length}</b> sesiones registradas.</p>
-  <table class="sesiones"><tr><th>Sesión</th><th>Realizados</th><th>Fecha</th></tr>${filas}</table>`;
+  cont.innerHTML = `<p style="font-size:.82rem;margin:0 0 8px;"><b>${registradas} de ${sesionesGlobal.length}</b> sesiones registradas.${(+document.getElementById('sesionesAut').value||0)?` · autorizadas: <b>${+document.getElementById('sesionesAut').value}</b> · restantes: <b>${Math.max(0,(+document.getElementById('sesionesAut').value)-registradas)}</b>`:''}</p>
+  <table class="sesiones"><tr><th>Sesión</th><th>Realizados</th><th>Fecha</th></tr>${filas}</table>${registradas===sesionesGlobal.length?'<div class="agente" style="color:var(--green);">✅ Plan completo: hacé la reevaluación final (repetí escalas, goniometría y EVA), compará con la inicial y decidí alta, continuidad o derivación.</div>':''}`;
 }
 
 function attachSesionNav(){
@@ -1846,19 +1902,17 @@ function calc(){
   const altura=(+document.getElementById('altura').value||0)/100;
   const actividad=document.getElementById('actividad').value;
   const patKey=document.getElementById('patologia').value;
-  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);
+  const marcado=id=>[...document.querySelectorAll('#'+id+' input:checked')].filter(i=>i.id!=='antecedenteNeuro').map(i=>i.value);
   const comorb=marcado('comorb'), medic=marcado('medic');
   const rojas=marcado('rojas'), amarillas=marcado('amarillas'), azules=marcado('azules'), negras=marcado('negras');
   const imc = altura>0 ? (peso/(altura*altura)) : null;
   const esMayor = edad>=65;
-  const pac={comorb,medic};
+  const pac={comorb,medic,patKey};
 
   let html='';
 
-  if(rojas.length){
-    html+=`<div class="res-block alerta"><h3>⚠ Bandera roja detectada</h3>
-    <p>Se marcaron ${rojas.length} indicador(es) de alarma. Priorizar <b>derivación médica</b> antes de continuar.</p></div>`;
-  }
+  if(!document.getElementById('idPaciente').value.trim()) html+=`<div class="res-block alerta"><h3>✍️ Falta el nombre del paciente</h3><p>Sin nombre no se guardan sesiones, evaluaciones ni evolución, y los datos de distintos pacientes se mezclarían. Escribilo arriba antes de cargar nada.</p></div>`;
+  html+=rojasHTML(rojas);
 
   if(imc!==null){
     let cat = imc<18.5?"bajo peso": imc<25?"normal": imc<30?"sobrepeso":"obesidad";
@@ -1867,12 +1921,15 @@ function calc(){
 
   const d=DB[patKey];
   if(!d) return;
-  html+=`<div class="res-block"><h3>${d.nombre} — test clínico</h3><p><b>${d.testN}.</b> ${d.testD}</p>
-  ${d.testExtra?`<p style="margin-top:8px;"><b>${d.testExtra.n}.</b> ${d.testExtra.d}</p>`:''}
+  html+=precaucionesHTML(pac,edad,imc);
+  const lado=document.getElementById('lateralidad').value;
+  html+=`<div class="res-block"><h3>${esc(d.nombre)}${lado?' — lado '+esc(lado.toLowerCase()):''} — test clínico</h3><p><b>${esc(d.testN)}.</b> ${esc(d.testD)}</p>
+  ${d.testExtra?`<p style="margin-top:8px;"><b>${esc(d.testExtra.n)}.</b> ${esc(d.testExtra.d)}</p>`:''}
   ${d.escala?`<p style="margin-top:8px;color:var(--muted);"><b>${(ESCALAS[d.escala]&&ESCALAS[d.escala].n)||''}:</b> ${(ESCALAS[d.escala]&&ESCALAS[d.escala].d)||''}</p>`:''}</div>`;
 
-  if(COMPLICACIONES[patKey] && COMPLICACIONES[patKey].length){
-    html+=`<div class="res-block alerta"><h3>⚠️ Complicaciones a vigilar</h3><ul>${COMPLICACIONES[patKey].map(c=>`<li>${c}</li>`).join('')}</ul></div>`;
+  const compl=complicacionesDe(patKey);
+  if(compl.length){
+    html+=`<div class="res-block alerta"><h3>⚠️ Complicaciones a vigilar</h3><ul>${compl.map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>`;
   }
 
   html+=`<div class="res-block"><h3>Agentes físicos</h3>${(d.agentes&&d.agentes.length)?d.agentes.map(k=>agenteHTML(k,pac)).join(''):'<p style="color:var(--muted);">Sin agentes físicos específicos.</p>'}</div>`;
@@ -1918,7 +1975,8 @@ function calc(){
   destino.scrollIntoView({behavior:'smooth', block:'start'});
 }
 document.getElementById('run').addEventListener('click',calc);
-    // ===== Autocompletado de pacientes, limpiar y navegación rápida =====
+
+// ===== Autocompletado de pacientes, limpiar y navegación rápida =====
 function registrosConocidos(){
   return (ultimoHistorial||[]).concat(leerPacientesLS());
 }
@@ -1941,6 +1999,8 @@ function cargarPacienteGuardado(nombre){
   document.getElementById('edad').value=r.edad||'';
   document.getElementById('peso').value=r.peso||'';
   document.getElementById('altura').value=r.altura||'';
+  ['fechaNac','sexo','lateralidad','obraSocial','nAfiliado','sesionesAut'].forEach(id=>{ document.getElementById(id).value=r[id]||''; });
+  if(r.fechaNac){ const a=edadDesde(r.fechaNac); if(a!=='') document.getElementById('edad').value=a; }
   document.getElementById('actividad').value=r.actividad||'sedentario';
   document.getElementById('zona').value='';
   document.getElementById('patologiaBuscador').value='';
@@ -1969,7 +2029,7 @@ function irASesionPendiente(){
   renderSesionStep();
   return completo;
 }
-    
+
 let ultimoCargado='';
 document.getElementById('idPaciente').addEventListener('change', e=>{
   const nombre=e.target.value.trim(), k=normalizarPaciente(nombre);
@@ -1990,7 +2050,7 @@ document.getElementById('idPaciente').addEventListener('change', e=>{
 });
 
 function limpiarFormulario(){
-  ['idPaciente','edad','peso','altura','patologiaBuscador','autoinmuneCual'].forEach(id=>document.getElementById(id).value='');
+  ['idPaciente','edad','peso','altura','patologiaBuscador','autoinmuneCual','fechaNac','sexo','lateralidad','obraSocial','nAfiliado','sesionesAut'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('actividad').value='sedentario';
   document.getElementById('zona').value='';
   filtrarPatologias();
@@ -2019,7 +2079,8 @@ document.getElementById('btnGuardarRapido').addEventListener('click', e=>{
   setTimeout(()=>b.textContent=txt,1500);
 });
 document.getElementById('btnNuevoPaciente').addEventListener('click', limpiarFormulario);
-    // ===== MÓDULO: pacientes, diagnóstico por zona, tests y examen neurológico =====
+
+// ===== MÓDULO: pacientes, diagnóstico por zona, tests y examen neurológico =====
 const NEURO_PAT=['acv','lesion_medular','parkinson','neuropatico','neuropatia_diabetica','pie_caido','plexo_braquial','cervicobraquialgia','ciatica'];
 const ESC_OPT={ashworth:['0','1','1+','2','3','4'],hoehnyahr:['I','II','III','IV','V'],asia:['A','B','C','D','E'],quebec:['0','I','II','III','IV'],daniels:['0','1','2','3','4','5']};
 const MIO=[['C5','Abd. hombro / flex. codo'],['C6','Ext. muñeca'],['C7','Ext. codo'],['C8','Flex. dedos'],['T1','Abd. dedos'],['L2','Flex. cadera'],['L3','Ext. rodilla'],['L4','Dorsiflexión'],['L5','Ext. hallux'],['S1','Flex. plantar']];
@@ -2134,14 +2195,14 @@ function renderListaPacientes(){
   });
   document.getElementById('cntPac').textContent=items.length?`(${items.length})`:'';
   c.innerHTML=items.length?items.map((r,i)=>{
-    let h=0; try{ h=Object.keys(JSON.parse(localStorage.getItem(claveEvolucion(obtenerCodigoPaciente(r.idPaciente),r.patologia))||'{}')).length; }catch(e){}
-    return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;"><b>${esc(r.idPaciente)}</b> <span style="color:var(--muted);font-size:.76rem;">${esc(DB[r.patologia]?DB[r.patologia].nombre:r.patologia)} · ${r.edad||'-'} años · ${h}/10 sesiones · ${new Date(r.fecha).toLocaleDateString()}</span><div style="display:flex;gap:6px;margin-top:6px;"><button type="button" class="banco-tab" data-i="${i}" data-a="s">💪 Sesión</button><button type="button" class="banco-tab" data-i="${i}" data-a="h">📋 Historia</button><button type="button" class="banco-tab" data-i="${i}" data-a="d" style="margin-left:auto;border-color:var(--red);color:var(--red);">🗑</button></div></div>`;
+    let h=0; try{ h=Object.keys(JSON.parse(localStorage.getItem(claveEvolucion(obtenerCodigoPaciente(r.idPaciente,false),r.patologia))||'{}')).length; }catch(e){}
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;"><b>${esc(r.idPaciente)}</b> <span style="color:var(--muted);font-size:.76rem;">${esc(DB[r.patologia]?DB[r.patologia].nombre:r.patologia)} · ${esc(r.edad||'-')} años · ${h}/10 sesiones · ${new Date(r.fecha).toLocaleDateString()}</span><div style="display:flex;gap:6px;margin-top:6px;"><button type="button" class="banco-tab" data-i="${i}" data-a="s">💪 Sesión</button><button type="button" class="banco-tab" data-i="${i}" data-a="h">📋 Historia</button><button type="button" class="banco-tab" data-i="${i}" data-a="d" style="margin-left:auto;border-color:var(--red);color:var(--red);">🗑</button></div></div>`;
   }).join(''):'<p style="color:var(--muted);font-size:.8rem;">Sin pacientes guardados.</p>';
   c.onclick=e=>{
-  const b=e.target.closest('button[data-a]'); if(!b) return;
-  if(b.dataset.a==='d') borrarRegistroPaciente(items[+b.dataset.i]);
-  else abrirPaciente(items[+b.dataset.i],b.dataset.a);
-};
+    const b=e.target.closest('button[data-a]'); if(!b) return;
+    if(b.dataset.a==='d') borrarRegistroPaciente(items[+b.dataset.i]);
+    else abrirPaciente(items[+b.dataset.i],b.dataset.a);
+  };
 }
 function abrirPaciente(r,a){
   const n=r.idPaciente;
@@ -2165,7 +2226,8 @@ renderListaPacientes();
   b.onclick=()=>(document.getElementById('evalBloque')||document.getElementById('results')).scrollIntoView({behavior:'smooth',block:'start'});
   document.getElementById('btnGuardarRapido').before(b);
 })();
-    // ===== MÓDULO: evolución del paciente + EVA =====
+
+// ===== MÓDULO: evolución del paciente + EVA =====
 let evaSel='';
 function leerNotas(){ try{ return JSON.parse(localStorage.getItem(evolucionClaveActual+'::notas')||'{}'); }catch(e){ return {}; } }
 function guardarNotas(o){ localStorage.setItem(evolucionClaveActual+'::notas',JSON.stringify(o)); }
@@ -2193,6 +2255,15 @@ function renderEvolucion(){
     const a=+V[0].eva, b=+V[V.length-1].eva;
     res=`<div style="font-size:.82rem;">EVA inicial <b>${a}</b> → actual <b>${b}</b> · ${b<a?'↓ mejora':b>a?'↑ empeora':'sin cambios'}${a>0&&a!==b?' ('+Math.round(Math.abs(a-b)/a*100)+'%)':''}</div>`;
   }
+  let sem='';
+  if(V.length){
+    const u=+V[V.length-1].eva, q=V.length>1?+V[V.length-2].eva:null;
+    const [c,t]= (u>=7||(q!==null&&u-q>=2))
+      ? ['var(--red)','🔴 Dolor alto o en aumento (EVA '+u+(q!==null?', antes '+q:'')+'): no progresar la carga; reevaluar, volver a la fase previa y descartar banderas rojas.']
+      : u<=3 ? ['var(--green)','🟢 EVA '+u+': dolor bajo; si cumple el criterio de la fase, se puede progresar.']
+      : ['var(--amber)','🟡 EVA '+u+': mantener la carga actual y reevaluar la respuesta a las 24 h.'];
+    sem=`<div style="border-left:4px solid ${c};padding:6px 10px;margin:8px 0;font-size:.82rem;background:var(--paper);border-radius:6px;">${t}</div>`;
+  }
   const hoy=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
   const btns=Array.from({length:11},(_,i)=>`<button type="button" class="dot" data-eva="${i}" style="width:30px;height:30px;">${i}</button>`).join('');
   const items=L.slice().reverse().map(n=>`<div style="border-bottom:1px dashed var(--line);padding:6px 0;font-size:.82rem;display:flex;gap:8px;align-items:flex-start;">
@@ -2207,7 +2278,7 @@ function renderEvolucion(){
     <label>Evolución de la sesión</label>
     <textarea id="evolNota" rows="3" placeholder="Cómo llegó, qué se hizo, cómo respondió, indicaciones para casa, plan para la próxima sesión..."></textarea>
     <button type="button" class="guardar-evol-btn" id="evolGuardar">➕ Registrar evolución</button> <span class="evol-guardado" id="evolMsg"></span>
-    ${evaChart(L)}${res}
+    ${sem}${evaChart(L)}${res}
     <div id="evolLista" style="max-height:300px;overflow-y:auto;margin-top:8px;">${items||'<p style="color:var(--muted);font-size:.8rem;">Todavía no hay registros.</p>'}</div>`;
   ref.parentNode.insertBefore(div,ref);
 
@@ -2251,7 +2322,23 @@ const _ep=evalPrintHTML; evalPrintHTML=function(){ return _ep()+evolPrintHTML();
   b.onclick=()=>(document.getElementById('evolBloque')||document.getElementById('results')).scrollIntoView({behavior:'smooth',block:'start'});
   document.getElementById('btnGuardarRapido').before(b);
 })();
-    // ===== MÓDULO: catálogo editable en vivo (patologías, tratamiento, agentes, banco) =====
+
+// ===== MÓDULO: catálogo editable en vivo (patologías, tratamiento, agentes, banco) =====
+(function(){
+  const P=(k,z,o)=>{ DB[k]=Object.assign({agentes:[],fuerzaFunc:[]},o); (ZONAS[z]=ZONAS[z]||[]).push(k); PATOLOGIA_OPCIONES.push({key:k,nombre:o.nombre}); };
+  P('atr','Rodilla',{nombre:'Artroplastia total de rodilla (post-quirúrgico)',testN:'Goniometría de flexión/extensión y lag extensor',testD:'Registrar rango y déficit de extensión activa; seguir el protocolo y las restricciones del cirujano.',agentes:['frio','tens'],
+    mov:['Extensión pasiva y deslizamiento de talón, 3x10','Movilización rotuliana suave según estado de la cicatriz'],control:['Isométricos de cuádriceps y glúteo, 3x10','Elevación de pierna recta sin lag, 3x8'],
+    fuerza:['Sit-to-stand y step-up bajo progresivo, 3x10','Bicicleta fija con asiento alto, progresiva'],funcional:['Marcha sin ayuda y escaleras alternando','Equilibrio unipodal progresivo']});
+  P('atc','Cadera',{nombre:'Artroplastia total de cadera (post-quirúrgico)',testN:'Evaluación de marcha y Trendelenburg',testD:'Observar control pélvico y patrón de marcha; respetar las precauciones del abordaje quirúrgico.',agentes:['frio','tens'],
+    mov:['Movilidad activa asistida dentro de las restricciones del abordaje','Bombeo de tobillo y respiración diafragmática'],control:['Activación de glúteo medio en decúbito, 3x10','Transferencias y marcha con ayuda técnica'],
+    fuerza:['Puente bilateral y abducción en decúbito, 3x10','Sit-to-stand con control pélvico, 3x8'],funcional:['Marcha sin ayuda y escaleras','Equilibrio y prevención de caídas']});
+  P('isquios','Cadera',{nombre:'Desgarro muscular de isquiotibiales',testN:'Elevación activa de pierna recta + fuerza resistida a 90°',testD:'Reproduce dolor y déficit de fuerza; comparar siempre con el lado sano.',agentes:['frio','us','tens'],
+    mov:['Movilidad activa en rango indoloro','Isométricos submáximos, 5x30 seg'],control:['Puente isométrico y control lumbopélvico, 3x10','Excéntricos suaves de baja carga'],
+    fuerza:['Peso muerto rumano progresivo, 3x8-10','Nordic hamstring progresivo, 3x5'],funcional:['Carrera progresiva y aceleraciones','Reentrenamiento del gesto deportivo']});
+  COMPLICACIONES.atr=['Dolor, edema o calor de pantorrilla (descartar TVP)','Herida con secreción, enrojecimiento o fiebre (descartar infección)','Flexión estancada (posible rigidez / artrofibrosis)'];
+  COMPLICACIONES.atc=['Dolor inguinal súbito, acortamiento o rotación del miembro (sospecha de luxación)','Dolor o edema de pantorrilla (descartar TVP)','Fiebre o secreción de la herida'];
+  filtrarPatologias();
+})();
 const ORIG_DB=JSON.parse(JSON.stringify(DB)), ORIG_ZONAS=JSON.parse(JSON.stringify(ZONAS));
 const CAT_KEY='kine_cat', G=id=>document.getElementById(id);
 let unsubCat=null, ultimoCatStr='';
@@ -2427,7 +2514,9 @@ nuevaPatZona=function(z){
 
 aplicarCat(leerCat());
 if(usuarioActual) iniciarCatalogoVivo();
-    let _tAuto=null, _cargandoPac=false;
+
+// ===== Autoguardado con espera de 1,2 s (solo con plan activo del mismo paciente y patología) =====
+let _tAuto=null, _cargandoPac=false;
 function guardarAuto(){
   if(_cargandoPac||!sesionesGlobal.length||!evolucionClaveActual) return;
   const nombre=document.getElementById('idPaciente').value.trim();
@@ -2446,7 +2535,9 @@ cargarPacienteGuardado=function(n){
   _cargandoPac=true;
   try{ return _cpgBase(n); } finally{ _cargandoPac=false; }
 };
-    function edadDesde(fn){
+
+// ===== Fecha de nacimiento → edad =====
+function edadDesde(fn){
   if(!fn) return '';
   const n=new Date(fn+'T12:00:00'), h=new Date();
   let e=h.getFullYear()-n.getFullYear();
@@ -2457,6 +2548,321 @@ cargarPacienteGuardado=function(n){
 document.getElementById('fechaNac').addEventListener('change',e=>{
   const a=edadDesde(e.target.value);
   if(a!=='') document.getElementById('edad').value=a;
+});
+
+// ===== BLOQUE 7: motor de reglas de seguridad clínica =====
+Object.assign(ETQ_COMORB,{hipertension:'Hipertensión arterial',sensibilidad:'Sensibilidad alterada / neuropatía',infeccion:'Infección activa / fiebre',trombosis:'Sospecha de trombosis (TVP)',piel:'Piel lesionada en la zona'});
+Object.assign(ETQ_MEDIC,{fluoroquinolonas:'Fluoroquinolonas'});
+
+// c/m = contraindicación por comorbilidad/medicación · p/pm = precaución · emb = contraindicado en embarazo · cerv = epilepsia en región cervical
+const REGLAS_AGENTE={
+  calor:    {c:['cancer','sensibilidad','infeccion','trombosis','piel'], p:['diabetes'], emb:true},
+  frio:     {c:['sensibilidad'], p:['hipertension','diabetes']},
+  tens:     {c:['cardio','piel'], p:['sensibilidad'], emb:true, cerv:true},
+  magneto:  {c:['cardio','implante','cancer','infeccion'], emb:true},
+  us:       {c:['cancer','trombosis','infeccion'], p:['sensibilidad','implante'], emb:true},
+  ondacorta:{c:['cardio','implante','cancer','sensibilidad','infeccion','trombosis'], p:['diabetes'], emb:true},
+  manual:   {c:['infeccion'], m:['anticoagulantes'], p:['osteoporosis','cancer'], pm:['corticoides']},
+  puncion:  {c:['cardio','infeccion','piel'], m:['anticoagulantes'], p:['diabetes','autoinmune']}
+};
+function nivelAgente(key,pac){
+  const r=REGLAS_AGENTE[key];
+  if(!r) return {n:'',t:''};
+  const C=pac.comorb||[], M=pac.medic||[];
+  const lc=a=>(a||[]).filter(x=>C.includes(x)).map(x=>ETQ_COMORB[x]||x);
+  const lm=a=>(a||[]).filter(x=>M.includes(x)).map(x=>ETQ_MEDIC[x]||x);
+  const contra=[...lc(r.c),...lm(r.m)];
+  if(r.emb && C.includes('embarazo')) contra.push('Embarazo');
+  if(r.cerv && C.includes('epilepsia') && (ZONAS['Columna cervical']||[]).includes(pac.patKey)) contra.push('Epilepsia (región cabeza/cuello)');
+  if(contra.length) return {n:'contra',t:contra.join(', ')};
+  const prec=[...lc(r.p),...lm(r.pm)];
+  return prec.length?{n:'precaucion',t:prec.join(', ')}:{n:'',t:''};
+}
+function badgeAgente(niv){
+  if(niv.n==='contra') return `<span class="warn">⚠ CONTRAINDICADO — ${esc(niv.t)}. </span>`;
+  if(niv.n==='precaucion') return `<span class="warn" style="color:var(--amber);">⚠ PRECAUCIÓN — ${esc(niv.t)}. </span>`;
+  return '';
+}
+
+const ROJAS_ACCION={
+  esfinteres:{u:1,t:'Alteración de esfínteres / anestesia en silla de montar: sospecha de síndrome de cola de caballo. Derivar a guardia hoy.'},
+  neurologico:{u:1,t:'Déficit neurológico progresivo: derivación médica urgente; no iniciar carga ni técnicas hasta contar con evaluación.'},
+  trauma:{t:'Trauma significativo reciente: descartar fractura o lesión estructural con estudios por imágenes antes de tratar.'},
+  fiebre:{t:'Fiebre o malestar general: descartar causa infecciosa o sistémica antes de continuar.'},
+  peso:{t:'Pérdida de peso inexplicada: derivar para estudio de causa sistémica.'},
+  nocturno:{t:'Dolor nocturno no mecánico: descartar causa visceral, infecciosa o tumoral.'},
+  cancerhist:{t:'Antecedente de cáncer: descartar recidiva o metástasis ósea; coordinar con oncología.'}
+};
+function rojasHTML(rojas){
+  if(!rojas.length) return '';
+  const urg=rojas.filter(k=>ROJAS_ACCION[k]&&ROJAS_ACCION[k].u);
+  const otras=rojas.filter(k=>!(ROJAS_ACCION[k]&&ROJAS_ACCION[k].u));
+  const li=k=>`<li>${esc((ROJAS_ACCION[k]||{t:k}).t)}</li>`;
+  return `<div class="res-block alerta"><h3>${urg.length?'🚨 Derivación médica URGENTE':'⚠ Bandera roja detectada'}</h3>`
+    +(urg.length?`<ul>${urg.map(li).join('')}</ul>`:'')
+    +(otras.length?`<p style="margin:8px 0 2px;"><b>Derivación médica antes de continuar:</b></p><ul>${otras.map(li).join('')}</ul>`:'')
+    +`<p style="font-size:.76rem;color:var(--muted);margin:6px 0 0;">Con banderas rojas, el plan de abajo es solo de referencia hasta contar con evaluación médica.</p></div>`;
+}
+
+function precaucionesHTML(pac,edad,imc){
+  const C=pac.comorb||[], M=pac.medic||[], out=[];
+  const si=(cond,t)=>{ if(cond) out.push(t); };
+  si(C.includes('diabetes')||M.includes('hipoglucemiantes'),'Diabetes / hipoglucemiantes: controlar glucemia antes y después del ejercicio, tener una fuente de glucosa disponible e inspeccionar la piel de los pies y de la zona de aplicación.');
+  si(C.includes('cardio'),'Enfermedad cardiovascular: controlar FC y TA en reposo y esfuerzo, evitar maniobras de Valsalva y derivar ante dolor torácico, disnea o mareo.');
+  si(C.includes('hipertension')||M.includes('antihipertensivos'),'Hipertensión / antihipertensivos: tomar la TA antes de la sesión y cuidar la hipotensión ortostática al cambiar de posición.');
+  si(C.includes('osteoporosis'),'Osteoporosis: evitar flexión lumbar cargada, rotaciones forzadas, impacto y manipulaciones de alta velocidad; usar movilización de bajo grado.');
+  si(M.includes('corticoides'),'Corticoides crónicos: mayor fragilidad ósea y tendinosa; progresar la carga con cautela.');
+  si(M.includes('hormonas'),'Anabólicos / esteroides: mayor riesgo de lesión tendinosa con cargas altas; progresar de forma gradual.');
+  si(M.includes('fluoroquinolonas'),'Fluoroquinolonas: riesgo de tendinopatía o rotura (sobre todo Aquiles); evitar cargas excéntricas intensas y avisar al médico tratante.');
+  si(M.includes('anticoagulantes'),'Anticoagulantes / antiagregantes: riesgo de hematomas; evitar técnicas invasivas o de alta presión y revisar la piel después.');
+  si(C.includes('embarazo'),'Embarazo: evitar decúbito supino prolongado (2.º-3.er trimestre) y agentes físicos en abdomen y zona lumbopélvica; coordinar con obstetricia.');
+  si(C.includes('epilepsia'),'Epilepsia: evitar electroestimulación en cabeza y cuello y tener definido el protocolo ante una crisis.');
+  si(C.includes('cancer'),'Cáncer activo o reciente: coordinar con oncología y evitar agentes físicos sobre la zona tumoral.');
+  si(C.includes('implante'),'Implantes metálicos: evitar diatermia y magnetoterapia sobre el implante; confirmar el tipo de material.');
+  si(M.includes('opioides')||M.includes('psiquiatrica'),'Medicación con efecto sedante (opioides / psiquiátrica): vigilar equilibrio, mareos y la percepción del dolor durante el ejercicio.');
+  si(M.includes('estatinas'),'Estatinas: si hay mialgias o debilidad nuevas, diferenciarlas de la patología y avisar al médico tratante.');
+  si(M.includes('aines'),'AINES crónicos: pueden enmascarar el dolor; vigilar sobrecarga.');
+  si(C.includes('sobrepeso')||(imc!==null&&imc>=30),'Obesidad: progresar el impacto y las cargas articulares de forma gradual.');
+  si(edad>=65,'Adulto mayor: incluir evaluación de riesgo de caídas y de equilibrio.');
+  si(C.includes('sensibilidad'),'Sensibilidad alterada: evitar calor y frío directos e inspeccionar la piel antes y después.');
+  si(C.includes('infeccion'),'Infección activa / fiebre: diferir los agentes físicos y derivar.');
+  si(C.includes('trombosis'),'Sospecha de trombosis: derivar antes de tratar; evitar masaje, calor y ejercicio en el miembro afectado.');
+  si(C.includes('piel'),'Piel lesionada: no aplicar electrodos, transductores ni punción sobre la lesión.');
+  si(C.includes('autoinmune'),'Enfermedad autoinmune: posible inmunosupresión y fatiga fluctuante; ajustar el volumen en brotes y vigilar infecciones.');
+  si((ZONAS['Columna cervical']||[]).includes(pac.patKey),'Región cervical: antes de movilizar o manipular, descartar disfunción arterial cervical (mareo, disartria, diplopía, disfagia, drop attacks, cefalea súbita intensa); si hay sospecha, derivar y no tratar.');
+  if(!out.length) return '';
+  return `<div class="res-block" style="border-left-color:var(--amber);"><h3 style="color:var(--amber);">🛡️ Precauciones para el plan</h3><ul>${out.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><p style="font-size:.76rem;color:var(--muted);margin:6px 0 0;">Criterios generales y orientativos; no reemplazan la indicación del médico tratante.</p></div>`;
+}
+
+const COMPL_ZONA={
+  "Columna lumbar":["Dolor irradiado nuevo o debilidad en miembro inferior","Alteración de esfínteres o anestesia en silla de montar (urgencia)","Dolor nocturno no mecánico que no cede con reposo"],
+  "Columna torácica / dorsal":["Dolor torácico con disnea, sudoración o irradiación (descartar causa cardíaca o pulmonar)","Dolor nocturno constante o pérdida de peso inexplicada"],
+  "Columna cervical":["Cefalea intensa súbita, mareos, disartria o diplopía (descartar causa vascular)","Déficit neurológico en miembro superior o signos de mielopatía (torpeza de manos, marcha inestable)"],
+  "Hombro":["Pérdida brusca de fuerza (posible rotura)","Dolor nocturno constante o sin relación mecánica","Dolor referido de origen cervical o visceral"],
+  "Codo / muñeca":["Pérdida progresiva de fuerza o atrofia tenar/interósea","Hinchazón, calor y enrojecimiento (descartar infección o artritis)"],
+  "Cadera":["Dolor inguinal que no cede con reposo o incapacidad de apoyo (descartar fractura de estrés o necrosis avascular)","Fiebre o dolor nocturno intenso"],
+  "Rodilla":["Bloqueo articular agudo","Derrame articular recurrente","Calor, rubor y fiebre (descartar artritis séptica)","Dolor o edema de pantorrilla (descartar TVP)"],
+  "Tobillo / pie":["Incapacidad de apoyo (reglas de Ottawa)","Dolor o edema de pantorrilla (descartar TVP)","Heridas que no cicatrizan en el pie (especialmente en diabetes)"],
+  "Neurológico central":["Nuevo déficit neurológico brusco: derivar a emergencia","Espasticidad creciente o dolor que impide movilizar","Riesgo de caídas, hipotensión ortostática y lesiones de piel por presión"],
+  "Neurológico periférico":["Déficit motor progresivo","Dolor intenso o signos de compresión que empeoran","Lesiones cutáneas o úlceras por pérdida de sensibilidad"]
+};
+function complicacionesDe(patKey){
+  if(COMPLICACIONES[patKey]) return COMPLICACIONES[patKey];
+  const z=Object.keys(ZONAS).find(z=>ZONAS[z].includes(patKey));
+  return COMPL_ZONA[z]||[];
+}
+
+/* ===== BLOQUE 9: Escalas funcionales ===== */
+// Los cambios mínimos son valores orientativos de la literatura; verificá la fuente original.
+const ESCALAS_FUNC={
+  psfs:{n:'PSFS — escala funcional específica del paciente (0-10)',min:0,max:10,mejor:'mayor',mcid:2,zonas:'*'},
+  odi:{n:'Oswestry ODI (0-100 %)',min:0,max:100,mejor:'menor',mcid:10,zonas:['Columna lumbar']},
+  rmdq:{n:'Roland-Morris RMDQ (0-24)',min:0,max:24,mejor:'menor',mcid:5,zonas:['Columna lumbar']},
+  ndi:{n:'NDI — discapacidad cervical (0-50)',min:0,max:50,mejor:'menor',mcid:7,zonas:['Columna cervical']},
+  spadi:{n:'SPADI — hombro (0-100)',min:0,max:100,mejor:'menor',mcid:10,zonas:['Hombro']},
+  dash:{n:'DASH — miembro superior (0-100)',min:0,max:100,mejor:'menor',mcid:10,zonas:['Hombro','Codo / muñeca']},
+  koos:{n:'KOOS — rodilla (0-100, mayor = mejor)',min:0,max:100,mejor:'mayor',mcid:8,zonas:['Rodilla']},
+  lefs:{n:'LEFS — miembro inferior (0-80)',min:0,max:80,mejor:'mayor',mcid:9,zonas:['Cadera','Rodilla','Tobillo / pie']},
+  berg:{n:'Berg — equilibrio (0-56)',min:0,max:56,mejor:'mayor',mcid:null,zonas:['Neurológico central','Neurológico periférico']},
+  barthel:{n:'Barthel — actividades de la vida diaria (0-100)',min:0,max:100,mejor:'mayor',mcid:null,zonas:['Neurológico central','Neurológico periférico']},
+  tug:{n:'TUG — Timed Up and Go (segundos)',min:0,max:300,mejor:'menor',mcid:null,zonas:['Neurológico central','Neurológico periférico','Cadera','Rodilla']}
+};
+function zonaDe(k){ return Object.keys(ZONAS).find(z=>ZONAS[z].includes(k))||''; }
+function hoyISO(){ return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function leerEsc(){ if(!evolucionClaveActual) return {}; try{ return JSON.parse(localStorage.getItem(evolucionClaveActual+'::escalas')||'{}'); }catch(e){ return {}; } }
+function guardarEsc(o){ localStorage.setItem(evolucionClaveActual+'::escalas',JSON.stringify(o)); }
+function renderEscalas(){
+  const ref=document.getElementById('bloqueSesion'); if(!ref||!evolucionClaveActual) return;
+  const old=document.getElementById('escalasBloque'); if(old) old.remove();
+  const zona=zonaDe(document.getElementById('patologia').value), keys=Object.keys(ESCALAS_FUNC);
+  const sug=keys.filter(k=>ESCALAS_FUNC[k].zonas==='*'||ESCALAS_FUNC[k].zonas.includes(zona));
+  const resto=keys.filter(k=>!sug.includes(k));
+  const opt=k=>`<option value="${k}">${esc(ESCALAS_FUNC[k].n)}</option>`;
+  const L=Object.entries(leerEsc()).map(([id,x])=>Object.assign({id},x)).filter(x=>!x.del).sort((a,b)=>new Date(a.f)-new Date(b.f));
+  const resumen=keys.map(k=>{
+    const S=ESCALAS_FUNC[k], P=L.filter(x=>x.k===k);
+    if(P.length<2) return '';
+    const a=+P[0].v, b=+P[P.length-1].v, d=b-a;
+    const mejora=S.mejor==='mayor'?d>0:d<0;
+    const ok=S.mcid&&Math.abs(d)>=S.mcid;
+    return `<div class="agente"><b>${esc(S.n)}</b>: ${a} → ${b} (${d>0?'+':''}${d}) · ${d===0?'sin cambios':mejora?'mejora':'empeora'}${ok&&d!==0?' · supera el cambio mínimo importante (~'+S.mcid+')':''}</div>`;
+  }).join('');
+  const filas=L.slice().reverse().map(x=>`<div style="border-bottom:1px dashed var(--line);padding:5px 0;font-size:.82rem;display:flex;gap:8px;"><div style="flex:1;"><b>${new Date(x.f).toLocaleDateString()}</b> · ${esc((ESCALAS_FUNC[x.k]||{n:x.k}).n)}: <b>${esc(x.v)}</b></div><button type="button" class="banco-tab" data-delesc="${x.id}">✕</button></div>`).join('');
+  const div=document.createElement('div'); div.className='res-block'; div.id='escalasBloque'; div.style.scrollMarginTop='64px';
+  div.innerHTML=`<h3>📋 Escalas funcionales</h3>
+    <label for="escSel">Escala</label>
+    <select id="escSel"><optgroup label="Sugeridas para esta zona">${sug.map(opt).join('')}</optgroup>${resto.length?`<optgroup label="Otras">${resto.map(opt).join('')}</optgroup>`:''}</select>
+    <div class="grid3">
+      <div><label for="escVal">Puntaje</label><input type="number" id="escVal" step="any" inputmode="decimal"></div>
+      <div><label for="escFecha">Fecha</label><input type="date" id="escFecha" value="${hoyISO()}"></div>
+      <div style="align-self:end;"><button type="button" class="guardar-evol-btn" id="escAdd" style="margin-top:0;">➕ Registrar</button></div>
+    </div>
+    <div class="evol-guardado" id="escMsg"></div>
+    <div style="margin-top:8px;">${resumen}</div>
+    <div style="max-height:220px;overflow-y:auto;margin-top:6px;">${filas||'<p style="color:var(--muted);font-size:.8rem;">Sin registros.</p>'}</div>
+    <p style="font-size:.72rem;color:var(--muted);margin:6px 0 0;">La app registra el puntaje; aplicá el cuestionario con su versión oficial. Los cambios mínimos importantes son orientativos.</p>`;
+  ref.parentNode.insertBefore(div,ref);
+  div.querySelector('#escAdd').onclick=()=>{
+    const k=div.querySelector('#escSel').value, S=ESCALAS_FUNC[k];
+    const raw=div.querySelector('#escVal').value, v=parseFloat(raw), msg=div.querySelector('#escMsg');
+    if(raw===''||isNaN(v)||v<S.min||v>S.max){ msg.style.color='var(--red)'; msg.textContent=`Ingresá un puntaje entre ${S.min} y ${S.max}.`; return; }
+    const f=div.querySelector('#escFecha').value, ahora=new Date().toISOString(), o=leerEsc();
+    o['e'+Date.now()]={fecha:ahora,f:f?new Date(f+'T12:00:00').toISOString():ahora,k,v};
+    guardarEsc(o); guardarPacienteRapido(); renderEscalas();
+  };
+  div.addEventListener('click',e=>{
+    const b=e.target.closest('[data-delesc]'); if(!b) return;
+    if(!confirm('¿Borrar este registro?')) return;
+    const o=leerEsc(), x=o[b.dataset.delesc];
+    if(x){ x.del=true; x.fecha=new Date().toISOString(); guardarEsc(o); guardarPacienteRapido(); renderEscalas(); }
+  });
+}
+
+/* ===== Goniometría ===== */
+// Referencias AAOS orientativas; variables según fuente
+const GONIO={
+  "Hombro":[["Flexión",180],["Extensión",60],["Abducción",180],["Rotación externa",90],["Rotación interna",70]],
+  "Codo / muñeca":[["Codo: flexión",150],["Antebrazo: pronación",80],["Antebrazo: supinación",80],["Muñeca: flexión",80],["Muñeca: extensión",70]],
+  "Cadera":[["Flexión",120],["Extensión",30],["Abducción",45],["Aducción",30],["Rotación interna",45],["Rotación externa",45]],
+  "Rodilla":[["Flexión",135],["Extensión",0]],
+  "Tobillo / pie":[["Dorsiflexión",20],["Flexión plantar",50],["Inversión",35],["Eversión",15]],
+  "Columna cervical":[["Flexión",45],["Extensión",45],["Inclinación lateral",45],["Rotación",60]],
+  "Columna lumbar":[["Flexión",60],["Extensión",25],["Inclinación lateral",25],["Rotación",30]]
+};
+function leerGon(){ if(!evolucionClaveActual) return {}; try{ return JSON.parse(localStorage.getItem(evolucionClaveActual+'::gonio')||'{}'); }catch(e){ return {}; } }
+function gonioDeficit(ref,d,i,lat){
+  const D=d===''?null:+d, I=i===''?null:+i;
+  if(lat==='Derecho'&&D!=null&&I!=null) return I-D;
+  if(lat==='Izquierdo'&&D!=null&&I!=null) return D-I;
+  const af=lat==='Izquierdo'?I:D;
+  return (ref!=null&&af!=null)?ref-af:null;
+}
+function renderGonio(){
+  const ref=document.getElementById('bloqueSesion'); if(!ref||!evolucionClaveActual) return;
+  const old=document.getElementById('gonioBloque'); if(old) old.remove();
+  const plantilla=GONIO[zonaDe(document.getElementById('patologia').value)]; if(!plantilla) return;
+  const lat=document.getElementById('lateralidad').value;
+  const recs=Object.entries(leerGon()).map(([id,x])=>Object.assign({id},x)).filter(x=>!x.del).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  const ult=recs.length?recs[recs.length-1].vals:{}, prim=recs.length?recs[0].vals:{};
+  const af=lat==='Izquierdo'?'i':'d';
+  const evo=recs.length>1?plantilla.map(([mov])=>{
+    const a=prim[mov]&&prim[mov][af], b=ult[mov]&&ult[mov][af];
+    return (a!==undefined&&a!==''&&b!==undefined&&b!=='')?`<div class="agente">${esc(mov)}: ${a}° → ${b}° (${b-a>=0?'+':''}${b-a}°)</div>`:'';
+  }).join(''):'';
+  const filas=plantilla.map(([mov,r],i)=>{
+    const u=ult[mov]||{};
+    return `<tr><td>${esc(mov)}<div style="font-size:.68rem;color:var(--muted);">ref. ${r!=null?r+'°':'—'}</div></td>
+      <td><input type="number" data-gm="${i}" data-s="d" value="${esc(u.d==null?'':u.d)}" inputmode="numeric" style="width:64px;"></td>
+      <td><input type="number" data-gm="${i}" data-s="i" value="${esc(u.i==null?'':u.i)}" inputmode="numeric" style="width:64px;"></td>
+      <td><select data-gm="${i}" data-s="p"><option></option><option${u.p==='Sí'?' selected':''}>Sí</option><option${u.p==='No'?' selected':''}>No</option></select></td>
+      <td data-def="${i}" style="font-size:.76rem;"></td></tr>`;
+  }).join('');
+  const div=document.createElement('div'); div.className='res-block'; div.id='gonioBloque'; div.style.scrollMarginTop='64px';
+  div.innerHTML=`<h3>📐 Goniometría (grados)</h3>
+    <div style="overflow-x:auto;"><table class="sesiones"><tr><th>Movimiento</th><th>Der.</th><th>Izq.</th><th>Dolor</th><th>Déficit</th></tr>${filas}</table></div>
+    <button type="button" class="guardar-evol-btn" id="gonGuardar">💾 Guardar medición</button> <span class="evol-guardado" id="gonMsg"></span>
+    <div style="margin-top:8px;">${evo}</div>
+    <p style="font-size:.72rem;color:var(--muted);margin:6px 0 0;">Déficit = diferencia con el lado sano (si hay lado afectado indicado) o con la referencia. Cada guardado crea una medición nueva con fecha.</p>`;
+  ref.parentNode.insertBefore(div,ref);
+  const actDef=()=>{
+    plantilla.forEach(([mov,r],i)=>{
+      const g=s=>div.querySelector(`[data-gm="${i}"][data-s="${s}"]`).value;
+      const def=gonioDeficit(r,g('d'),g('i'),lat);
+      div.querySelector(`[data-def="${i}"]`).textContent = def==null?'':(def>0?`−${def}°`:'sin déficit');
+    });
+  };
+  div.addEventListener('input',actDef); actDef();
+  div.querySelector('#gonGuardar').onclick=()=>{
+    const vals={};
+    plantilla.forEach(([mov],i)=>{
+      const g=s=>div.querySelector(`[data-gm="${i}"][data-s="${s}"]`).value;
+      if(g('d')!==''||g('i')!==''||g('p')!=='') vals[mov]={d:g('d'),i:g('i'),p:g('p')};
+    });
+    const msg=div.querySelector('#gonMsg');
+    if(!Object.keys(vals).length){ msg.style.color='var(--red)'; msg.textContent='Cargá al menos un valor.'; return; }
+    const o=leerGon(); o['g'+Date.now()]={fecha:new Date().toISOString(),zona:zonaDe(document.getElementById('patologia').value),lat,vals};
+    localStorage.setItem(evolucionClaveActual+'::gonio',JSON.stringify(o));
+    guardarPacienteRapido(); renderGonio();
+  };
+}
+
+/* ===== Motivo de consulta, anamnesis, diagnóstico kinésico, objetivos y consentimiento ===== */
+function leerHC(){ if(!evolucionClaveActual) return {}; try{ return (JSON.parse(localStorage.getItem(evolucionClaveActual+'::hc')||'{}').d)||{}; }catch(e){ return {}; } }
+function renderHC(){
+  const ref=document.getElementById('bloqueSesion'); if(!ref||!evolucionClaveActual) return;
+  const old=document.getElementById('hcBloque'); if(old) old.remove();
+  const sv=leerHC();
+  const T=(id,l,ph,r=2)=>`<label for="${id}">${l}</label><textarea id="${id}" rows="${r}" placeholder="${esc(ph)}">${esc(sv[id]||'')}</textarea>`;
+  const div=document.createElement('div'); div.className='res-block'; div.id='hcBloque'; div.style.scrollMarginTop='64px';
+  div.innerHTML=`<h3>📝 Motivo, anamnesis y objetivos</h3>`
+    +T('hcMotivo','Motivo de consulta','Con palabras del paciente')
+    +T('hcAnam','Anamnesis','Inicio, mecanismo, lado dominante, comportamiento del dolor en 24 h, qué lo agrava o alivia, tratamientos previos, estudios...',3)
+    +T('hcDx','Diagnóstico kinésico / hipótesis','Deficiencias, limitaciones de actividad y restricciones de participación')
+    +T('hcObj','Objetivos (con plazo)','Ej: subir escaleras sin dolor en 4 semanas')
+    +`<div class="check-row"><input type="checkbox" id="hcConsent" ${sv.hcConsent==='1'?'checked':''}><span>Consentimiento informado explicado y aceptado por el paciente${sv.hcConsentFecha?' ('+new Date(sv.hcConsentFecha).toLocaleDateString()+')':''}</span></div>`
+    +`<button type="button" class="guardar-evol-btn" id="hcGuardar">💾 Guardar</button> <span class="evol-guardado" id="hcMsg"></span>`;
+  const ev=document.getElementById('evalBloque');
+  (ev||ref).parentNode.insertBefore(div,ev||ref);
+  div.querySelector('#hcGuardar').onclick=()=>{
+    const d={fecha:new Date().toISOString()};
+    ['hcMotivo','hcAnam','hcDx','hcObj'].forEach(id=>{ d[id]=div.querySelector('#'+id).value.trim(); });
+    d.hcConsent=div.querySelector('#hcConsent').checked?'1':'';
+    if(d.hcConsent) d.hcConsentFecha=sv.hcConsentFecha||d.fecha;
+    localStorage.setItem(evolucionClaveActual+'::hc',JSON.stringify({d}));
+    guardarPacienteRapido();
+    div.querySelector('#hcMsg').textContent='Guardado ✓';
+  };
+}
+
+/* ===== PDF: incluir lo nuevo ===== */
+function hcPrintHTML(){
+  const s=leerHC(); if(!Object.keys(s).length) return '';
+  const fila=(t,v)=>v?`<div class="ph-row"><b>${t}:</b> ${esc(v)}</div>`:'';
+  const h=fila('Motivo de consulta',s.hcMotivo)+fila('Anamnesis',s.hcAnam)+fila('Diagnóstico kinésico',s.hcDx)+fila('Objetivos',s.hcObj)
+    +(s.hcConsent==='1'?`<div class="ph-row"><b>Consentimiento informado:</b> aceptado${s.hcConsentFecha?' el '+new Date(s.hcConsentFecha).toLocaleDateString():''}</div>`:'');
+  return h?'<div class="ph-h">Motivo, anamnesis y objetivos</div>'+h:'';
+}
+function medicionPrintHTML(){
+  let h='';
+  const L=Object.values(leerEsc()).filter(x=>!x.del).sort((a,b)=>new Date(a.f)-new Date(b.f));
+  if(L.length) h+='<div class="ph-h">Escalas funcionales</div><table class="ph-table"><tr><th>Fecha</th><th>Escala</th><th>Puntaje</th></tr>'
+    +L.map(x=>`<tr><td>${new Date(x.f).toLocaleDateString()}</td><td>${esc((ESCALAS_FUNC[x.k]||{n:x.k}).n)}</td><td>${esc(x.v)}</td></tr>`).join('')+'</table>';
+  const G=Object.values(leerGon()).filter(x=>!x.del).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  if(G.length){
+    const g=G[G.length-1];
+    h+=`<div class="ph-h">Goniometría — ${new Date(g.fecha).toLocaleDateString()}</div><table class="ph-table"><tr><th>Movimiento</th><th>Der.</th><th>Izq.</th><th>Dolor</th></tr>`
+      +Object.entries(g.vals).map(([m,v])=>`<tr><td>${esc(m)}</td><td>${esc(v.d)}</td><td>${esc(v.i)}</td><td>${esc(v.p)}</td></tr>`).join('')+'</table>';
+  }
+  return h;
+}
+const _epMed=evalPrintHTML;
+evalPrintHTML=function(){ return hcPrintHTML()+_epMed()+medicionPrintHTML(); };
+
+/* ===== Registrar los bloques al generar el plan ===== */
+const _reMed=renderEvaluacion;
+renderEvaluacion=function(){ _reMed(); renderEscalas(); renderGonio(); renderHC(); };
+
+/* ===== Plantilla SOAP en la evolución ===== */
+const _revSoap=renderEvolucion;
+renderEvolucion=function(){
+  _revSoap();
+  const t=document.getElementById('evolNota'); if(!t) return;
+  const b=document.createElement('button'); b.type='button'; b.className='banco-tab'; b.textContent='📝 Plantilla SOAP';
+  b.onclick=()=>{ if(!t.value.trim()) t.value='S (subjetivo): \nO (objetivo): \nA (análisis): \nP (plan): '; t.focus(); };
+  t.before(b);
+};
+
+/* ===== BLOQUE 11.2: usabilidad ===== */
+document.addEventListener('click',e=>{
+  const r=e.target.closest('.check-row');
+  if(!r||e.target.tagName==='INPUT'||e.target.closest('select,textarea,button')) return;
+  const c=r.querySelector('input[type=checkbox]');
+  if(c){ c.checked=!c.checked; c.dispatchEvent(new Event('change',{bubbles:true})); }
+});
+document.querySelectorAll('label').forEach(l=>{
+  if(l.htmlFor) return;
+  const n=l.nextElementSibling;
+  if(n&&/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName)&&n.id) l.htmlFor=n.id;
 });
 </script>
 </body>
