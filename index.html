@@ -569,7 +569,6 @@ details.acc-item>fieldset,details.acc-item>div{padding:2px 13px 13px;margin:0}
             <option value="lesion_medular">Lesión medular</option>
             <option value="parkinson">Enfermedad de Parkinson</option>
           </select>
-          <div id="chipsPat" class="chips"></div>
         </section>
 
         <section class="card acc-amber">
@@ -3198,5 +3197,140 @@ document.querySelectorAll('label').forEach(l=>{
 </script>
 </body>
 </html>
+
+<style id="msk30-style">
+:root{--msk30-bg:#f3f7f8;--msk30-card:#fff;--msk30-ink:#17313a;--msk30-muted:#6a7d84;--msk30-line:#dbe6e9;--msk30-accent:#00a896;--msk30-accent2:#267a8d;--msk30-soft:#e8f7f4;--msk30-danger:#d65c5c;--msk30-shadow:0 12px 35px rgba(22,48,58,.08)}
+.msk30-wrap{margin:0 0 28px;display:grid;gap:18px}.msk30-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}.msk30-kicker{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--msk30-accent2);font-weight:800}.msk30-title{font-size:1.65rem;margin:3px 0;color:var(--msk30-ink)}.msk30-sub{margin:0;color:var(--msk30-muted);max-width:760px}.msk30-actions{display:flex;gap:8px;flex-wrap:wrap}.msk30-btn{border:1px solid var(--msk30-line);background:#fff;color:var(--msk30-ink);border-radius:12px;padding:10px 13px;font-weight:750;cursor:pointer}.msk30-btn.primary{background:var(--msk30-accent);border-color:var(--msk30-accent);color:#fff}.msk30-btn:hover{transform:translateY(-1px);box-shadow:0 5px 15px rgba(0,0,0,.07)}
+.msk30-grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.msk30-metric{background:var(--msk30-card);border:1px solid var(--msk30-line);border-radius:18px;padding:16px;box-shadow:var(--msk30-shadow)}.msk30-metric span{display:block;color:var(--msk30-muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.msk30-metric strong{display:block;font-size:1.5rem;margin-top:7px;color:var(--msk30-ink)}.msk30-metric small{display:block;color:var(--msk30-muted);margin-top:3px}.msk30-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:18px}.msk30-card{background:var(--msk30-card);border:1px solid var(--msk30-line);border-radius:20px;padding:18px;box-shadow:var(--msk30-shadow)}.msk30-card h3{margin:0 0 5px;color:var(--msk30-ink)}.msk30-card p{color:var(--msk30-muted)}.msk30-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.msk30-chip{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--msk30-soft);color:#087d71;font-size:.72rem;font-weight:800}
+.msk30-body-stage{min-height:390px;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#effcf9 0,#f8fbfb 42%,#eef4f5 100%);border-radius:16px;border:1px solid var(--msk30-line);overflow:hidden}.msk30-body-stage svg{height:360px;max-width:100%}.msk30-hit{cursor:pointer;transition:.18s}.msk30-hit:hover{filter:brightness(1.08);transform:scale(1.04);transform-origin:center}.msk30-body-label{font-size:10px;fill:#365761;font-weight:800;pointer-events:none}.msk30-zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.msk30-zone{border:1px solid var(--msk30-line);background:#fff;border-radius:12px;padding:10px;text-align:left;cursor:pointer;color:var(--msk30-ink)}.msk30-zone b{display:block}.msk30-zone small{color:var(--msk30-muted)}.msk30-zone.active{border-color:var(--msk30-accent);background:var(--msk30-soft)}
+.msk30-gonio{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center}.msk30-gauge{width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--msk30-accent) var(--gauge,0deg),#e7eef0 0);display:grid;place-items:center;position:relative}.msk30-gauge:after{content:"";position:absolute;inset:13px;border-radius:50%;background:#fff}.msk30-gauge-value{position:relative;z-index:2;text-align:center}.msk30-gauge-value strong{display:block;font-size:1.7rem;color:var(--msk30-ink)}.msk30-gauge-value span{font-size:.7rem;color:var(--msk30-muted)}.msk30-formrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.msk30-formrow label{font-size:.75rem;font-weight:800;color:var(--msk30-muted)}.msk30-formrow input,.msk30-formrow select{width:100%;margin-top:5px}
+.msk30-bar{margin-top:15px}.msk30-bar-track{height:12px;border-radius:999px;background:#e8eef0;overflow:hidden}.msk30-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--msk30-accent),var(--msk30-accent2));border-radius:999px;transition:width .3s}.msk30-scale{display:flex;justify-content:space-between;color:var(--msk30-muted);font-size:.68rem;margin-top:5px}
+.msk30-timeline{position:relative;margin:8px 0 0 10px;padding-left:25px}.msk30-timeline:before{content:"";position:absolute;left:6px;top:7px;bottom:7px;width:2px;background:#d9e8ea}.msk30-event{position:relative;padding:0 0 18px}.msk30-event:before{content:"";position:absolute;left:-24px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--msk30-accent);box-shadow:0 0 0 4px #e4f5f2}.msk30-event time{font-size:.7rem;color:var(--msk30-muted)}.msk30-event b{display:block;color:var(--msk30-ink);margin-top:3px}.msk30-event span{font-size:.78rem;color:var(--msk30-muted)}
+.msk30-library{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.msk30-ex{border:1px solid var(--msk30-line);border-radius:16px;overflow:hidden;background:#fff}.msk30-ex-visual{height:130px;background:linear-gradient(135deg,#edf8f7,#eef3f5);display:grid;place-items:center}.msk30-ex-visual svg{height:115px}.msk30-ex-body{padding:13px}.msk30-ex-body b{color:var(--msk30-ink)}.msk30-ex-body p{font-size:.76rem;margin:5px 0 9px}.msk30-tags{display:flex;gap:5px;flex-wrap:wrap}.msk30-tag{font-size:.65rem;padding:4px 7px;background:#f1f5f6;border-radius:999px;color:#567078;font-weight:700}
+.msk30-visuals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.msk30-visual{min-height:160px;border-radius:17px;border:1px solid var(--msk30-line);background:#f7fafb;padding:14px;overflow:hidden}.msk30-visual h4{margin:0 0 8px;color:var(--msk30-ink)}.msk30-visual svg{width:100%;height:110px}.msk30-note{padding:11px 13px;border-radius:12px;background:#f8fafb;border:1px solid var(--msk30-line);color:var(--msk30-muted);font-size:.78rem}
+@media(max-width:1050px){.msk30-grid4{grid-template-columns:repeat(2,1fr)}.msk30-layout{grid-template-columns:1fr}.msk30-library,.msk30-visuals{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.msk30-head{display:block}.msk30-actions{margin-top:12px}.msk30-grid4,.msk30-library,.msk30-visuals{grid-template-columns:1fr}.msk30-gonio{grid-template-columns:1fr;justify-items:center}.msk30-formrow{grid-template-columns:1fr}.msk30-zones{grid-template-columns:1fr}}
+</style>
+
+<section class="section" id="secVision">
+  <div class="msk30-wrap">
+    <div class="msk30-head">
+      <div>
+        <div class="msk30-kicker">MSK Clinical Intelligence · 3.0</div>
+        <h2 class="msk30-title">Visión clínica</h2>
+        <p class="msk30-sub">Una lectura visual del caso actual. Los datos se toman de la evaluación existente; esta capa organiza la información y no reemplaza el examen físico ni el juicio profesional.</p>
+      </div>
+      <div class="msk30-actions"><button class="msk30-btn" id="msk30GoEval">← Volver a evaluación</button><button class="msk30-btn primary" id="msk30Refresh">↻ Actualizar visión</button></div>
+    </div>
+    <div class="msk30-grid4">
+      <div class="msk30-metric"><span>Paciente</span><strong id="msk30Patient">—</strong><small id="msk30PatientMeta">Sin seleccionar</small></div>
+      <div class="msk30-metric"><span>Dolor / EVA</span><strong id="msk30Pain">—</strong><small>Registrar en evaluación clínica</small></div>
+      <div class="msk30-metric"><span>Región</span><strong id="msk30Zone">—</strong><small id="msk30Path">Patología no seleccionada</small></div>
+      <div class="msk30-metric"><span>Screening</span><strong id="msk30Screen">—</strong><small id="msk30ScreenDetail">Sin evaluación</small></div>
+    </div>
+    <div class="msk30-layout">
+      <div class="msk30-card">
+        <div class="msk30-card-head"><div><h3>Mapa corporal</h3><p>Seleccioná una región para llevarla al selector clínico.</p></div><span class="msk30-chip" id="msk30SelectedZone">Sin región</span></div>
+        <div class="msk30-body-stage">
+          <svg viewBox="0 0 300 430" role="img" aria-label="Mapa corporal anterior interactivo">
+            <g fill="#d9e7e9" stroke="#6c858d" stroke-width="2">
+              <circle cx="150" cy="45" r="31"/><path d="M116 82 Q150 68 184 82 L199 160 L180 210 L171 320 L129 320 L120 210 L101 160 Z"/><path d="M104 95 L50 170 L66 184 L123 129 M196 95 L250 170 L234 184 L177 129"/><path d="M129 316 L105 405 M171 316 L195 405" fill="none" stroke-width="20" stroke-linecap="round"/>
+            </g>
+            <g class="msk30-hit" data-vzone="hombro"><ellipse cx="104" cy="100" rx="19" ry="14" fill="#62cbbf"/><ellipse cx="196" cy="100" rx="19" ry="14" fill="#62cbbf"/><text x="205" y="93" class="msk30-body-label">HOMBRO</text></g>
+            <g class="msk30-hit" data-vzone="codo"><circle cx="63" cy="176" r="13" fill="#70b9d0"/><circle cx="237" cy="176" r="13" fill="#70b9d0"/><text x="246" y="173" class="msk30-body-label">CODO</text></g>
+            <g class="msk30-hit" data-vzone="cadera"><ellipse cx="130" cy="207" rx="19" ry="14" fill="#b6a6dc"/><ellipse cx="170" cy="207" rx="19" ry="14" fill="#b6a6dc"/><text x="176" y="222" class="msk30-body-label">CADERA</text></g>
+            <g class="msk30-hit" data-vzone="rodilla"><circle cx="129" cy="319" r="13" fill="#e3a867"/><circle cx="171" cy="319" r="13" fill="#e3a867"/><text x="179" y="317" class="msk30-body-label">RODILLA</text></g>
+            <g class="msk30-hit" data-vzone="tobillo"><circle cx="105" cy="405" r="11" fill="#d18c9e"/><circle cx="195" cy="405" r="11" fill="#d18c9e"/><text x="201" y="403" class="msk30-body-label">TOBILLO</text></g>
+            <g class="msk30-hit" data-vzone="cervical"><circle cx="150" cy="82" r="10" fill="#82a9d4"/><text x="158" y="78" class="msk30-body-label">CERVICAL</text></g>
+            <g class="msk30-hit" data-vzone="lumbar"><rect x="140" y="145" width="20" height="48" rx="9" fill="#7db5a8"/><text x="164" y="172" class="msk30-body-label">LUMBAR</text></g>
+          </svg>
+        </div>
+        <div class="msk30-zones">
+          <button class="msk30-zone" data-vzone="hombro"><b>Hombro</b><small>Manguito · escápula</small></button><button class="msk30-zone" data-vzone="codo"><b>Codo</b><small>Epicondíleo · flexores</small></button>
+          <button class="msk30-zone" data-vzone="cervical"><b>Cervical</b><small>Cuello · miembro superior</small></button><button class="msk30-zone" data-vzone="lumbar"><b>Lumbar</b><small>Columna · pelvis</small></button>
+          <button class="msk30-zone" data-vzone="cadera"><b>Cadera</b><small>Pelvis · muslo</small></button><button class="msk30-zone" data-vzone="rodilla"><b>Rodilla</b><small>Extensor · menisco</small></button>
+          <button class="msk30-zone" data-vzone="tobillo"><b>Tobillo / pie</b><small>Pie · tríceps sural</small></button><button class="msk30-zone" data-vzone="general"><b>General</b><small>Sin región específica</small></button>
+        </div>
+      </div>
+      <div class="msk30-card">
+        <div class="msk30-card-head"><div><h3>Goniometría visual</h3><p>Herramienta de registro y comparación; la referencia se puede adaptar al caso.</p></div><span class="msk30-chip">ROM</span></div>
+        <div class="msk30-gonio"><div class="msk30-gauge" id="msk30Gauge"><div class="msk30-gauge-value"><strong id="msk30AngleValue">0°</strong><span>rango registrado</span></div></div><div><div class="msk30-formrow"><label>Movimiento<select id="msk30Movement"><option>Flexión de hombro</option><option>Abducción de hombro</option><option>Flexión de codo</option><option>Extensión de codo</option><option>Flexión de rodilla</option><option>Flexión de cadera</option><option>Dorsiflexión de tobillo</option></select></label><label>Ángulo<input id="msk30Angle" type="number" min="0" max="360" value="0"></label></div><div class="msk30-formrow" style="margin-top:9px"><label>Referencia<input id="msk30Reference" type="number" min="1" max="360" value="180"></label><label>Sesión<input id="msk30Session" type="text" placeholder="Inicial / S2 / S3"></label></div></div></div>
+        <div class="msk30-bar"><div class="msk30-bar-track"><div class="msk30-bar-fill" id="msk30RomFill"></div></div><div class="msk30-scale"><span>0°</span><span id="msk30RefLabel">180° referencia</span></div></div>
+        <div class="msk30-note" style="margin-top:14px">💡 Esta herramienta no modifica automáticamente los valores clínicos originales. Sirve como panel visual; la goniometría oficial continúa en el módulo de evaluación existente.</div>
+      </div>
+    </div>
+    <div class="msk30-layout">
+      <div class="msk30-card"><div class="msk30-card-head"><div><h3>Timeline del tratamiento</h3><p>Sesiones y registros disponibles en la evaluación actual.</p></div></div><div id="msk30Timeline" class="msk30-timeline"></div></div>
+      <div class="msk30-card"><div class="msk30-card-head"><div><h3>Lectura del screening</h3><p>Resumen de banderas registradas.</p></div></div><div id="msk30ScreeningBox" class="msk30-note">Generá la orientación para actualizar este panel.</div></div>
+    </div>
+    <div class="msk30-card"><div class="msk30-card-head"><div><h3>Biblioteca visual de ejercicios</h3><p>Material demostrativo organizado por objetivo. El banco original continúa disponible en Herramientas.</p></div><span class="msk30-chip">Biblioteca MSK</span></div><div class="msk30-library" id="msk30ExerciseLibrary"></div></div>
+    <div class="msk30-card"><div class="msk30-card-head"><div><h3>Recursos visuales</h3><p>Paneles anatómicos y de movimiento para acompañar la explicación al paciente o una exposición académica.</p></div></div><div class="msk30-visuals">
+      <div class="msk30-visual"><h4>🦴 Articulación</h4><svg viewBox="0 0 250 120"><circle cx="88" cy="60" r="34" fill="#d9e7e9" stroke="#567078" stroke-width="3"/><path d="M115 35 Q160 60 115 85" fill="none" stroke="#00a896" stroke-width="12" stroke-linecap="round"/><path d="M154 34 Q195 60 154 86" fill="none" stroke="#267a8d" stroke-width="12" stroke-linecap="round"/><text x="12" y="110" fill="#567078" font-size="11">movilidad · carga · control</text></svg></div>
+      <div class="msk30-visual"><h4>📐 Movimiento</h4><svg viewBox="0 0 250 120"><path d="M55 90 L115 35 L180 90" fill="none" stroke="#6c858d" stroke-width="8" stroke-linecap="round"/><path d="M102 52 A45 45 0 0 1 150 55" fill="none" stroke="#00a896" stroke-width="5"/><text x="104" y="42" fill="#267a8d" font-size="12" font-weight="700">ROM</text></svg></div>
+      <div class="msk30-visual"><h4>💪 Carga</h4><svg viewBox="0 0 250 120"><rect x="35" y="54" width="180" height="12" rx="6" fill="#d9e7e9"/><rect x="35" y="54" width="120" height="12" rx="6" fill="#00a896"/><circle cx="155" cy="60" r="12" fill="#267a8d"/><text x="38" y="92" fill="#567078" font-size="11">progresión de tolerancia</text></svg></div>
+    </div></div>
+  </div>
+</section>
+
+<script id="msk30-script">
+(function(){
+  'use strict';
+  const ZMAP={hombro:'Hombro',codo:'Codo',muñeca:'Muñeca / mano',cervical:'Cervical',lumbar:'Lumbar',cadera:'Cadera',rodilla:'Rodilla',tobillo:'Tobillo / pie',general:'General'};
+  const exercises=[
+    {n:'Movilidad activa asistida',o:'Movilidad',t:'Control del rango sin aumentar síntomas.',tags:['movilidad','inicio'],svg:'<circle cx="95" cy="35" r="12" fill="#d9e7e9"/><path d="M95 49 L95 83 M95 57 L55 76 M95 57 L135 76 M95 83 L70 112 M95 83 L120 112" stroke="#607a82" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M52 72 Q95 15 138 72" fill="none" stroke="#00a896" stroke-width="4"/>'},
+    {n:'Rotación externa con banda',o:'Control motor',t:'Activación progresiva de rotadores externos.',tags:['hombro','control'],svg:'<circle cx="105" cy="30" r="11" fill="#d9e7e9"/><path d="M105 43 L105 78 M105 53 L76 72 M105 53 L133 72 M105 78 L82 108 M105 78 L128 108" stroke="#607a82" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M67 67 Q105 48 143 67" fill="none" stroke="#267a8d" stroke-width="5"/>'},
+    {n:'Puente de cadera',o:'Fuerza',t:'Extensión de cadera y control lumbopélvico.',tags:['cadera','fuerza'],svg:'<circle cx="45" cy="78" r="10" fill="#d9e7e9"/><path d="M56 82 L108 55 L175 80 M108 55 L122 95 M175 80 L205 103" stroke="#607a82" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M70 83 Q115 20 160 78" fill="none" stroke="#00a896" stroke-width="5"/>'},
+    {n:'Sentadilla asistida',o:'Funcional',t:'Trabajo de fuerza y control de miembro inferior.',tags:['rodilla','funcional'],svg:'<circle cx="100" cy="26" r="11" fill="#d9e7e9"/><path d="M100 40 L100 70 L70 90 L125 90 L145 110 M100 70 L135 75" stroke="#607a82" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M70 90 Q100 110 130 90" fill="none" stroke="#267a8d" stroke-width="5"/>'},
+    {n:'Dorsiflexión en pared',o:'Movilidad',t:'Movilidad de tobillo con carga progresiva.',tags:['tobillo','movilidad'],svg:'<path d="M185 18 L185 110" stroke="#6c858d" stroke-width="8"/><circle cx="95" cy="35" r="11" fill="#d9e7e9"/><path d="M95 48 L105 75 L80 105 M105 75 L145 75 L175 105" stroke="#607a82" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M145 75 Q160 52 181 57" fill="none" stroke="#00a896" stroke-width="5"/>'},
+    {n:'Retracción escapular',o:'Control motor',t:'Conciencia y control de la cintura escapular.',tags:['escápula','hombro'],svg:'<circle cx="105" cy="25" r="11" fill="#d9e7e9"/><path d="M105 39 L105 95 M105 53 L65 72 M105 53 L145 72" stroke="#607a82" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M55 68 Q70 52 85 68 M125 68 Q140 52 155 68" fill="none" stroke="#00a896" stroke-width="5"/>'}
+  ];
+  function qs(s){return document.querySelector(s)}
+  function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function currentZone(){const z=qs('#zona');return z&&z.value?z.value:''}
+  function currentPath(){const p=qs('#patologia');return p&&p.options[p.selectedIndex]?p.options[p.selectedIndex].text:''}
+  function selectedCount(id){const box=qs('#'+id);return box?[...box.querySelectorAll('input:checked')].length:0}
+  function goZone(z){
+    const sel=qs('#zona'); if(!sel)return;
+    const target=[...sel.options].find(o=>(o.value||'').toLowerCase()===z.toLowerCase() || o.textContent.toLowerCase().includes(z.toLowerCase()));
+    if(target){sel.value=target.value; sel.dispatchEvent(new Event('change',{bubbles:true}));}
+    document.querySelectorAll('[data-vzone]').forEach(x=>x.classList.toggle('active',x.dataset.vzone===z));
+    const chip=qs('#msk30SelectedZone'); if(chip)chip.textContent=ZMAP[z]||z;
+    const live=qs('#mskLiveZone');if(live)live.textContent=ZMAP[z]||z;
+  }
+  function refresh(){
+    const patient=(qs('#idPaciente')?.value||'').trim(); const age=qs('#edad')?.value||''; const zone=currentZone(); const path=currentPath();
+    const p=qs('#msk30Patient');if(p)p.textContent=patient||'—'; const pm=qs('#msk30PatientMeta');if(pm)pm.textContent=age?age+' años':'Sin edad registrada';
+    const mz=qs('#msk30Zone');if(mz)mz.textContent=ZMAP[zone]||zone||'—'; const mp=qs('#msk30Path');if(mp)mp.textContent=path&&path!=='— todas las zonas —'?path:'Patología no seleccionada';
+    const red=selectedCount('rojas'), am=selectedCount('amarillas'), az=selectedCount('azules'), ne=selectedCount('negras');
+    const total=red+am+az+ne; const ss=qs('#msk30Screen');if(ss)ss.textContent=red?'ATENCIÓN':total?'Registrado':'Sin datos';
+    const sd=qs('#msk30ScreenDetail');if(sd)sd.textContent=red?red+' bandera(s) roja(s)':total?total+' factor(es) registrado(s)':'Sin evaluación';
+    const sb=qs('#msk30ScreeningBox');if(sb){sb.innerHTML=red?'<b style="color:#b23d3d">Priorizar revisión de las banderas rojas registradas.</b>':total?`Se registraron ${total} factor(es): ${am} amarillo(s), ${az} azul(es), ${ne} negro(s).`:'No hay factores de screening registrados en la pantalla actual.';}
+    renderTimeline();
+  }
+  function renderTimeline(){
+    const c=qs('#msk30Timeline'); if(!c)return;
+    const arr=(typeof sesionesGlobal!=='undefined' && Array.isArray(sesionesGlobal))?sesionesGlobal:[]; const evo=(typeof evolucionGlobal!=='undefined' && evolucionGlobal)?evolucionGlobal:{};
+    if(!arr.length){c.innerHTML='<div class="msk30-note">Todavía no hay un plan de sesiones generado. Generá la orientación clínica para construir el timeline.</div>';return;}
+    c.innerHTML=arr.map(s=>{const r=evo[s.n];const date=r?.fecha?new Date(r.fecha).toLocaleDateString('es-AR'):'Pendiente';const done=r?.marcados?.length||0;const total=s.ejercicios?.length||0;return `<div class="msk30-event"><time>Sesión ${esc(s.n)} · ${esc(date)}</time><b>${r?'Registrada':'Planificada'}</b><span>${r?`${done}/${total} ejercicios registrados`:'Sin registro de evolución todavía'}</span></div>`}).join('');
+  }
+  function renderExercises(){
+    const c=qs('#msk30ExerciseLibrary');if(!c)return;c.innerHTML=exercises.map((e,i)=>`<article class="msk30-ex"><div class="msk30-ex-visual"><svg viewBox="0 0 210 130">${e.svg}</svg></div><div class="msk30-ex-body"><b>${esc(e.n)}</b><p>${esc(e.t)}</p><div class="msk30-tags">${e.tags.map(t=>`<span class="msk30-tag">${esc(t)}</span>`).join('')}</div></div></article>`).join('');
+  }
+  function updateGauge(){const a=Math.max(0,Number(qs('#msk30Angle')?.value||0)),r=Math.max(1,Number(qs('#msk30Reference')?.value||180));const pct=Math.min(1,a/r);const g=qs('#msk30Gauge');if(g)g.style.setProperty('--gauge',(pct*360)+'deg');const v=qs('#msk30AngleValue');if(v)v.textContent=Math.round(a)+'°';const f=qs('#msk30RomFill');if(f)f.style.width=(pct*100)+'%';const l=qs('#msk30RefLabel');if(l)l.textContent=r+'° referencia';}
+  function init(){
+    const app=qs('#appContent');if(!app)return;
+    const nav=qs('.nav');if(nav&&!qs('[data-ir="secVision"]')){const b=document.createElement('button');b.type='button';b.dataset.ir='secVision';b.innerHTML='05 · Visión clínica';nav.insertBefore(b,nav.lastElementChild)}
+    document.addEventListener('click',e=>{const b=e.target.closest('[data-ir="secVision"]');if(b&&typeof window.navTo==='function'){window.navTo('secVision');refresh();}});
+    document.querySelectorAll('[data-vzone]').forEach(el=>el.addEventListener('click',()=>goZone(el.dataset.vzone)));
+    qs('#msk30GoEval')?.addEventListener('click',()=>window.navTo&&window.navTo('secEvaluacion'));
+    qs('#msk30Refresh')?.addEventListener('click',refresh);
+    qs('#msk30Angle')?.addEventListener('input',updateGauge);qs('#msk30Reference')?.addEventListener('input',updateGauge);
+    ['idPaciente','edad','zona','patologia','rojas','amarillas','azules','negras'].forEach(id=>{const el=qs('#'+id);el?.addEventListener('input',refresh);el?.addEventListener('change',refresh);});
+    renderExercises();updateGauge();refresh();
+    setInterval(()=>{if(qs('#secVision')?.classList.contains('active'))refresh()},1500);
+  }
+  window.addEventListener('load',init);
+})();
+</script>
 </body>
 </html>
