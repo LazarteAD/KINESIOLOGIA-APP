@@ -5,487 +5,569 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Asistente Clínico Musculoesquelético</title>
 <style>
-  :root{
-    --ink:#1e2430; --paper:#f2f3fb; --panel:#ffffff; --line:#e2e4f0;
-    --teal:#00b8a9; --teal-deep:#0a8f83; --amber:#f5a524; --red:#f0455a;
-    --blue:#3d7ef5; --purple:#8b5cf6; --pink:#ec4899; --orange:#f97316; --green:#22c55e;
-    --muted:#6b7280;
-    --shadow:0 2px 10px rgba(30,36,48,.06), 0 1px 2px rgba(30,36,48,.05);
-    box-sizing:border-box;
-    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  html{scroll-padding-top:env(safe-area-inset-top,0px);}
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --ink:#eef0f7; --paper:#12141f; --panel:#1b1f2e; --line:#2d3346;
-      --teal:#2dd4c4; --teal-deep:#5eead4; --amber:#fbbf24; --red:#fb7185;
-      --blue:#60a5fa; --purple:#a78bfa; --pink:#f472b6; --orange:#fb923c; --green:#4ade80;
-      --muted:#9aa3b8;
-      --shadow:0 2px 14px rgba(0,0,0,.35);
-    }
-  }
-  :root[data-theme="dark"]{
-    --ink:#eef0f7; --paper:#12141f; --panel:#1b1f2e; --line:#2d3346;
-    --teal:#2dd4c4; --teal-deep:#5eead4; --amber:#fbbf24; --red:#fb7185;
-    --blue:#60a5fa; --purple:#a78bfa; --pink:#f472b6; --orange:#fb923c; --green:#4ade80;
-    --muted:#9aa3b8;
-    --shadow:0 2px 14px rgba(0,0,0,.35);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; color:var(--ink); font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif; line-height:1.45;
-    background-color:var(--paper);
-  }
-  body::before{
-    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; transform:translateZ(0);
-    background-image:
-      radial-gradient(circle at 12% 18%, rgba(139,92,246,.14), transparent 42%),
-      radial-gradient(circle at 88% 12%, rgba(0,184,169,.14), transparent 42%),
-      radial-gradient(circle at 80% 82%, rgba(236,72,153,.11), transparent 45%),
-      radial-gradient(circle at 15% 88%, rgba(61,126,245,.11), transparent 45%);
-    background-repeat:no-repeat;
-  }
-  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 80px;}
-  header{
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='%23ffffff' fill-opacity='0.14'%3E%3Cpath d='M25 18h6v9h9v6h-9v9h-6v-9h-9v-6h9z'/%3E%3C/g%3E%3C/svg%3E"),
-      linear-gradient(120deg,var(--purple),var(--teal) 55%,var(--blue));
-    background-repeat:repeat, no-repeat;
-    border-radius:14px;padding:22px 20px;margin-bottom:20px;box-shadow:var(--shadow);
-  }
-  header h1{font-size:1.5rem;margin:0 0 4px;font-weight:700;color:#fff;}
-  header p{margin:0;color:rgba(255,255,255,.92);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.88rem;}
-  h2{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.78rem;font-weight:700;color:var(--teal-deep);letter-spacing:.03em;margin:0 0 10px;padding-left:0;display:flex;align-items:center;gap:6px;}
-  section.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);transition:box-shadow .2s, transform .2s;}
-  section.card.acc-purple{border-left-color:var(--purple);}
-  section.card.acc-pink{border-left-color:var(--pink);}
-  section.card.acc-orange{border-left-color:var(--orange);}
-  section.card.acc-blue{border-left-color:var(--blue);}
-  section.card.acc-green{border-left-color:var(--green);}
-  section.card.acc-amber{border-left-color:var(--amber);}
-  label{display:block;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.84rem;margin:7px 0 3px;font-weight:600;color:var(--ink);}
-  input[type=number],input[type=text],input[type=password],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.9rem;transition:border-color .15s, box-shadow .15s;}
-  input[type=number]:focus,input[type=text]:focus,input[type=password]:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,184,169,.18);}
-  textarea{resize:vertical;font-family:-apple-system,Helvetica,Arial,sans-serif;}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 16px;}
-  @media(max-width:600px){.grid3{grid-template-columns:1fr;}}
-  fieldset{border:none;padding:0;margin:8px 0 0;}
-  .check-row{display:flex;align-items:flex-start;gap:8px;padding:9px 6px;border-radius:6px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.83rem;border-bottom:1px dashed var(--line);transition:background .15s;cursor:pointer;}
-  .check-row:hover{background:rgba(0,184,169,.06);}
-  .check-row input{margin-top:3px;accent-color:var(--teal-deep);}
-  .flagband{border-radius:20px;padding:4px 12px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.03em;display:inline-block;margin-bottom:8px;}
-  .band-red{background:var(--red);color:#fff;} .band-amber{background:var(--amber);color:#241a08;}
-  .band-blue{background:var(--blue);color:#fff;} .band-black{background:var(--ink);color:var(--paper);}
-  button{font-family:-apple-system,Helvetica,Arial,sans-serif;}
-  button#run{
-    width:100%;padding:14px;font-weight:700;font-size:.96rem;color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(10,143,131,.35);transition:transform .15s, box-shadow .15s;
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='%23ffffff' fill-opacity='0.10'%3E%3Cpath d='M25 18h6v9h9v6h-9v9h-6v-9h-9v-6h9z'/%3E%3C/g%3E%3C/svg%3E"),
-      linear-gradient(120deg,var(--teal-deep),var(--teal));
-    background-repeat:repeat, no-repeat;
-  }
-  button#run:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(10,143,131,.45);}
-  button#run:active{transform:translateY(1px);box-shadow:0 2px 8px rgba(10,143,131,.35);}
-  #results{margin-top:22px;}
-  .res-block{border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;background:var(--panel);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow);animation:fadeSlideIn .25s ease;}
-  .res-block.alerta{border-left-color:var(--red);background:linear-gradient(0deg, rgba(240,69,90,.06), rgba(240,69,90,.06)), var(--panel);}
-  .res-block h3{margin:0 0 8px;font-size:1rem;font-family:-apple-system,Helvetica,Arial,sans-serif;color:var(--teal-deep);}
-  .res-block.alerta h3{color:var(--red);}
-  .res-block ul{margin:4px 0 0;padding-left:20px;} .res-block li{margin-bottom:4px;}
-  .imc-pill{display:inline-block;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;font-weight:700;background:linear-gradient(120deg,var(--purple),var(--blue));color:#fff;border-radius:20px;padding:4px 14px;margin-top:6px;}
-  .disclaimer{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.77rem;color:var(--muted);border-top:1px solid var(--line);margin-top:28px;padding-top:14px;}
-  .agente{padding:8px 0;border-bottom:1px dashed var(--line);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.86rem;}
-  .agente b{font-family:inherit;}
-  .agente .dosis{color:var(--muted);font-size:.82rem;}
-  .agente.contra{color:var(--red);}
-  .agente.contra b{color:var(--red);}
-  .agente .warn{font-weight:700;font-size:.75rem;letter-spacing:.02em;}
-  table.sesiones{width:100%;border-collapse:collapse;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.82rem;}
-  table.sesiones th{text-align:left;font-size:.7rem;letter-spacing:.03em;color:var(--muted);border-bottom:1px solid var(--line);padding:4px 6px;}
-  table.sesiones td{vertical-align:top;padding:7px 6px;border-bottom:1px solid var(--line);}
-  table.sesiones td.n{font-weight:700;color:var(--teal-deep);width:26px;}
-  table.sesiones td.f{width:130px;color:var(--teal-deep);font-weight:600;}
-  .stepbtn{padding:10px 18px;font-weight:700;font-size:.82rem;background:linear-gradient(120deg,var(--purple),var(--pink));color:#fff;border:none;border-radius:20px;cursor:pointer;white-space:nowrap;transition:transform .15s, box-shadow .15s;box-shadow:0 3px 10px rgba(139,92,246,.3);}
-  .stepbtn:hover:not(:disabled){transform:translateY(-1px);}
-  .stepbtn:disabled{opacity:.3;cursor:default;box-shadow:none;}
-  .dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--panel);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--muted);padding:0;transition:transform .15s;}
-  .dot:hover{transform:scale(1.12);}
-  .dot.active{background:linear-gradient(120deg,var(--purple),var(--pink));color:#fff;border-color:transparent;}
-  .dot.done:not(.active){border-color:var(--green);box-shadow:inset 0 0 0 2px var(--green);color:var(--green);}
-  .sesion-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;flex-wrap:wrap;}
-  .sesion-dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;flex:1;}
-  .sesion-progress{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-bottom:10px;}
-  .sesion-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:6px;transition:width .3s ease;}
-  .res-block.sesion-block{position:relative;overflow:hidden;}
-  .res-block.sesion-block::before{content:'💪';position:absolute;right:-14px;top:-18px;font-size:5.5rem;opacity:.07;pointer-events:none;}
 
-  @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-
-  details.acc-item{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--paper);overflow:hidden;}
-  details.acc-item summary{cursor:pointer;padding:11px 14px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.85rem;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;transition:background .15s;}
-  details.acc-item summary:hover{background:rgba(0,184,169,.08);}
-  details.acc-item summary::-webkit-details-marker{display:none;}
-  details.acc-item summary::before{content:'▸';display:inline-block;transition:transform .18s;color:var(--teal-deep);font-weight:700;}
-  details.acc-item[open] summary::before{transform:rotate(90deg);}
-  details.acc-item > fieldset, details.acc-item > div{padding:2px 14px 14px;margin:0;animation:fadeSlideIn .22s ease;}
-  .acc-count{font-weight:600;color:var(--purple);font-size:.76rem;margin-left:auto;background:rgba(139,92,246,.12);padding:2px 8px;border-radius:10px;}
-
-  .grid-add-pat{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start;margin-bottom:16px;}
-  @media(max-width:760px){.grid-add-pat{grid-template-columns:1fr;}}
-
-  .banco-tabs{display:flex;gap:6px;flex-wrap:wrap;}
-  .banco-tab{padding:7px 14px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.78rem;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:20px;cursor:pointer;transition:transform .15s;}
-  .banco-tab:hover{transform:translateY(-1px);}
-  .banco-tab.active{background:linear-gradient(120deg,var(--orange),var(--amber));color:#fff;border-color:transparent;}
-  .ban-item{display:block;width:100%;text-align:left;margin-bottom:6px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.82rem;cursor:pointer;transition:border-color .15s, transform .1s;}
-  .ban-item:hover{border-color:var(--orange);transform:translateX(2px);}
-  .ban-item.added{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08);}
-  .banco-ref-group{margin-bottom:10px;}
-  .banco-ref-group h4{margin:0 0 6px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.78rem;color:var(--teal-deep);}
-  .banco-ref-group ul{margin:0;padding-left:18px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.82rem;}
-  .banco-ref-group li{margin-bottom:3px;}
-
-  details.acc-toggle{margin-bottom:16px;}
-  details.acc-toggle summary{
-    cursor:pointer;padding:13px 18px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;font-size:.9rem;color:#fff;border:none;border-radius:10px;list-style:none;box-shadow:var(--shadow);transition:transform .15s;
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='%23ffffff' fill-opacity='0.14'%3E%3Cpath d='M25 18h6v9h9v6h-9v9h-6v-9h-9v-6h9z'/%3E%3C/g%3E%3C/svg%3E"),
-      linear-gradient(120deg,var(--purple),var(--pink));
-    background-repeat:repeat, no-repeat;
+:root{
+  --ink:#17202a; --paper:#f6f8fb; --panel:#ffffff; --panel-soft:#f1f4f8;
+  --line:#dfe5ec; --line-strong:#cbd5e1; --muted:#64748b;
+  --teal:#0f9d8d; --teal-deep:#08786d; --blue:#3977e8; --purple:#7c55d9;
+  --pink:#d94f91; --orange:#e97816; --amber:#e6a11b; --red:#d94156; --green:#1c9b57;
+  --shadow:0 8px 24px rgba(23,32,42,.06),0 1px 3px rgba(23,32,42,.05);
+  --radius:12px; --sidebar:230px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#edf2f7;--paper:#0f141b;--panel:#171e27;--panel-soft:#202936;
+    --line:#2b3542;--line-strong:#3b4858;--muted:#9aa8b8;
+    --teal:#36c7b5;--teal-deep:#67dfcf;--blue:#6ea0f2;--purple:#a88be8;
+    --pink:#ef79b0;--orange:#fb9b49;--amber:#f5c45c;--red:#fb7185;--green:#55c98a;
+    --shadow:0 10px 30px rgba(0,0,0,.24);
   }
-  details.acc-toggle summary:hover{transform:translateY(-1px);}
-  details.acc-toggle summary::-webkit-details-marker{display:none;}
-  details.acc-toggle[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0;}
-  details.acc-toggle > .grid-add-pat{margin-top:0;padding:16px;border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;background:var(--paper);animation:fadeSlideIn .22s ease;}
+}
+:root[data-theme="dark"]{
+  --ink:#edf2f7;--paper:#0f141b;--panel:#171e27;--panel-soft:#202936;
+  --line:#2b3542;--line-strong:#3b4858;--muted:#9aa8b8;
+  --teal:#36c7b5;--teal-deep:#67dfcf;--blue:#6ea0f2;--purple:#a88be8;
+  --pink:#ef79b0;--orange:#fb9b49;--amber:#f5c45c;--red:#fb7185;--green:#55c98a;
+  --shadow:0 10px 30px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{
+  margin:0;color:var(--ink);background:var(--paper);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  line-height:1.45;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 8%,rgba(124,85,217,.08),transparent 30%),
+    radial-gradient(circle at 92% 10%,rgba(15,157,141,.07),transparent 30%);
+}
+.app-shell{min-height:100vh;display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr)}
+.sidebar{
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;
+  padding:18px 14px;background:var(--panel);border-right:1px solid var(--line);z-index:30;
+}
+.brand{padding:8px 10px 18px;border-bottom:1px solid var(--line)}
+.brand-mark{
+  width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--purple),var(--teal));color:#fff;font-weight:800;
+  box-shadow:0 5px 14px rgba(15,157,141,.2);margin-bottom:10px;
+}
+.brand h1{font-size:1rem;line-height:1.2;margin:0 0 4px}
+.brand p{font-size:.72rem;color:var(--muted);margin:0}
+.nav{display:grid;gap:5px;margin-top:16px}
+.nav button{
+  width:100%;border:1px solid transparent;background:transparent;color:var(--muted);
+  padding:10px 11px;border-radius:9px;text-align:left;font-weight:650;font-size:.82rem;
+}
+.nav button:hover,.nav button.active{background:var(--panel-soft);color:var(--ink);border-color:var(--line)}
+.nav button.active{box-shadow:inset 3px 0 0 var(--teal)}
+.sidebar-footer{margin-top:auto;font-size:.68rem;color:var(--muted);padding:10px}
+.main{min-width:0;padding:22px 24px 70px}
+.topbar{
+  position:sticky;top:0;z-index:25;display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding:10px 0 14px;background:linear-gradient(var(--paper) 78%,transparent);
+}
+.topbar-title{font-size:.86rem;font-weight:700}
+.topbar-sub{font-size:.72rem;color:var(--muted)}
+.account-compact{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);
+  background:var(--panel);border-radius:999px;font-size:.75rem;color:var(--muted);
+}
+.account-compact b{color:var(--ink);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.login-wrap{max-width:620px;margin:8vh auto}
+.login-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+.login-card h2{font-size:1.05rem;margin:0 0 5px}
+.login-card p{color:var(--muted);font-size:.82rem;margin:0 0 18px}
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.auth-actions{display:flex;gap:8px;margin-top:10px}
+.auth-actions button{flex:1}
+.section{scroll-margin-top:86px;margin-bottom:18px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:9px}
+.section-kicker{font-size:.67rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.section-title{font-size:1.12rem;margin:0}
+.section-help{font-size:.76rem;color:var(--muted);margin:3px 0 0}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;box-shadow:var(--shadow);margin-bottom:10px;
+}
+.card.acc-pink{border-top:3px solid var(--pink)}
+.card.acc-blue{border-top:3px solid var(--blue)}
+.card.acc-orange{border-top:3px solid var(--orange)}
+.card.acc-amber{border-top:3px solid var(--amber)}
+.card.acc-purple{border-top:3px solid var(--purple)}
+.card.acc-green{border-top:3px solid var(--green)}
+.card-title{display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:800;margin:0 0 10px}
+.card-title .count{margin-left:auto;color:var(--muted);font-size:.7rem;font-weight:600}
+label{
+  display:block;font-size:.72rem;font-weight:700;color:var(--muted);
+  margin:9px 0 4px;
+}
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{
+  width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+  background:var(--paper);color:var(--ink);font-size:.82rem;transition:.15s;
+}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,157,141,.12)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 14px}
+.action-bar{
+  position:sticky;bottom:12px;z-index:24;display:flex;gap:8px;align-items:center;
+  padding:8px;background:color-mix(in srgb,var(--panel) 92%,transparent);
+  border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.10);
+  backdrop-filter:blur(12px);margin:12px 0 20px;
+}
+.btn{
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;
+  padding:9px 12px;font-weight:700;font-size:.78rem;
+}
+.btn:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:#fff;border-color:transparent}
+.btn-secondary{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;border-color:transparent}
+.btn-danger{color:var(--red);border-color:rgba(217,65,86,.35)}
+.btn-block{width:100%}
+.status{font-size:.72rem;color:var(--muted);min-height:18px}
+.optional{font-weight:500;color:var(--muted)}
+details.acc-item,details.acc-toggle{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;margin-bottom:9px;
+}
+details.acc-item summary,details.acc-toggle summary{
+  cursor:pointer;list-style:none;padding:11px 13px;font-size:.8rem;font-weight:750;
+  display:flex;align-items:center;gap:8px;background:var(--panel);
+}
+details.acc-item summary::-webkit-details-marker,details.acc-toggle summary::-webkit-details-marker{display:none}
+details.acc-item summary::before{content:"▸";color:var(--teal-deep);transition:transform .18s}
+details.acc-item[open] summary::before{transform:rotate(90deg)}
+details.acc-item>fieldset,details.acc-item>div{padding:2px 13px 13px;margin:0}
+.acc-count{margin-left:auto;color:var(--purple);font-size:.7rem;background:rgba(124,85,217,.10);padding:2px 7px;border-radius:999px}
+.check-row{
+  display:flex;align-items:flex-start;gap:8px;padding:8px 4px;border-bottom:1px dashed var(--line);
+  font-size:.78rem;cursor:pointer;
+}
+.check-row input{margin-top:3px;accent-color:var(--teal)}
+.flagband{
+  display:inline-block;border-radius:999px;padding:3px 8px;font-size:.62rem;font-weight:800;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.band-red{background:var(--red);color:#fff}.band-amber{background:var(--amber);color:#241a08}
+.band-blue{background:var(--blue);color:#fff}.band-black{background:var(--ink);color:var(--paper)}
+.search-row{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.banco-tab{
+  padding:7px 11px;border:1px solid var(--line);background:var(--panel-soft);color:var(--ink);
+  border-radius:999px;font-size:.72rem;font-weight:700;
+}
+.banco-tab:hover{transform:translateY(-1px)}
+.banco-tab.active{background:linear-gradient(135deg,var(--orange),var(--amber));color:#fff;border-color:transparent}
+.ban-item{
+  display:block;width:100%;text-align:left;margin-bottom:6px;padding:9px 11px;border:1px solid var(--line);
+  border-radius:8px;background:var(--panel);font-size:.76rem;
+}
+.ban-item:hover{border-color:var(--orange);transform:translateX(2px)}
+.ban-item.added{border-color:var(--green);color:var(--green);background:rgba(28,155,87,.08)}
+#results{scroll-margin-top:86px}
+.res-block{
+  border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;
+  background:var(--panel);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);
+  animation:fadeSlideIn .22s ease;
+}
+.res-block.alerta{border-left-color:var(--red);background:linear-gradient(0deg,rgba(217,65,86,.06),rgba(217,65,86,.06)),var(--panel)}
+.res-block h3{margin:0 0 8px;font-size:.9rem}
+.res-block.alerta h3{color:var(--red)}
+.res-block ul{margin:4px 0;padding-left:20px}.res-block li{margin-bottom:4px;font-size:.8rem}
+.agente{padding:8px 0;border-bottom:1px dashed var(--line);font-size:.78rem}
+.agente b{font-size:.78rem}.agente .dosis{color:var(--muted);font-size:.72rem}.agente.contra,.agente.contra b{color:var(--red)}
+.stepbtn,.guardar-evol-btn{
+  border:0;border-radius:999px;padding:9px 14px;font-size:.74rem;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 3px 10px rgba(124,85,217,.22)
+}
+.stepbtn:disabled{opacity:.35;box-shadow:none}
+.dot{
+  width:27px;height:27px;border-radius:50%;border:2px solid var(--line);background:var(--panel);
+  font-size:.68rem;font-weight:800;color:var(--muted);padding:0
+}
+.dot.active{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;border-color:transparent}
+.dot.done:not(.active){border-color:var(--green);color:var(--green)}
+.sesion-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.sesion-dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;flex:1}
+.sesion-progress{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:12px}
+.sesion-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:99px;transition:width .3s}
+.sesion-block{position:relative;overflow:hidden}
+.sesion-block::before{content:"💪";position:absolute;right:-12px;top:-18px;font-size:5rem;opacity:.05;pointer-events:none}
+.imc-pill{display:inline-block;font-size:.72rem;font-weight:800;background:linear-gradient(120deg,var(--purple),var(--blue));color:#fff;border-radius:20px;padding:4px 12px;margin-top:5px}
+.disclaimer{font-size:.7rem;color:var(--muted);border-top:1px solid var(--line);margin-top:24px;padding-top:12px}
+#barraRapida{display:none}
+#secPaciente,#bloqueSesion,#secHistorial,#results{scroll-margin-top:86px}
+#bloqueoLogin{max-width:620px;margin:40px auto}
+#appContent{min-width:0}
+.empty-state{padding:22px;text-align:center;border:1px dashed var(--line-strong);border-radius:10px;color:var(--muted);font-size:.78rem}
+.tool-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px}
+.history-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+#historial{font-size:.78rem}
+.ph-title{font-size:1.3rem;font-weight:700;margin:0 0 2px;color:#123933}
+.ph-sub{font-size:.82rem;color:#555;margin:0 0 16px}.ph-h{font-size:.75rem;font-weight:700;letter-spacing:.03em;color:#123933;border-bottom:1px solid #123933;padding-bottom:3px;margin:16px 0 8px}
+.ph-row{font-size:.92rem;margin-bottom:4px}.ph-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:6px}
+.ph-table th{text-align:left;border-bottom:1px solid #999;padding:3px 6px}.ph-table td{border-bottom:1px solid #ddd;padding:3px 6px;vertical-align:top}
+.ph-foot{font-size:.72rem;color:#666;margin-top:20px;border-top:1px solid #ccc;padding-top:8px}
+#printArea{display:none}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){
+  .app-shell{grid-template-columns:1fr}
+  .sidebar{position:sticky;height:auto;top:0;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;padding:4px 2px 8px}.brand-mark{margin:0}
+  .brand h1{font-size:.9rem}.brand p{display:none}
+  .nav{display:flex;overflow:auto;margin:0;gap:5px}.nav button{white-space:nowrap;text-align:center}
+  .sidebar-footer{display:none}.main{padding:14px 14px 60px}.topbar{padding-top:3px}
+}
+@media(max-width:650px){
+  .auth-grid,.grid2,.grid3,.tool-grid,.history-actions,.search-row{grid-template-columns:1fr}
+  .action-bar{bottom:7px}.action-bar .status{display:none}
+  .main{padding-left:10px;padding-right:10px}.card{padding:13px}
+}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;left:0;top:0;width:100%;background:#fff;color:#111;padding:10mm;font-family:Georgia,"Times New Roman",serif}
+  @page{margin:14mm}
+}
 
-  .ejercicio-row{display:flex;align-items:flex-start;gap:8px;padding:7px 4px;border-radius:6px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.85rem;border-bottom:1px dashed var(--line);transition:background .15s;}
-  .ejercicio-row:hover{background:rgba(0,184,169,.06);}
-  .ejercicio-row input{margin-top:3px;accent-color:var(--green);}
-  .guardar-evol-btn{margin-top:10px;padding:9px 16px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;font-size:.8rem;background:linear-gradient(120deg,var(--green),var(--teal));color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 10px rgba(34,197,94,.3);transition:transform .15s;}
-  .guardar-evol-btn:hover{transform:translateY(-1px);}
-  .evol-guardado{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--green);margin-top:6px;font-weight:600;}
-
-  #printArea{display:none;}
-  @media print{
-    body *{visibility:hidden;}
-    #printArea, #printArea *{visibility:visible;}
-    #printArea{display:block;position:absolute;left:0;top:0;width:100%;background:#fff;color:#111;padding:10mm;font-family:Georgia,'Times New Roman',serif;}
-    @page{margin:14mm;}
-  }
-  .ph-title{font-size:1.3rem;font-weight:700;margin:0 0 2px;color:#123933;}
-  .ph-sub{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.82rem;color:#555;margin:0 0 16px;}
-  .ph-h{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.03em;color:#123933;border-bottom:1px solid #123933;padding-bottom:3px;margin:16px 0 8px;}
-  .ph-row{font-size:.92rem;margin-bottom:4px;}
-  .ph-table{width:100%;border-collapse:collapse;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;margin-top:6px;}
-  .ph-table th{text-align:left;border-bottom:1px solid #999;padding:3px 6px;}
-  .ph-table td{border-bottom:1px solid #ddd;padding:3px 6px;vertical-align:top;}
-  .ph-foot{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.72rem;color:#666;margin-top:20px;border-top:1px solid #ccc;padding-top:8px;}
-    #barraRapida{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);}
-  #secPaciente,#bloqueSesion,#secHistorial,#results{scroll-margin-top:64px;}
 </style>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <h1>Asistente Clínico Musculoesquelético</h1>
-    <p>Apoyo a la decisión para Kinesiología y Fisiatría — por estudiante Adrián Lazarte</p>
-  </header>
 
-  <section class="card acc-pink">
-    <h2>🔐 Tu cuenta (guarda tus pacientes en la nube)</h2>
-    <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 6px;">Creá tu cuenta una vez — tus pacientes quedan guardados solo para vos, accesibles desde cualquier dispositivo. Necesitás iniciar sesión para usar la app. Los datos también quedan guardados en este dispositivo para trabajar sin conexión.</p>
+<body>
+<div id="bloqueoLogin" class="login-wrap">
+  <section class="login-card">
+    <div class="brand-mark">✚</div>
+    <h2>Asistente Clínico Musculoesquelético</h2>
+    <p>Herramienta de apoyo al razonamiento clínico para Kinesiología y Fisiatría. Iniciá sesión para acceder a tus pacientes.</p>
     <div id="cuentaLoggedOut">
-      <label>Email</label>
-      <input type="text" id="cuentaEmail" placeholder="tu@email.com">
-      <label>Contraseña</label>
-      <input type="password" id="cuentaPassword" placeholder="Mínimo 6 caracteres">
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button type="button" id="btnIngresar" style="flex:1;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:linear-gradient(120deg,var(--purple),var(--pink));color:#fff;border:none;border-radius:8px;cursor:pointer;">Ingresar</button>
-        <button type="button" id="btnCrearCuenta" style="flex:1;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;">Crear cuenta</button>
+      <div class="auth-grid">
+        <div><label for="cuentaEmail">Email</label><input type="text" id="cuentaEmail" autocomplete="email" placeholder="tu@email.com"></div>
+        <div><label for="cuentaPassword">Contraseña</label><input type="password" id="cuentaPassword" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></div>
       </div>
-      <button type="button" id="btnOlvide" style="margin-top:8px;background:none;border:none;color:var(--blue);font-size:.8rem;cursor:pointer;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
+      <div class="auth-actions">
+        <button type="button" id="btnIngresar" class="btn btn-primary">Ingresar</button>
+        <button type="button" id="btnCrearCuenta" class="btn">Crear cuenta</button>
+      </div>
+      <button type="button" id="btnOlvide" class="btn" style="width:100%;margin-top:8px;background:transparent;border:0;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
     </div>
     <div id="cuentaLoggedIn" style="display:none;">
-      <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.88rem;">Conectado como <b id="cuentaEmailActual"></b></p>
-      <button type="button" id="btnCerrarSesion" style="width:100%;padding:9px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--paper);color:var(--muted);border:1px solid var(--line);border-radius:8px;cursor:pointer;">Cerrar sesión</button>
+      <p>Conectado como <b id="cuentaEmailActual"></b></p>
+      <button type="button" id="btnCerrarSesion" class="btn btn-block">Cerrar sesión</button>
     </div>
-    <div id="cuentaStatus" style="margin-top:8px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.78rem;color:var(--muted);"></div>
+    <div id="cuentaStatus" class="status"></div>
   </section>
-
-  <div id="bloqueoLogin" class="res-block alerta" style="text-align:center;">
-    <h3>🔒 Iniciá sesión para usar la aplicación</h3>
-    <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.86rem;">Creá tu cuenta o ingresá arriba con tu email y contraseña — es gratis y tus pacientes quedan guardados solo para vos.</p>
-  </div>
-
-  <div id="appContent" style="display:none;">
-      <div id="barraRapida">
-    <button type="button" class="banco-tab" data-ir="secPaciente">👤 Paciente</button>
-    <button type="button" class="banco-tab" data-ir="bloqueSesion">💪 Sesión</button>
-    <button type="button" class="banco-tab" data-ir="secHistorial">🗂️ Historial</button>
-    <button type="button" class="banco-tab" id="btnGuardarRapido">💾 Guardar</button>
-    <button type="button" class="banco-tab" id="btnNuevoPaciente" style="margin-left:auto;border-color:var(--red);color:var(--red);">🧹 Nuevo paciente</button>
-  </div>
-
-  <details class="acc-item">
-    <summary>🩺 Datos del profesional (para la historia clínica en PDF)</summary>
-    <div>
-      <label>Nombre y matrícula profesional</label>
-      <input type="text" id="matriculaProfesional" placeholder="Ej: Estudiante de Kinesiología — supervisor: Lic. Nombre, MP 12345">
-    </div>
-  </details>
-
-  <section class="card acc-blue" id="secPaciente">
-    <h2>👤 Paciente</h2>
-    <label>Nombre o Nº de historia clínica</label>
-    <input type="text" id="idPaciente" list="listaPacientes" autocomplete="off" placeholder="Ej: Pérez, Juan — HC 1234">
-    <datalist id="listaPacientes"></datalist>
-    <div id="codigoPacienteDisplay" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:4px;"></div>
-    <div id="dbStatus" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin-top:2px;"></div>
-    <div class="grid3" style="margin-top:8px;">
-      <div><label>Edad (años)</label><input type="number" id="edad" min="0" max="120" inputmode="numeric"></div>
-      <div><label>Peso (kg)</label><input type="number" id="peso" min="0" inputmode="numeric"></div>
-      <div><label>Altura (cm)</label><input type="number" id="altura" min="0" inputmode="numeric"></div>
-    </div>
-    <div class="grid3" style="margin-top:4px;">
-      <div><label for="fechaNac">Fecha de nacimiento</label><input type="date" id="fechaNac"></div>
-      <div><label for="sexo">Sexo</label>
-        <select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro / no informa</option></select></div>
-      <div><label for="lateralidad">Lado afectado</label>
-        <select id="lateralidad"><option value="">—</option><option>Derecho</option><option>Izquierdo</option><option>Bilateral</option><option>Central / no aplica</option></select></div>
-    </div>
-    <div class="grid3" style="margin-top:4px;">
-      <div><label for="obraSocial">Obra social / prepaga</label><input type="text" id="obraSocial"></div>
-      <div><label for="nAfiliado">N.º de afiliado</label><input type="text" id="nAfiliado"></div>
-      <div><label for="sesionesAut">Sesiones autorizadas</label><input type="number" id="sesionesAut" min="0" inputmode="numeric"></div>
-    </div>
-    <label>Tipo de vida / actividad</label>
-    <select id="actividad">
-      <option value="sedentario">Sedentario</option>
-      <option value="activo">Activo (trabajo o ejercicio moderado)</option>
-      <option value="deportista">Deportista / alta demanda física</option>
-      <option value="laboral_pesado">Trabajo físico exigente / cargas repetitivas</option>
-    </select>
-  </section>
-
-  <section class="card acc-orange">
-    <h2>🎯 Diagnóstico / región a evaluar</h2>
-    <label>Zona corporal (opcional, acota la lista de abajo)</label>
-    <select id="zona"><option value="">— todas las zonas —</option></select>
-    <label>Buscar patología por nombre</label>
-    <input type="text" id="patologiaBuscador" placeholder="Escribí para filtrar, ej: hombro, túnel, rodilla...">
-    <div id="patologiaContador" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.76rem;color:var(--muted);margin:6px 0 2px;"></div>
-    <select id="patologia" style="margin-top:4px;">
-      <option value="lumbalgia">Lumbalgia mecánica / no específica</option>
-      <option value="ciatica">Ciática / hernia discal lumbar</option>
-      <option value="estenosis_lumbar">Estenosis de canal lumbar</option>
-      <option value="facetario">Síndrome facetario lumbar</option>
-      <option value="piriforme">Síndrome piriforme</option>
-      <option value="sacroileitis">Disfunción / sacroileítis</option>
-      <option value="dorsalgia">Dorsalgia mecánica / síndrome de dolor torácico</option>
-      <option value="cervicalgia">Cervicalgia mecánica</option>
-      <option value="cervicobraquialgia">Cervicobraquialgia (radiculopatía cervical)</option>
-      <option value="cefalea_cervicogenica">Cefalea cervicogénica</option>
-      <option value="latigazo">Latigazo cervical (whiplash)</option>
-      <option value="hombro">Dolor de hombro (manguito rotador)</option>
-      <option value="capsulitis">Capsulitis adhesiva (hombro congelado)</option>
-      <option value="inestabilidad_hombro">Inestabilidad glenohumeral</option>
-      <option value="bursitis_subacromial">Bursitis subacromial</option>
-      <option value="epicondilitis">Epicondilitis lateral (codo de tenista)</option>
-      <option value="epitrocleitis">Epitrocleitis (codo de golfista)</option>
-      <option value="dequervain">Tendinopatía de De Quervain</option>
-      <option value="tunel">Síndrome del túnel carpiano</option>
-      <option value="tunel_cubital">Síndrome del túnel cubital</option>
-      <option value="cadera">Coxartrosis / pinzamiento femoroacetabular</option>
-      <option value="bursitis_trocanterea">Bursitis trocantérea</option>
-      <option value="pubalgia">Pubalgia / osteitis del pubis</option>
-      <option value="rodilla">Gonartrosis / dolor de rodilla</option>
-      <option value="patelofemoral">Síndrome patelofemoral</option>
-      <option value="tendinopatia_rotuliana">Tendinopatía rotuliana</option>
-      <option value="lca">Rehabilitación post lesión de LCA</option>
-      <option value="itb">Síndrome de la cintilla iliotibial</option>
-      <option value="tobillo">Esguince de tobillo</option>
-      <option value="aquiles">Tendinopatía de Aquiles</option>
-      <option value="fascitis">Fascitis plantar</option>
-      <option value="metatarsalgia">Metatarsalgia</option>
-      <option value="neuropatico">Dolor neuropático periférico / radicular</option>
-      <option value="neuropatia_diabetica">Neuropatía diabética periférica</option>
-      <option value="pie_caido">Lesión de nervio peroneo (pie caído)</option>
-      <option value="plexo_braquial">Lesión de plexo braquial</option>
-      <option value="acv">ACV / hemiparesia (neurológico central)</option>
-      <option value="lesion_medular">Lesión medular</option>
-      <option value="parkinson">Enfermedad de Parkinson</option>
-    </select>
-  </section>
-
-  <section class="card acc-amber">
-    <details id="detAntecedentes"><summary style="cursor:pointer;list-style:none;"><h2 style="margin:0;">🚩 Antecedentes y cribado (tocar para desplegar)</h2></summary>
-    <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 10px;">Desplegá cada bloque para completarlo. Los que tengan algo marcado muestran cuántos ítems tienen.</p>
-
-    <details class="acc-item">
-      <summary>🧬 Comorbilidades de base <span class="acc-count" data-count-for="comorb"></span></summary>
-      <fieldset id="comorb">
-        <div class="check-row"><input type="checkbox" value="diabetes" id="chkDiabetes"><span>Diabetes</span></div>
-        <div id="diabetesTipoWrap" style="display:none;margin:-2px 0 8px 28px;">
-          <select id="diabetesTipo" style="max-width:220px;">
-            <option value="">Tipo no especificado</option>
-            <option value="Tipo 1">Tipo 1</option>
-            <option value="Tipo 2">Tipo 2</option>
-          </select>
-        </div>
-        <div class="check-row"><input type="checkbox" value="osteoporosis"><span>Osteoporosis / osteopenia</span></div>
-        <div class="check-row"><input type="checkbox" value="cardio"><span>Enfermedad cardiovascular / marcapasos</span></div>
-        <div class="check-row"><input type="checkbox" value="cancer"><span>Cáncer activo o reciente</span></div>
-        <div class="check-row"><input type="checkbox" value="embarazo"><span>Embarazo</span></div>
-        <div class="check-row"><input type="checkbox" value="implante"><span>Implantes metálicos / prótesis</span></div>
-        <div class="check-row"><input type="checkbox" value="epilepsia"><span>Epilepsia</span></div>
-        <div class="check-row"><input type="checkbox" value="sobrepeso"><span>Sobrepeso / obesidad</span></div>
-        <div class="check-row"><input type="checkbox" value="tabaquismo"><span>Tabaquismo</span></div>
-        <div class="check-row"><input type="checkbox" value="celiaquia"><span>Celiaquía (mayor riesgo de osteopenia/osteoporosis por malabsorción de calcio)</span></div>
-        <div class="check-row"><input type="checkbox" value="autoinmune" id="chkAutoinmune"><span>Enfermedad autoinmune</span></div>
-        <div id="autoinmuneCualWrap" style="display:none;margin:-2px 0 8px 28px;">
-          <input type="text" id="autoinmuneCual" placeholder="¿Cuál? Ej: artritis reumatoidea, lupus, psoriasis...">
-        </div>
-        <div class="check-row"><input type="checkbox" value="hipertension"><span>Hipertensión arterial</span></div>
-        <div class="check-row"><input type="checkbox" value="sensibilidad"><span>Sensibilidad alterada en la zona / neuropatía (térmica o táctil)</span></div>
-        <div class="check-row"><input type="checkbox" value="infeccion"><span>Infección activa / fiebre</span></div>
-        <div class="check-row"><input type="checkbox" value="trombosis"><span>Sospecha o antecedente de trombosis (TVP)</span></div>
-        <div class="check-row"><input type="checkbox" value="piel"><span>Piel lesionada o herida en la zona a tratar</span></div>
-        <div class="check-row"><input type="checkbox" id="antecedenteNeuro"><span>Antecedente o sospecha de problema neurológico (ACV, lesión medular, Parkinson, neuropatía, radiculopatía, etc.)</span></div>
-      </fieldset>
-    </details>
-
-    <details class="acc-item">
-      <summary>💊 Medicación de base <span class="acc-count" data-count-for="medic"></span></summary>
-      <fieldset id="medic">
-        <div class="check-row"><input type="checkbox" value="anticoagulantes"><span>Anticoagulantes / antiagregantes</span></div>
-        <div class="check-row"><input type="checkbox" value="corticoides"><span>Corticoides crónicos</span></div>
-        <div class="check-row"><input type="checkbox" value="opioides"><span>Opioides</span></div>
-        <div class="check-row"><input type="checkbox" value="aines"><span>AINES de uso crónico</span></div>
-        <div class="check-row"><input type="checkbox" value="hormonas"><span>Hormonas (ej. anabólicos/esteroides — deportistas, fisicoculturistas)</span></div>
-        <div class="check-row"><input type="checkbox" value="antihipertensivos"><span>Antihipertensivos</span></div>
-        <div class="check-row"><input type="checkbox" value="hipoglucemiantes"><span>Hipoglucemiantes</span></div>
-        <div class="check-row"><input type="checkbox" value="estatinas"><span>Estatinas (hipolipemiantes — pueden dar efectos secundarios musculoesqueléticos)</span></div>
-        <div class="check-row"><input type="checkbox" value="psiquiatrica"><span>Medicación psiquiátrica</span></div>
-        <div class="check-row"><input type="checkbox" value="fluoroquinolonas"><span>Fluoroquinolonas (ciprofloxacina, levofloxacina — riesgo tendinoso)</span></div>
-      </fieldset>
-    </details>
-
-    <details class="acc-item">
-      <summary><span class="flagband band-red">Rojas</span> Urgencia médica <span class="acc-count" data-count-for="rojas"></span></summary>
-      <fieldset id="rojas">
-        <div class="check-row"><input type="checkbox" value="peso"><span>Pérdida de peso inexplicada</span></div>
-        <div class="check-row"><input type="checkbox" value="nocturno"><span>Dolor nocturno no mecánico / no cede en reposo</span></div>
-        <div class="check-row"><input type="checkbox" value="fiebre"><span>Fiebre o malestar general no explicado</span></div>
-        <div class="check-row"><input type="checkbox" value="cancerhist"><span>Antecedente de cáncer</span></div>
-        <div class="check-row"><input type="checkbox" value="neurologico"><span>Déficit neurológico progresivo (fuerza/sensibilidad)</span></div>
-        <div class="check-row"><input type="checkbox" value="esfinteres"><span>Alteración de esfínteres / anestesia en silla de montar</span></div>
-        <div class="check-row"><input type="checkbox" value="trauma"><span>Trauma significativo reciente</span></div>
-      </fieldset>
-    </details>
-
-    <details class="acc-item">
-      <summary><span class="flagband band-amber">Amarillas</span> Psicosociales <span class="acc-count" data-count-for="amarillas"></span></summary>
-      <fieldset id="amarillas">
-        <div class="check-row"><input type="checkbox" value="catastrofismo"><span>Catastrofismo / creencia de daño grave</span></div>
-        <div class="check-row"><input type="checkbox" value="miedo"><span>Miedo al movimiento (kinesiofobia)</span></div>
-        <div class="check-row"><input type="checkbox" value="animo"><span>Bajo ánimo / ansiedad marcada</span></div>
-      </fieldset>
-    </details>
-
-    <details class="acc-item">
-      <summary><span class="flagband band-blue">Azules</span> Percepción laboral <span class="acc-count" data-count-for="azules"></span></summary>
-      <fieldset id="azules">
-        <div class="check-row"><input type="checkbox" value="trabajoempeora"><span>Percibe que el trabajo empeora su dolor</span></div>
-        <div class="check-row"><input type="checkbox" value="soporte"><span>Baja percepción de apoyo del entorno laboral</span></div>
-      </fieldset>
-    </details>
-
-    <details class="acc-item">
-      <summary><span class="flagband band-black">Negras</span> Contexto y sistema <span class="acc-count" data-count-for="negras"></span></summary>
-      <fieldset id="negras">
-        <div class="check-row"><input type="checkbox" value="litigio"><span>Litigio / compensación laboral en curso</span></div>
-        <div class="check-row"><input type="checkbox" value="licencia"><span>Licencia prolongada o beneficio ligado al reposo</span></div>
-      </fieldset>
-    </details>
-   </details>   
-  </section>
-
-  <button id="run">Generar orientación clínica</button>
-  <div id="results"></div>
-
-  <section class="card acc-blue" id="secHistorial" style="margin-top:20px;">
-    <h2>🗂️ Historial de pacientes (uso diario)</h2>
-    <button id="guardar" type="button" style="width:100%;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--ink);color:var(--paper);border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;">Guardar sesión de este paciente</button>
-    <button id="exportarCsv" type="button" style="width:100%;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--teal);color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;">Descargar historial completo (CSV, se abre en Excel / Google Sheets)</button>
-    <button id="generarPdf" type="button" style="width:100%;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--blue);color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:10px;">🖨️ Historia clínica de este paciente (PDF / imprimir)</button>
-    <div id="historial" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.84rem;"></div>
-  </section>
-
-  <details class="acc-toggle">
-    <summary>➕ ¿Falta una patología en el catálogo? Agregarla acá</summary>
-    <div class="grid-add-pat">
-      <section class="card acc-purple">
-        <h2>➕ Agregar patología nueva al catálogo</h2>
-        <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 6px;">Se guarda en este navegador y queda disponible en el selector de "Diagnóstico / región a evaluar" (y en la sugerencia por zona, si elegís una).</p>
-        <label>Nombre de la patología</label>
-        <input type="text" id="nuevaNombre" placeholder="Ej: Síndrome de Tietze">
-        <button id="buscarIA" type="button" style="width:100%;margin-top:8px;padding:9px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;">📚 Buscar este nombre en PubMed / Google Scholar</button>
-        <div id="sugerenciaResultado" style="margin-top:8px;"></div>
-        <label>Zona corporal</label>
-        <select id="nuevaZona"></select>
-        <label>Test clínico principal — nombre</label>
-        <input type="text" id="nuevaTestN" placeholder="Ej: Test de compresión costocondral">
-        <label>Test clínico principal — qué evalúa</label>
-        <input type="text" id="nuevaTestD" placeholder="Breve descripción de para qué sirve el test">
-        <label>Agentes físicos aplicables</label>
-        <fieldset id="nuevaAgentes"></fieldset>
-        <label>Fase 1-2 — Educación / movilidad protegida (un ejercicio por línea)</label>
-        <textarea id="nuevaMov" rows="2"></textarea>
-        <label>Fase 3-5 — Activación y control motor</label>
-        <textarea id="nuevaControl" rows="2"></textarea>
-        <label>Fase 6-8 — Fuerza progresiva (adulto estándar)</label>
-        <textarea id="nuevaFuerza" rows="2"></textarea>
-        <label>Fase 6-8 — Fuerza funcional (adulto mayor)</label>
-        <textarea id="nuevaFuerzaFunc" rows="2"></textarea>
-        <label>Fase 9-10 — Integración funcional / alta</label>
-        <textarea id="nuevaFuncional" rows="2"></textarea>
-        <button id="agregarPatologia" type="button" style="width:100%;margin-top:12px;padding:10px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--ink);color:var(--paper);border:none;border-radius:3px;cursor:pointer;">Agregar al catálogo</button>
-        <button id="cancelarEdicionPatologia" type="button" style="display:none;width:100%;margin-top:8px;padding:8px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:700;background:var(--paper);color:var(--muted);border:1px solid var(--line);border-radius:3px;cursor:pointer;">Cancelar edición</button>
-        <div id="nuevaPatologiaStatus" style="margin-top:8px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);"></div>
-
-        <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:12px;">
-          <label style="margin-top:0;">Patologías que agregaste vos</label>
-          <div id="listaPatologiasCustom" style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.82rem;"></div>
-        </div>
-      </section>
-
-      <section class="card acc-orange">
-        <h2>🏋️ Banco de ejercicios</h2>
-        <p style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.8rem;color:var(--muted);margin:0 0 8px;">Ideas concretas con banda elástica y elementos simples de consultorio. Elegí la fase de destino y tocá un ejercicio para agregarlo al formulario de la izquierda.</p>
-        <label>Agregar a fase</label>
-        <select id="bancoFaseDestino">
-          <option value="nuevaMov">Fase 1-2 — Movilidad protegida</option>
-          <option value="nuevaControl">Fase 3-5 — Activación y control motor</option>
-          <option value="nuevaFuerza">Fase 6-8 — Fuerza (adulto estándar)</option>
-          <option value="nuevaFuerzaFunc">Fase 6-8 — Fuerza funcional (adulto mayor)</option>
-          <option value="nuevaFuncional">Fase 9-10 — Integración funcional</option>
-        </select>
-        <div class="banco-tabs" id="bancoTabs" style="margin-top:10px;"></div>
-        <div class="banco-list" id="bancoLista" style="margin-top:8px;max-height:320px;overflow-y:auto;"></div>
-      </section>
-    </div>
-  </details>
-
-  </div>
-
-  <p class="disclaimer">
-    Esta herramienta organiza criterios generales de práctica musculoesquelética (test clínico principal, agentes
-    físicos con dosificación orientativa y plan de 10 sesiones) para ordenar el razonamiento clínico. No está
-    conectada a una base de papers en tiempo real ni reemplaza el examen físico, el juicio clínico ni la revisión
-    de literatura actualizada por el profesional. Ante cualquier bandera roja, priorizar derivación médica.
-  </p>
 </div>
 
+<div id="appContent" style="display:none;">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✚</div>
+        <div><h1>Asistente Clínico</h1><p>Kinesiología y Fisiatría</p></div>
+      </div>
+      <nav class="nav" aria-label="Navegación principal">
+        <button type="button" class="active" data-ir="secPaciente">01 · Paciente</button>
+        <button type="button" data-ir="secEvaluacion">02 · Evaluación</button>
+        <button type="button" data-ir="secResultados">03 · Orientación</button>
+        <button type="button" data-ir="secHistorial">04 · Historial</button>
+        <button type="button" data-ir="secHerramientas">⚙ Herramientas</button>
+      </nav>
+      <div class="sidebar-footer">Uso educativo y de apoyo. No reemplaza evaluación clínica ni protocolos vigentes.</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title">Asistente Clínico Musculoesquelético</div>
+          <div class="topbar-sub">por estudiante Adrián Lazarte</div>
+        </div>
+        <div class="account-compact">● <b id="cuentaEmailTop"></b><button type="button" id="btnCerrarSesionTop" class="btn" style="padding:5px 8px;font-size:.68rem;">Salir</button></div>
+      </div>
+
+      <section class="section" id="secPaciente">
+        <div class="section-head">
+          <div><div class="section-kicker">Paso 01</div><h2 class="section-title">Paciente</h2><p class="section-help">Identificación y datos básicos. Los campos opcionales quedan separados para no saturar la pantalla.</p></div>
+        </div>
+
+        <section class="card acc-blue">
+          <h3 class="card-title">👤 Identificación <span id="codigoPacienteDisplay" class="count"></span></h3>
+          <label for="idPaciente">Nombre o Nº de historia clínica</label>
+          <input type="text" id="idPaciente" list="listaPacientes" autocomplete="off" placeholder="Ej.: Pérez, Juan — HC 1234">
+          <datalist id="listaPacientes"></datalist>
+          <div id="dbStatus" class="status" style="margin-top:5px;"></div>
+
+          <div class="grid3">
+            <div><label for="edad">Edad (años)</label><input type="number" id="edad" min="0" max="120" inputmode="numeric"></div>
+            <div><label for="peso">Peso (kg)</label><input type="number" id="peso" min="0" inputmode="numeric"></div>
+            <div><label for="altura">Altura (cm)</label><input type="number" id="altura" min="0" inputmode="numeric"></div>
+          </div>
+
+          <details class="acc-item" style="margin-top:12px;">
+            <summary>Datos administrativos y personales <span class="optional">opcional</span></summary>
+            <div class="grid3">
+              <div><label for="fechaNac">Fecha de nacimiento</label><input type="date" id="fechaNac"></div>
+              <div><label for="sexo">Sexo</label><select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro / no informa</option></select></div>
+              <div><label for="lateralidad">Lado afectado</label><select id="lateralidad"><option value="">—</option><option>Derecho</option><option>Izquierdo</option><option>Bilateral</option><option>Central / no aplica</option></select></div>
+              <div><label for="obraSocial">Obra social / prepaga</label><input type="text" id="obraSocial"></div>
+              <div><label for="nAfiliado">N.º de afiliado</label><input type="text" id="nAfiliado"></div>
+              <div><label for="sesionesAut">Sesiones autorizadas</label><input type="number" id="sesionesAut" min="0" inputmode="numeric"></div>
+            </div>
+          </details>
+
+          <div class="grid2">
+            <div><label for="actividad">Tipo de vida / actividad</label>
+              <select id="actividad">
+                <option value="sedentario">Sedentario</option>
+                <option value="activo">Activo (trabajo o ejercicio moderado)</option>
+                <option value="deportista">Deportista / alta demanda física</option>
+                <option value="laboral_pesado">Trabajo físico exigente / cargas repetitivas</option>
+              </select>
+            </div>
+            <div><label for="matriculaProfesional">Profesional / matrícula <span class="optional">para PDF</span></label>
+              <input type="text" id="matriculaProfesional" placeholder="Ej.: Estudiante — supervisor: Lic. Nombre, MP 12345">
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="section" id="secEvaluacion">
+        <div class="section-head">
+          <div><div class="section-kicker">Paso 02</div><h2 class="section-title">Evaluación inicial</h2><p class="section-help">Primero elegí la región y el diagnóstico orientativo; después completá el cribado que corresponda.</p></div>
+        </div>
+
+        <section class="card acc-orange">
+          <h3 class="card-title">🎯 Región y diagnóstico</h3>
+          <div class="search-row">
+            <div>
+              <label for="patologiaBuscador">Buscar patología</label>
+              <input type="text" id="patologiaBuscador" placeholder="Ej.: hombro, túnel, rodilla…">
+            </div>
+            <div>
+              <label for="zona">Zona corporal <span class="optional">opcional</span></label>
+              <select id="zona"><option value="">— todas las zonas —</option></select>
+            </div>
+          </div>
+          <div id="patologiaContador" class="status" style="margin:6px 0 2px;"></div>
+          <label for="patologia">Diagnóstico / región a evaluar</label>
+          <select id="patologia" style="margin-top:2px;">
+            <option value="lumbalgia">Lumbalgia mecánica / no específica</option>
+            <option value="ciatica">Ciática / hernia discal lumbar</option>
+            <option value="estenosis_lumbar">Estenosis de canal lumbar</option>
+            <option value="facetario">Síndrome facetario lumbar</option>
+            <option value="piriforme">Síndrome piriforme</option>
+            <option value="sacroileitis">Disfunción / sacroileítis</option>
+            <option value="dorsalgia">Dorsalgia mecánica / síndrome de dolor torácico</option>
+            <option value="cervicalgia">Cervicalgia mecánica</option>
+            <option value="cervicobraquialgia">Cervicobraquialgia (radiculopatía cervical)</option>
+            <option value="cefalea_cervicogenica">Cefalea cervicogénica</option>
+            <option value="latigazo">Latigazo cervical (whiplash)</option>
+            <option value="hombro">Dolor de hombro (manguito rotador)</option>
+            <option value="capsulitis">Capsulitis adhesiva (hombro congelado)</option>
+            <option value="inestabilidad_hombro">Inestabilidad glenohumeral</option>
+            <option value="bursitis_subacromial">Bursitis subacromial</option>
+            <option value="epicondilitis">Epicondilitis lateral (codo de tenista)</option>
+            <option value="epitrocleitis">Epitrocleitis (codo de golfista)</option>
+            <option value="dequervain">Tendinopatía de De Quervain</option>
+            <option value="tunel">Síndrome del túnel carpiano</option>
+            <option value="tunel_cubital">Síndrome del túnel cubital</option>
+            <option value="cadera">Coxartrosis / pinzamiento femoroacetabular</option>
+            <option value="bursitis_trocanterea">Bursitis trocantérea</option>
+            <option value="pubalgia">Pubalgia / osteitis del pubis</option>
+            <option value="rodilla">Gonartrosis / dolor de rodilla</option>
+            <option value="patelofemoral">Síndrome patelofemoral</option>
+            <option value="tendinopatia_rotuliana">Tendinopatía rotuliana</option>
+            <option value="lca">Rehabilitación post lesión de LCA</option>
+            <option value="itb">Síndrome de la cintilla iliotibial</option>
+            <option value="tobillo">Esguince de tobillo</option>
+            <option value="aquiles">Tendinopatía de Aquiles</option>
+            <option value="fascitis">Fascitis plantar</option>
+            <option value="metatarsalgia">Metatarsalgia</option>
+            <option value="neuropatico">Dolor neuropático periférico / radicular</option>
+            <option value="neuropatia_diabetica">Neuropatía diabética periférica</option>
+            <option value="pie_caido">Lesión de nervio peroneo (pie caído)</option>
+            <option value="plexo_braquial">Lesión de plexo braquial</option>
+            <option value="acv">ACV / hemiparesia (neurológico central)</option>
+            <option value="lesion_medular">Lesión medular</option>
+            <option value="parkinson">Enfermedad de Parkinson</option>
+          </select>
+          <div id="chipsPat" class="chips"></div>
+        </section>
+
+        <section class="card acc-amber">
+          <details id="detAntecedentes">
+            <summary class="card-title" style="margin:0;padding:0;">🚩 Antecedentes y cribado <span class="optional">abrir solo lo necesario</span></summary>
+            <p class="section-help" style="margin:10px 0;">Los bloques se mantienen cerrados para reducir ruido. Los contadores indican si ya hay elementos seleccionados.</p>
+
+            <details class="acc-item">
+              <summary>🧬 Comorbilidades de base <span class="acc-count" data-count-for="comorb"></span></summary>
+              <fieldset id="comorb">
+                <div class="check-row"><input type="checkbox" value="diabetes" id="chkDiabetes"><span>Diabetes</span></div>
+                <div id="diabetesTipoWrap" style="display:none;margin:-2px 0 8px 28px;"><select id="diabetesTipo" style="max-width:220px;"><option value="">Tipo no especificado</option><option value="Tipo 1">Tipo 1</option><option value="Tipo 2">Tipo 2</option></select></div>
+                <div class="check-row"><input type="checkbox" value="osteoporosis"><span>Osteoporosis / osteopenia</span></div>
+                <div class="check-row"><input type="checkbox" value="cardio"><span>Enfermedad cardiovascular / marcapasos</span></div>
+                <div class="check-row"><input type="checkbox" value="cancer"><span>Cáncer activo o reciente</span></div>
+                <div class="check-row"><input type="checkbox" value="embarazo"><span>Embarazo</span></div>
+                <div class="check-row"><input type="checkbox" value="implante"><span>Implantes metálicos / prótesis</span></div>
+                <div class="check-row"><input type="checkbox" value="epilepsia"><span>Epilepsia</span></div>
+                <div class="check-row"><input type="checkbox" value="sobrepeso"><span>Sobrepeso / obesidad</span></div>
+                <div class="check-row"><input type="checkbox" value="tabaquismo"><span>Tabaquismo</span></div>
+                <div class="check-row"><input type="checkbox" value="celiaquia"><span>Celiaquía (mayor riesgo de osteopenia/osteoporosis por malabsorción de calcio)</span></div>
+                <div class="check-row"><input type="checkbox" value="autoinmune" id="chkAutoinmune"><span>Enfermedad autoinmune</span></div>
+                <div id="autoinmuneCualWrap" style="display:none;margin:-2px 0 8px 28px;"><input type="text" id="autoinmuneCual" placeholder="¿Cuál?"></div>
+                <div class="check-row"><input type="checkbox" value="hipertension"><span>Hipertensión arterial</span></div>
+                <div class="check-row"><input type="checkbox" value="sensibilidad"><span>Sensibilidad alterada en la zona / neuropatía</span></div>
+                <div class="check-row"><input type="checkbox" value="infeccion"><span>Infección activa / fiebre</span></div>
+                <div class="check-row"><input type="checkbox" value="trombosis"><span>Sospecha o antecedente de trombosis (TVP)</span></div>
+                <div class="check-row"><input type="checkbox" value="piel"><span>Piel lesionada o herida en la zona a tratar</span></div>
+                <div class="check-row"><input type="checkbox" id="antecedenteNeuro"><span>Antecedente o sospecha de problema neurológico</span></div>
+              </fieldset>
+            </details>
+
+            <details class="acc-item">
+              <summary>💊 Medicación de base <span class="acc-count" data-count-for="medic"></span></summary>
+              <fieldset id="medic">
+                <div class="check-row"><input type="checkbox" value="anticoagulantes"><span>Anticoagulantes / antiagregantes</span></div>
+                <div class="check-row"><input type="checkbox" value="corticoides"><span>Corticoides crónicos</span></div>
+                <div class="check-row"><input type="checkbox" value="opioides"><span>Opioides</span></div>
+                <div class="check-row"><input type="checkbox" value="aines"><span>AINES de uso crónico</span></div>
+                <div class="check-row"><input type="checkbox" value="hormonas"><span>Hormonas / anabólicos / esteroides</span></div>
+                <div class="check-row"><input type="checkbox" value="antihipertensivos"><span>Antihipertensivos</span></div>
+                <div class="check-row"><input type="checkbox" value="hipoglucemiantes"><span>Hipoglucemiantes</span></div>
+                <div class="check-row"><input type="checkbox" value="estatinas"><span>Estatinas</span></div>
+                <div class="check-row"><input type="checkbox" value="psiquiatrica"><span>Medicación psiquiátrica</span></div>
+                <div class="check-row"><input type="checkbox" value="fluoroquinolonas"><span>Fluoroquinolonas</span></div>
+              </fieldset>
+            </details>
+
+            <details class="acc-item">
+              <summary><span class="flagband band-red">Rojas</span> Urgencia médica <span class="acc-count" data-count-for="rojas"></span></summary>
+              <fieldset id="rojas">
+                <div class="check-row"><input type="checkbox" value="peso"><span>Pérdida de peso inexplicada</span></div>
+                <div class="check-row"><input type="checkbox" value="nocturno"><span>Dolor nocturno no mecánico / no cede en reposo</span></div>
+                <div class="check-row"><input type="checkbox" value="fiebre"><span>Fiebre o malestar general no explicado</span></div>
+                <div class="check-row"><input type="checkbox" value="cancerhist"><span>Antecedente de cáncer</span></div>
+                <div class="check-row"><input type="checkbox" value="neurologico"><span>Déficit neurológico progresivo</span></div>
+                <div class="check-row"><input type="checkbox" value="esfinteres"><span>Alteración de esfínteres / anestesia en silla de montar</span></div>
+                <div class="check-row"><input type="checkbox" value="trauma"><span>Trauma significativo reciente</span></div>
+              </fieldset>
+            </details>
+
+            <details class="acc-item">
+              <summary><span class="flagband band-amber">Amarillas</span> Psicosociales <span class="acc-count" data-count-for="amarillas"></span></summary>
+              <fieldset id="amarillas">
+                <div class="check-row"><input type="checkbox" value="catastrofismo"><span>Catastrofismo / creencia de daño grave</span></div>
+                <div class="check-row"><input type="checkbox" value="miedo"><span>Miedo al movimiento (kinesiofobia)</span></div>
+                <div class="check-row"><input type="checkbox" value="animo"><span>Bajo ánimo / ansiedad marcada</span></div>
+              </fieldset>
+            </details>
+
+            <details class="acc-item">
+              <summary><span class="flagband band-blue">Azules</span> Percepción laboral <span class="acc-count" data-count-for="azules"></span></summary>
+              <fieldset id="azules">
+                <div class="check-row"><input type="checkbox" value="trabajoempeora"><span>Percibe que el trabajo empeora su dolor</span></div>
+                <div class="check-row"><input type="checkbox" value="soporte"><span>Baja percepción de apoyo del entorno laboral</span></div>
+              </fieldset>
+            </details>
+
+            <details class="acc-item">
+              <summary><span class="flagband band-black">Negras</span> Contexto y sistema <span class="acc-count" data-count-for="negras"></span></summary>
+              <fieldset id="negras">
+                <div class="check-row"><input type="checkbox" value="litigio"><span>Litigio / compensación laboral en curso</span></div>
+                <div class="check-row"><input type="checkbox" value="licencia"><span>Licencia prolongada o beneficio ligado al reposo</span></div>
+              </fieldset>
+            </details>
+          </details>
+        </section>
+      </section>
+
+      <div class="action-bar">
+        <button type="button" id="run" class="btn btn-primary" style="flex:1;">Generar orientación clínica</button>
+        <button type="button" id="btnGuardarRapido" class="btn">💾 Guardar</button>
+        <button type="button" id="btnNuevoPaciente" class="btn btn-danger">Nuevo</button>
+        <span id="actionStatus" class="status"></span>
+      </div>
+
+      <section class="section" id="secResultados">
+        <div class="section-head">
+          <div><div class="section-kicker">Paso 03</div><h2 class="section-title">Orientación y plan</h2><p class="section-help">Los resultados aparecen después de generar la orientación. La evaluación detallada se agrega debajo del plan.</p></div>
+        </div>
+        <div id="results">
+          <div class="empty-state">Completá paciente + diagnóstico y presioná <b>Generar orientación clínica</b>.</div>
+        </div>
+      </section>
+
+      <section class="section" id="secHistorial">
+        <div class="section-head">
+          <div><div class="section-kicker">Paso 04</div><h2 class="section-title">Historial</h2><p class="section-help">Consultá pacientes guardados, exportá datos o generá la historia clínica imprimible.</p></div>
+      </div>
+        <section class="card acc-blue">
+          <div class="history-actions">
+            <button id="guardar" type="button" class="btn btn-primary">💾 Guardar sesión</button>
+            <button id="exportarCsv" type="button" class="btn">⬇ CSV</button>
+            <button id="generarPdf" type="button" class="btn">🖨️ Historia clínica</button>
+          </div>
+          <div id="historial"></div>
+        </section>
+      </section>
+
+      <section class="section" id="secHerramientas">
+        <div class="section-head">
+          <div><div class="section-kicker">Herramientas</div><h2 class="section-title">Catálogo y banco de ejercicios</h2><p class="section-help">Zona de mantenimiento. Queda fuera del flujo diario para evitar sobrecargar la pantalla principal.</p></div>
+        </div>
+        <details class="acc-toggle">
+          <summary>⚙ Abrir herramientas de catálogo</summary>
+          <div class="tool-grid" style="padding:14px;">
+            <section class="card acc-purple">
+              <h3 class="card-title">➕ Agregar / editar patología</h3>
+              <p class="section-help">Las patologías personalizadas se guardan en el navegador y, cuando corresponde, se sincronizan.</p>
+              <label for="nuevaNombre">Nombre</label><input type="text" id="nuevaNombre" placeholder="Ej.: Síndrome de Tietze">
+              <button id="buscarIA" type="button" class="btn btn-block" style="margin-top:8px;">📚 Buscar este nombre en PubMed / Google Scholar</button>
+              <div id="sugerenciaResultado" style="margin-top:8px;"></div>
+              <label for="nuevaZona">Zona corporal</label><select id="nuevaZona"></select>
+              <label for="nuevaTestN">Test clínico principal — nombre</label><input type="text" id="nuevaTestN">
+              <label for="nuevaTestD">Test clínico principal — qué evalúa</label><input type="text" id="nuevaTestD">
+              <label>Agentes físicos aplicables</label><fieldset id="nuevaAgentes"></fieldset>
+              <label for="nuevaMov">Fase 1-2 — Educación / movilidad protegida</label><textarea id="nuevaMov" rows="2"></textarea>
+              <label for="nuevaControl">Fase 3-5 — Activación y control motor</label><textarea id="nuevaControl" rows="2"></textarea>
+              <label for="nuevaFuerza">Fase 6-8 — Fuerza progresiva</label><textarea id="nuevaFuerza" rows="2"></textarea>
+              <label for="nuevaFuerzaFunc">Fase 6-8 — Fuerza funcional (adulto mayor)</label><textarea id="nuevaFuerzaFunc" rows="2"></textarea>
+              <label for="nuevaFuncional">Fase 9-10 — Integración funcional / alta</label><textarea id="nuevaFuncional" rows="2"></textarea>
+              <button id="agregarPatologia" type="button" class="btn btn-primary btn-block" style="margin-top:10px;">Agregar al catálogo</button>
+              <button id="cancelarEdicionPatologia" type="button" class="btn btn-block" style="display:none;margin-top:7px;">Cancelar edición</button>
+              <div id="nuevaPatologiaStatus" class="status" style="margin-top:7px;"></div>
+              <div id="listaPatologiasCustom" style="margin-top:12px;"></div>
+            </section>
+            <section class="card acc-orange">
+              <h3 class="card-title">🏋️ Banco de ejercicios</h3>
+              <p class="section-help">Seleccioná una fase y tocá un ejercicio para agregarlo al formulario.</p>
+              <label for="bancoFaseDestino">Agregar a fase</label>
+              <select id="bancoFaseDestino">
+                <option value="nuevaMov">Fase 1-2 — Movilidad protegida</option>
+                <option value="nuevaControl">Fase 3-5 — Activación y control motor</option>
+                <option value="nuevaFuerza">Fase 6-8 — Fuerza (adulto estándar)</option>
+                <option value="nuevaFuerzaFunc">Fase 6-8 — Fuerza funcional (adulto mayor)</option>
+                <option value="nuevaFuncional">Fase 9-10 — Integración funcional</option>
+              </select>
+              <div class="banco-tabs" id="bancoTabs" style="margin-top:10px;"></div>
+              <div id="bancoLista" style="margin-top:8px;max-height:420px;overflow-y:auto;"></div>
+            </section>
+          </div>
+        </details>
+      </section>
+
+      <p class="disclaimer">
+        Esta herramienta organiza criterios generales de práctica musculoesquelética para ordenar el razonamiento clínico.
+        No reemplaza el examen físico, el juicio clínico, los protocolos institucionales ni la revisión de literatura actualizada.
+        Ante banderas rojas, priorizar la derivación correspondiente.
+      </p>
+    </main>
+  </div>
+</div>
 <div id="printArea"></div>
 
 <!-- SDK de Firebase (Auth + Firestore) — se usa para que cada usuario guarde sus pacientes en su propia cuenta -->
@@ -2865,5 +2947,44 @@ document.querySelectorAll('label').forEach(l=>{
   if(n&&/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName)&&n.id) l.htmlFor=n.id;
 });
 </script>
+
+<script>
+/* ===== Capa de navegación / UX ===== */
+(function(){
+  const navButtons=[...document.querySelectorAll('.nav button[data-ir]')];
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=document.getElementById(btn.dataset.ir);
+      if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+      navButtons.forEach(x=>x.classList.toggle('active',x===btn));
+    });
+  });
+
+  const topLogout=document.getElementById('btnCerrarSesionTop');
+  if(topLogout){
+    topLogout.addEventListener('click',()=>{
+      const b=document.getElementById('btnCerrarSesion');
+      if(b) b.click();
+    });
+  }
+
+  function syncAccountTop(user){
+    const el=document.getElementById('cuentaEmailTop');
+    if(el) el.textContent=user&&user.email?user.email:'';
+  }
+  if(window.firebase && firebase.auth){
+    firebase.auth().onAuthStateChanged(syncAccountTop);
+  }
+
+  const run=document.getElementById('run');
+  const actionStatus=document.getElementById('actionStatus');
+  if(run){
+    run.addEventListener('click',()=>{ if(actionStatus) actionStatus.textContent='Orientación actualizada ✓'; });
+  }
+})();
+</script>
+
+</body>
+</html>
 </body>
 </html>
