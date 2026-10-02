@@ -6,6 +6,94 @@
 <title>Asistente Clínico Musculoesquelético</title>
 <style>
 
+/* ================================================================
+   MSK 2.0 — VISUAL SYSTEM
+   Capa visual sobre el motor clínico original.
+   No elimina IDs ni funciones existentes.
+   ================================================================ */
+:root{
+  --msk-ink:#13202b; --msk-bg:#eef3f6; --msk-panel:#ffffff;
+  --msk-navy:#123047; --msk-teal:#00a896; --msk-cyan:#27b8d6;
+  --msk-soft:#e7f4f3; --msk-gold:#d8a83e;
+  --msk-shadow:0 18px 50px rgba(18,48,71,.08),0 3px 10px rgba(18,48,71,.05);
+  --msk-radius:18px;
+}
+body{background:var(--msk-bg);}
+body::before{background:radial-gradient(circle at 8% 5%,rgba(39,184,214,.12),transparent 27%),radial-gradient(circle at 92% 3%,rgba(0,168,150,.10),transparent 30%),radial-gradient(circle at 65% 90%,rgba(216,168,62,.05),transparent 28%)}
+.sidebar{background:linear-gradient(180deg,#102c40 0%,#12364d 60%,#0d2738 100%);border-right:0;color:#fff;box-shadow:12px 0 35px rgba(10,34,50,.10)}
+.brand{border-bottom-color:rgba(255,255,255,.12)}
+.brand h1{color:#fff;letter-spacing:-.02em;font-size:1.02rem}
+.brand p,.sidebar-footer{color:rgba(255,255,255,.62)}
+.brand-mark{background:linear-gradient(135deg,#00a896,#27b8d6);box-shadow:0 10px 28px rgba(0,168,150,.30);font-size:1.1rem}
+.nav button{color:rgba(255,255,255,.68);border-color:transparent}
+.nav button:hover,.nav button.active{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.08)}
+.nav button.active{box-shadow:inset 3px 0 0 #45dfcf}
+.main{padding:18px 28px 90px;max-width:1600px}
+.topbar{padding:10px 2px 15px}
+.topbar-title{font-size:.9rem;color:var(--msk-navy);letter-spacing:.01em}
+.topbar-sub{color:#6b7d8b}
+.account-compact{box-shadow:0 4px 15px rgba(18,48,71,.05)}
+/* Hero */
+.msk-hero{position:relative;overflow:hidden;margin:0 0 22px;padding:30px;border-radius:26px;background:linear-gradient(120deg,#102f46 0%,#16465c 58%,#087e78 100%);color:#fff;box-shadow:0 24px 55px rgba(12,53,73,.18)}
+.msk-hero:before{content:"";position:absolute;width:360px;height:360px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-100px;top:-180px;box-shadow:0 0 0 55px rgba(255,255,255,.025),0 0 0 110px rgba(255,255,255,.02)}
+.msk-hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:26px;align-items:center}
+.msk-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#72e8dc;margin-bottom:9px}
+.msk-hero h2{font-size:clamp(1.65rem,3vw,2.5rem);line-height:1.05;letter-spacing:-.04em;margin:0 0 11px;max-width:700px}
+.msk-hero p{max-width:650px;color:rgba(255,255,255,.78);font-size:.9rem;margin:0 0 18px}
+.msk-hero-actions{display:flex;flex-wrap:wrap;gap:8px}
+.msk-hero .hero-btn{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;border-radius:10px;padding:10px 13px;font-weight:750;font-size:.78rem}
+.msk-hero .hero-btn.primary{background:#fff;color:#123047;border-color:#fff}
+.msk-hero-orbit{min-height:220px;display:grid;place-items:center}
+.msk-body-mini{width:min(100%,260px);filter:drop-shadow(0 15px 24px rgba(0,0,0,.18))}
+.msk-status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.msk-status{padding:10px 11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:12px}
+.msk-status span{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.58)}
+.msk-status b{display:block;margin-top:2px;font-size:.78rem}
+/* Dashboard quick cards */
+.msk-dashboard{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-bottom:18px}
+.msk-panel{background:var(--msk-panel);border:1px solid #dce5eb;border-radius:var(--msk-radius);box-shadow:var(--msk-shadow);padding:18px}
+.msk-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:13px}
+.msk-panel-kicker{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:#718594;font-weight:850}
+.msk-panel-title{font-size:1rem;font-weight:850;color:var(--msk-navy);margin:3px 0 0}
+.msk-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.msk-mini{border:1px solid #e2e9ee;border-radius:13px;padding:12px;background:#fbfcfd}
+.msk-mini .ico{font-size:1.15rem;margin-bottom:6px}
+.msk-mini b{display:block;font-size:.78rem;color:var(--msk-navy)}
+.msk-mini span{font-size:.68rem;color:#758794}
+.msk-timeline{display:grid;gap:8px}
+.msk-tline{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:start}
+.msk-tline .date{font-size:.64rem;font-weight:800;color:#6f8290;text-align:right;padding-top:4px}
+.msk-tline .event{border-left:2px solid #cfe4e3;padding:3px 0 8px 12px;font-size:.72rem}
+.msk-tline .event b{color:var(--msk-navy)}
+/* Clinical visual atlas */
+.msk-atlas{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:stretch}
+.msk-atlas-figure{border:1px solid #dce7ec;border-radius:16px;background:linear-gradient(180deg,#f7fbfc,#edf5f7);padding:12px;display:grid;place-items:center;min-height:340px}
+.msk-atlas-figure svg{width:100%;height:310px}
+.msk-atlas-copy h3{font-size:1rem;margin:0 0 5px;color:var(--msk-navy)}
+.msk-atlas-copy p{font-size:.74rem;color:#6b7d8b;margin:0 0 13px}
+.msk-zone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.msk-zone-btn{border:1px solid #dce5eb;background:#fff;border-radius:10px;padding:9px 7px;text-align:left;color:#284152;font-size:.7rem;font-weight:750;transition:.16s}
+.msk-zone-btn:hover{transform:translateY(-1px);border-color:#73c9c0;background:#f4fbfa}
+.msk-zone-btn small{display:block;font-weight:500;color:#81929e;margin-top:2px}
+.msk-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#e9f6f4;color:#16776d;font-size:.65rem;font-weight:800}
+/* Better sections */
+.section{margin-bottom:24px}
+.section-head{margin-bottom:12px}
+.section-title{font-size:1.25rem;letter-spacing:-.025em;color:var(--msk-navy)}
+.card,.login-card{border-radius:16px;box-shadow:var(--msk-shadow);border-color:#dce5eb}
+.card-title{color:var(--msk-navy)}
+.action-bar{border:1px solid #d9e4e9;border-radius:15px;box-shadow:0 12px 32px rgba(18,48,71,.10);backdrop-filter:blur(12px);margin:12px 0 18px}
+.btn{border-radius:9px}
+.btn-primary{background:linear-gradient(135deg,#087e78,#00a896);border-color:#087e78;box-shadow:0 7px 18px rgba(0,168,150,.18)}
+/* Image-ready exercise cards generated by the existing engine */
+.res-block{border-radius:15px}
+.sesion-block{overflow:hidden}
+.agente{border-radius:12px!important}
+/* Reduce visual noise from inline legacy styles */
+.optional{color:#81929e!important}
+@media(max-width:1050px){.msk-hero-grid,.msk-dashboard{grid-template-columns:1fr}.msk-hero-orbit{display:none}.msk-atlas{grid-template-columns:220px 1fr}}
+@media(max-width:760px){.main{padding:12px 12px 80px}.msk-hero{padding:21px;border-radius:20px}.msk-hero h2{font-size:1.55rem}.msk-status-row,.msk-mini-grid{grid-template-columns:1fr}.msk-atlas{grid-template-columns:1fr}.msk-atlas-figure{min-height:270px}.msk-zone-grid{grid-template-columns:repeat(2,1fr)}.topbar{position:relative}.account-compact b{max-width:110px}}
+
 :root{
   --ink:#17202a; --paper:#f6f8fb; --panel:#ffffff; --panel-soft:#f1f4f8;
   --line:#dfe5ec; --line-strong:#cbd5e1; --muted:#64748b;
@@ -288,6 +376,92 @@ details.acc-item>fieldset,details.acc-item>div{padding:2px 13px 13px;margin:0}
         </div>
         <div class="account-compact">● <b id="cuentaEmailTop"></b><button type="button" id="btnCerrarSesionTop" class="btn" style="padding:5px 8px;font-size:.68rem;">Salir</button></div>
       </div>
+
+      <section class="msk-hero" aria-label="Panel clínico">
+        <div class="msk-hero-grid">
+          <div>
+            <div class="msk-eyebrow">MSK Clinical Workspace · 2.0</div>
+            <h2>Del dato clínico al plan de intervención.</h2>
+            <p>Un espacio de trabajo musculoesquelético diseñado para ordenar anamnesis, screening, evaluación, razonamiento, tratamiento y evolución sin perder las herramientas que ya forman parte de tu aplicación.</p>
+            <div class="msk-hero-actions">
+              <button type="button" class="hero-btn primary" data-ir="secPaciente">＋ Nueva evaluación</button>
+              <button type="button" class="hero-btn" data-ir="secHistorial">Ver pacientes</button>
+              <button type="button" class="hero-btn" id="mskThemeBtn">☼ Apariencia</button>
+            </div>
+            <div class="msk-status-row">
+              <div class="msk-status"><span>Estado</span><b id="mskLiveState">Listo para comenzar</b></div>
+              <div class="msk-status"><span>Paciente</span><b id="mskLivePatient">Sin seleccionar</b></div>
+              <div class="msk-status"><span>Zona</span><b id="mskLiveZone">Sin seleccionar</b></div>
+            </div>
+          </div>
+          <div class="msk-hero-orbit">
+            <svg class="msk-body-mini" viewBox="0 0 220 300" role="img" aria-label="Mapa corporal musculoesquelético">
+              <defs><linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b7fff4"/><stop offset="1" stop-color="#48c9db"/></linearGradient></defs>
+              <circle cx="110" cy="37" r="25" fill="none" stroke="url(#bodyGrad)" stroke-width="5"/>
+              <path d="M82 70 Q110 58 138 70 L150 128 L136 171 L128 260 M92 70 L70 128 L84 171 L92 260 M92 260 L74 291 M128 260 L146 291" fill="none" stroke="url(#bodyGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M70 88 L34 132 M150 88 L186 132" fill="none" stroke="#8eece1" stroke-width="7" stroke-linecap="round"/>
+              <circle cx="72" cy="91" r="7" fill="#fff" opacity=".9"/><circle cx="148" cy="91" r="7" fill="#fff" opacity=".9"/>
+              <circle cx="110" cy="117" r="5" fill="#fff" opacity=".75"/><circle cx="110" cy="165" r="5" fill="#fff" opacity=".75"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="msk-dashboard" aria-label="Accesos rápidos">
+        <div class="msk-panel">
+          <div class="msk-panel-head"><div><div class="msk-panel-kicker">Centro de trabajo</div><div class="msk-panel-title">El flujo clínico, sin ruido</div></div><span class="msk-chip">● Activo</span></div>
+          <div class="msk-mini-grid">
+            <button type="button" class="msk-mini" data-ir="secPaciente"><div class="ico">👤</div><b>Paciente</b><span>Identificación y antecedentes</span></button>
+            <button type="button" class="msk-mini" data-ir="secEvaluacion"><div class="ico">🩺</div><b>Evaluación</b><span>Screening y orientación</span></button>
+            <button type="button" class="msk-mini" data-ir="secResultados"><div class="ico">📈</div><b>Seguimiento</b><span>Plan, sesiones y evolución</span></button>
+          </div>
+        </div>
+        <div class="msk-panel">
+          <div class="msk-panel-head"><div><div class="msk-panel-kicker">Tu flujo</div><div class="msk-panel-title">Secuencia recomendada</div></div></div>
+          <div class="msk-timeline">
+            <div class="msk-tline"><div class="date">01</div><div class="event"><b>Paciente</b><br>Identificación y contexto</div></div>
+            <div class="msk-tline"><div class="date">02</div><div class="event"><b>Evaluación</b><br>Zona · patología · screening</div></div>
+            <div class="msk-tline"><div class="date">03</div><div class="event"><b>Orientación</b><br>Tests · agentes · sesiones</div></div>
+            <div class="msk-tline"><div class="date">04</div><div class="event"><b>Evolución</b><br>Registro y reevaluación</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="msk-panel" id="mskAtlasPanel" style="margin-bottom:24px;">
+        <div class="msk-panel-head">
+          <div><div class="msk-panel-kicker">Atlas visual</div><div class="msk-panel-title">Seleccioná una región para orientar la evaluación</div></div>
+          <span class="msk-chip">Anatomía interactiva</span>
+        </div>
+        <div class="msk-atlas">
+          <div class="msk-atlas-figure">
+            <svg viewBox="0 0 220 350" role="img" aria-label="Esquema corporal interactivo">
+              <circle cx="110" cy="38" r="25" fill="#d8e7eb" stroke="#6f8794" stroke-width="2"/>
+              <path d="M83 72 Q110 60 137 72 L149 132 L134 178 L126 280 L94 280 L86 178 L71 132 Z" fill="#d8e7eb" stroke="#6f8794" stroke-width="2"/>
+              <path d="M72 84 L33 137 L46 148 L87 111 M148 84 L187 137 L174 148 L133 111" fill="#d8e7eb" stroke="#6f8794" stroke-width="2"/>
+              <path d="M94 278 L73 330 M126 278 L147 330" fill="none" stroke="#6f8794" stroke-width="15" stroke-linecap="round"/>
+              <g fill="#00a896" stroke="#fff" stroke-width="2">
+                <circle cx="72" cy="91" r="9"/><circle cx="148" cy="91" r="9"/><circle cx="93" cy="151" r="8"/><circle cx="127" cy="151" r="8"/>
+                <circle cx="84" cy="219" r="8"/><circle cx="136" cy="219" r="8"/><circle cx="91" cy="276" r="7"/><circle cx="129" cy="276" r="7"/>
+              </g>
+            </svg>
+          </div>
+          <div class="msk-atlas-copy">
+            <h3>Atlas musculoesquelético</h3>
+            <p>La capa visual no reemplaza la evaluación física: sirve para ubicar rápidamente la región y llevarla al selector clínico existente.</p>
+            <div class="msk-zone-grid">
+              <button class="msk-zone-btn" type="button" data-msk-zone="hombro">Hombro<small>manguito · escápula</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="codo">Codo<small>epicondíleo · flexor</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="muñeca">Muñeca / mano<small>mano · antebrazo</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="cervical">Cervical<small>cuello · miembro superior</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="lumbar">Lumbar<small>columna · pelvis</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="cadera">Cadera<small>pelvis · muslo</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="rodilla">Rodilla<small>extensor · menisco</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="tobillo">Tobillo / pie<small>pie · tríceps sural</small></button>
+              <button class="msk-zone-btn" type="button" data-msk-zone="general">General<small>sin región específica</small></button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section class="section" id="secPaciente">
         <div class="section-head">
@@ -2984,6 +3158,44 @@ document.querySelectorAll('label').forEach(l=>{
 })();
 </script>
 
+
+<script>
+/* MSK 2.0 — UI enhancement layer. No clinical engine is replaced here. */
+(function(){
+  const $=id=>document.getElementById(id);
+  function navTo(id){const el=$(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});}
+  document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>navTo(b.dataset.ir)));
+
+  const patient=$('idPaciente'), zone=$('zona'), state=$('mskLiveState'), livePatient=$('mskLivePatient'), liveZone=$('mskLiveZone');
+  function sync(){
+    if(livePatient) livePatient.textContent=(patient&&patient.value.trim())||'Sin seleccionar';
+    if(liveZone) liveZone.textContent=(zone&&zone.value)||'Sin seleccionar';
+    const pat=$('patologia');
+    if(state) state.textContent=(pat&&pat.value)?'Evaluación en curso':'Listo para comenzar';
+  }
+  ['input','change'].forEach(ev=>{
+    if(patient) patient.addEventListener(ev,sync); if(zone) zone.addEventListener(ev,sync);
+    const pat=$('patologia'); if(pat) pat.addEventListener(ev,sync);
+  });
+  sync();
+
+  document.querySelectorAll('[data-msk-zone]').forEach(btn=>btn.addEventListener('click',()=>{
+    const wanted=(btn.dataset.mskZone||'').toLowerCase();
+    if(!zone) return;
+    const opt=[...zone.options].find(o=>String(o.value).toLowerCase()===wanted || String(o.textContent).toLowerCase().includes(wanted));
+    if(opt){ zone.value=opt.value; zone.dispatchEvent(new Event('change',{bubbles:true})); }
+    else { navTo('secEvaluacion'); }
+  }));
+
+  const themeBtn=$('mskThemeBtn');
+  if(themeBtn) themeBtn.addEventListener('click',()=>{
+    const root=document.documentElement;
+    const dark=root.getAttribute('data-theme')==='dark';
+    root.setAttribute('data-theme',dark?'light':'dark');
+    themeBtn.textContent=dark?'☼ Apariencia':'☾ Apariencia';
+  });
+})();
+</script>
 </body>
 </html>
 </body>
